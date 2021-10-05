@@ -26,6 +26,7 @@ using MidiBard.DalamudApi;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
+using Dalamud.Game.Gui;
 using static MidiBard.DalamudApi.api;
 
 namespace MidiBard
@@ -34,6 +35,7 @@ namespace MidiBard
 	{
 		public static Configuration config { get; private set; }
 		internal static PluginUI Ui { get; set; }
+
 #if DEBUG
 		public static bool Debug = true;
 #else
@@ -67,7 +69,9 @@ namespace MidiBard
 
 		public string Name => nameof(MidiBard);
 
-		public unsafe MidiBard(DalamudPluginInterface pi)
+		private static ChatGui _chatGui;
+
+		public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
 		{
 			DalamudApi.api.Initialize(this, pi);
 
@@ -87,6 +91,8 @@ namespace MidiBard
 #endif
 
 			PlaylistManager.ReloadPlayListFromConfig();
+			_chatGui = chatGui;
+			_chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
 			CurrentOutputDevice = new BardPlayDevice();
 			InputDeviceManager.ScanMidiDeviceThread.Start();
@@ -96,9 +102,8 @@ namespace MidiBard
 			Framework.Update += Tick;
 			PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
-			if (PluginInterface.IsDev) Ui.Open();
-
-
+			if (PluginInterface.IsDev)
+				Ui.Open();
 		}
 
 		private void Tick(Dalamud.Game.Framework framework)
@@ -114,7 +119,8 @@ namespace MidiBard
 				}
 			}
 
-			if (!config.MonitorOnEnsemble) return;
+			if (!config.MonitorOnEnsemble)
+				return;
 
 			if (AgentPerformance.InPerformanceMode)
 			{
@@ -137,7 +143,7 @@ namespace MidiBard
 		[HelpMessage("Toggle MidiBard window.\n/mbard perform <instrument name/instrument ID> → Switch to specified instrument.\n/mbard cancel → Quit performance mode.\n/mbard <play/pause/playpause/stop/next/prev> → Player control.")]
 		public void Command2(string command, string args) => OnCommand(command, args);
 
-		async Task OnCommand(string command, string args)
+		private async Task OnCommand(string command, string args)
 		{
 			PluginLog.Debug($"command: {command}, {args}");
 
@@ -169,35 +175,29 @@ namespace MidiBard
 					catch (Exception e)
 					{
 						PluginLog.Warning(e, "error when parsing or finding instrument strings");
-						ChatGui.PrintError($"failed parsing command argument \"{args}\"");
+						api.ChatGui.PrintError($"failed parsing command argument \"{args}\"");
 					}
 				}
-
 				else if (argStrings[0] == "playpause")
 				{
 					MidiPlayerControl.PlayPause();
 				}
-
 				else if (argStrings[0] == "play")
 				{
 					MidiPlayerControl.Play();
 				}
-
 				else if (argStrings[0] == "pause")
 				{
 					MidiPlayerControl.Pause();
 				}
-
 				else if (argStrings[0] == "stop")
 				{
 					MidiPlayerControl.Stop();
 				}
-
 				else if (argStrings[0] == "next")
 				{
 					MidiPlayerControl.Next();
 				}
-
 				else if (argStrings[0] == "prev")
 				{
 					MidiPlayerControl.Prev();
@@ -232,10 +232,9 @@ namespace MidiBard
 			config = (Configuration)PluginInterface.GetPluginConfig() ?? new Configuration();
 		}
 
-
 		#region IDisposable Support
 
-		void FreeUnmanagedResources()
+		private void FreeUnmanagedResources()
 		{
 #if DEBUG
 			Testhooks.Instance?.Dispose();
@@ -260,7 +259,6 @@ namespace MidiBard
 				PluginLog.Error($"{e}");
 			}
 
-
 			DalamudApi.api.Dispose();
 		}
 
@@ -274,7 +272,7 @@ namespace MidiBard
 			{
 				PluginLog.Error(e, "error when saving config file");
 			}
-
+			_chatGui.ChatMessage -= ChatCommand.OnChatMessage;
 			FreeUnmanagedResources();
 			GC.SuppressFinalize(this);
 		}
@@ -283,6 +281,7 @@ namespace MidiBard
 		{
 			FreeUnmanagedResources();
 		}
-		#endregion
+
+		#endregion IDisposable Support
 	}
 }
