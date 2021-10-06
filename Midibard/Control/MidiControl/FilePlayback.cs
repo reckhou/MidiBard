@@ -11,6 +11,7 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Standards;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
+using MidiBard.Managers;
 using static MidiBard.MidiBard;
 
 namespace MidiBard.Control.MidiControl
@@ -288,6 +289,25 @@ namespace MidiBard.Control.MidiControl
 		{
 			waitStart = null;
 			waitUntil = null;
+		}
+
+		internal static void ChangeCompensation(float delta)
+		{
+			if (CurrentPlayback == null || !CurrentPlayback.IsRunning || EnsembleManager.Ensemble == 0)
+			{
+				return;
+			}
+
+			long RealElapasedTick = DateTime.Now.Ticks - EnsembleManager.PlayStartTick;
+			long microsecTime = (long)(RealElapasedTick / 10 + delta * 1000 * 1000);
+			if (microsecTime < 0)
+			{
+				return;
+			}
+
+			MetricTimeSpan newTime = new MetricTimeSpan(microsecTime);
+			//PluginLog.LogWarning("RealElapsed: " + RealElapasedTick / 10 + " newTime: " + newTime.TotalMicroseconds);
+			CurrentPlayback.MoveToTime(newTime);
 		}
 	}
 }

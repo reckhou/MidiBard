@@ -9,6 +9,7 @@ using Melanchall.DryWetMidi.Devices;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
+using MidiBard.Util;
 using static MidiBard.MidiBard;
 
 namespace MidiBard.Managers
@@ -20,6 +21,9 @@ namespace MidiBard.Managers
 		//	sendNotes = new List<(byte[] notes, byte[] tones)>();
 		//	recvNotes = new List<(byte[] notes, byte[] tones)>();
 		//}
+
+		internal static long PlayStartTick;
+		internal static byte Ensemble;
 
 		private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
 
@@ -38,7 +42,6 @@ namespace MidiBard.Managers
 				var original = UpdateMetronomeHook.Original(agentMetronome, currentBeat);
 				if (MidiBard.config.MonitorOnEnsemble)
 				{
-					byte Ensemble;
 					byte beatsPerBar;
 					int barElapsed;
 					unsafe
@@ -71,6 +74,13 @@ namespace MidiBard.Managers
 
 							try
 							{
+								compensation -= (int)(FPSCompensation.Compensation * 1000);
+								//PluginLog.Warning("ins: " + MidiBard.CurrentInstrument +  " Comp: " + compensation);
+								if (compensation < 1)
+								{
+									compensation = 1;
+								}
+								//PluginLog.Warning("FPS Comp: " + (int)(FPSCompensation.Compensation * 1000));
 								var midiClock = new MidiClock(true, new HighPrecisionTickGenerator(), TimeSpan.FromMilliseconds(compensation));
 								midiClock.Restart();
 								PluginLog.Warning($"setup midiclock compensation: {compensation}");
@@ -82,6 +92,8 @@ namespace MidiBard.Managers
 									EnsembleStart?.Invoke();
 									PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
 									midiClock.Ticked -= OnMidiClockOnTicked;
+
+									PlayStartTick = DateTime.Now.Ticks;
 								}
 
 								Task.Delay(1000).ContinueWith(_ =>

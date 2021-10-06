@@ -25,6 +25,7 @@ using MidiBard.Control.MidiControl;
 using MidiBard.DalamudApi;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
+using MidiBard.Util;
 using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 
@@ -127,6 +128,8 @@ namespace MidiBard
 
 				wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning;
 			}
+
+			FPSCompensation.Tick();
 		}
 
 		[Command("/midibard")]
