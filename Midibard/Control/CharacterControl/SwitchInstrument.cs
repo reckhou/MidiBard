@@ -187,12 +187,17 @@ namespace MidiBard.Control.CharacterControl
 
 		internal static void UpdateGuitarToneByConfig()
 		{
+			if (MidiBard.CurrentTracks == null)
+			{
+				return;
+			}
+
 			for (int track = 0; track < MidiBard.CurrentTracks.Count; track++)
 			{
 				if (MidiBard.config.EnabledTracks[track] && MidiBard.CurrentTracks[track].trackInfo != null)
 				{
 					var curInstrument = MidiBard.CurrentTracks[track].trackInfo?.InstrumentIDFromTrackName;
-					if (MidiBard.guitarGroup.Contains((byte)curInstrument))
+					if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))
 					{
 						var toneID = curInstrument - MidiBard.guitarGroup[0];
 						MidiBard.config.TonesPerTrack[track] = (int)toneID;
