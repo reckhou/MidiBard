@@ -100,10 +100,8 @@ namespace MidiBard
 			ImGui.SetCursorPosX(ImGui.GetCursorPosX() - ImGui.GetStyle().ItemInnerSpacing.X);
 			ImGui.TextUnformatted("Theme color".Localize());
 
-#if DEBUG
 			ImGui.Checkbox("BMP track name compatible".Localize(), ref MidiBard.config.bmpTrackNames);
 			ImGuiUtil.ToolTip("transpose/switch instrument based on first enabled midi track name.\nPlease know what you are doing before enabling this.".Localize());
-#endif
 		}
 	}
 }

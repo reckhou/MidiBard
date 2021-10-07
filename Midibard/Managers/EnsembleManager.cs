@@ -53,6 +53,8 @@ namespace MidiBard.Managers
 					{
 						if (Ensemble != 0)
 						{
+							MidiPlayerControl.playDeltaTime = 0;
+
 							// 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
 							// 而提前开始又不可能， 所以把所有乐器的延迟时间减去延迟最大的鲁特琴（让所有乐器等待鲁特琴）
 							// 也就是105减去每种乐器各自的延迟

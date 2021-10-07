@@ -12,6 +12,7 @@ namespace MidiBard.Control.MidiControl
 	{
 		internal static void Play()
 		{
+			playDeltaTime = 0;
 			if (CurrentPlayback == null)
 			{
 				Task.Run(async () =>
@@ -204,6 +205,7 @@ namespace MidiBard.Control.MidiControl
 
 		public static void SwitchSong(int number, bool startPlaying = false)
 		{
+			playDeltaTime = 0;
 			if (number < 0 || number >= PlaylistManager.Filelist.Count)
 			{
 				return;
@@ -221,6 +223,29 @@ namespace MidiBard.Control.MidiControl
 			{
 				PluginLog.Debug(e, "error when switching song");
 			}
+		}
+
+		internal static int playDeltaTime = 0;
+		internal static void ChangeDeltaTime(int delta)
+		{
+			if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+			{
+				playDeltaTime = 0;
+				return;
+			}
+
+			var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+			long msTime = currentTime.TotalMicroseconds;
+			//PluginLog.LogDebug("curTime:" + msTime);
+			if (msTime + delta * 1000 < 0)
+			{
+				return;
+			}
+			msTime += delta * 1000;
+			MetricTimeSpan newTime = new MetricTimeSpan(msTime);
+			//PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
+			CurrentPlayback.MoveToTime(newTime);
+			playDeltaTime += delta;
 		}
 	}
 }
