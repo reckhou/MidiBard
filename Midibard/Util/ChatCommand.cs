@@ -8,6 +8,7 @@ using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
+using System.Threading.Tasks;
 
 namespace MidiBard
 {
@@ -53,7 +54,7 @@ namespace MidiBard
 					return;
 				}
 
-				PlaylistManager.ReloadPlayListFromConfig(true);
+				Task.Run(() => PlaylistManager.Reload(MidiBard.config.Playlist.ToArray()));
 			}
 			else if (cmd == "close") // retract the instrument
 			{
