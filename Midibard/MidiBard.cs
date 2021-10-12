@@ -25,6 +25,7 @@ using MidiBard.Control.MidiControl;
 using MidiBard.DalamudApi;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
+using MidiBard.Managers.Ipc;
 using playlibnamespace;
 using Dalamud.Game.Gui;
 using static MidiBard.DalamudApi.api;
@@ -84,15 +85,16 @@ namespace MidiBard
 			AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.MetronomeAgent));
 			AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.PerformanceAgent));
 			_ = EnsembleManager.Instance;
+			_ = RPCManager.Instance;
 
 #if DEBUG
 			_ = NetworkManager.Instance;
 			_ = Testhooks.Instance;
 #endif
 
-			PlaylistManager.ReloadPlayListFromConfig();
 			_chatGui = chatGui;
 			_chatGui.ChatMessage += ChatCommand.OnChatMessage;
+			Task.Run(() => PlaylistManager.Reload(config.Playlist.ToArray()));
 
 			CurrentOutputDevice = new BardPlayDevice();
 			InputDeviceManager.ScanMidiDeviceThread.Start();
@@ -239,6 +241,8 @@ namespace MidiBard
 #if DEBUG
 			Testhooks.Instance?.Dispose();
 #endif
+			RPCManager.Instance.Dispose();
+			PartyWatcher.Instance.Dispose();
 			InputDeviceManager.ShouldScanMidiDeviceThread = false;
 			Framework.Update -= Tick;
 			PluginInterface.UiBuilder.Draw -= Ui.Draw;
