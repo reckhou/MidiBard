@@ -128,10 +128,10 @@ namespace MidiBard
 			{
 				playlib.ConfirmReadyCheck();
 
-				if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
-				{
-					MidiPlayerControl.Stop();
-				}
+				//if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
+				//{
+				//	MidiPlayerControl.Stop();
+				//}
 
 				wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning;
 			}
