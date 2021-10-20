@@ -57,14 +57,9 @@ namespace MidiBard
 				MidiBard.LoadConfig();
 				Task.Run(() => PlaylistManager.Reload(MidiBard.config.Playlist.ToArray()));
 			}
-			else if (cmd == "close") // retract the instrument
+			else if (cmd == "close") // switch off the instrument
 			{
-				if (MidiBard.IsPlaying)
-				{
-					PluginLog.LogInformation("Close is not allowed while playing.");
-					return;
-				}
-
+				MidiPlayerControl.Stop();
 				SwitchInstrument.SwitchTo(0);
 			}
 		}
