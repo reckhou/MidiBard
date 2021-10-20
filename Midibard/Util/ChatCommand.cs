@@ -54,6 +54,7 @@ namespace MidiBard
 					return;
 				}
 
+				MidiBard.LoadConfig();
 				Task.Run(() => PlaylistManager.Reload(MidiBard.config.Playlist.ToArray()));
 			}
 			else if (cmd == "close") // retract the instrument
