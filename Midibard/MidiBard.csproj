@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
-    <LangVersion>9.0</LangVersion>
-    <AssemblyVersion>1.8.0.3</AssemblyVersion>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <LangVersion>10.0</LangVersion>
+    <AssemblyVersion>1.9.2.6</AssemblyVersion>
+	  <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	  <Nullable>disable</Nullable>
+    <UseWpf>true</UseWpf>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -20,15 +22,15 @@
     <None Remove="lib\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.2" />
-    <PackageReference Include="ILRepack" Version="2.0.18" />
+    <PackageReference Include="DalamudPackager" Version="2.1.5" />
+    <!--<PackageReference Include="ILRepack" Version="2.0.18" />-->
     <PackageReference Include="Melanchall.DryWetMidi" Version="5.2.1" />
-    <PackageReference Include="SharedMemory" Version="2.2.3" />
   </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
-      <Private>False</Private>
+      <Private>false</Private>
     </Reference>
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
@@ -50,15 +52,30 @@
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="playlib">
-      <HintPath>..\lib\playlib.dll</HintPath>
-    </Reference>
+	  <Reference Include="playlib">
+		  <HintPath>..\lib\playlib.dll</HintPath>
+		  <Private>true</Private>
+	  </Reference>
   </ItemGroup>
 
-  <PropertyGroup>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyFiles" AfterTargets="Build">
+    <Copy SourceFiles="..\lib\System.Text.Encoding.CodePages.dll" DestinationFolder="$(TargetDir)" />
+  </Target>
 
   <Target Name="CleanOutDir" AfterTargets="Build">
     <ItemGroup>
