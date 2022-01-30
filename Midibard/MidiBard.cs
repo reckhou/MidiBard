@@ -31,6 +31,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using playlibnamespace;
 using static MidiBard.DalamudApi.api;
+using Dalamud.Game.Gui;
 
 namespace MidiBard;
 
@@ -73,8 +74,9 @@ public class MidiBard : IDalamudPlugin
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
 
     public string Name => nameof(MidiBard);
+    private static ChatGui _chatGui;
 
-    public unsafe MidiBard(DalamudPluginInterface pi)
+    public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
         DalamudApi.api.Initialize(this, pi);
 
@@ -125,6 +127,8 @@ public class MidiBard : IDalamudPlugin
 			_ = NetworkManager.Instance;
 			_ = Testhooks.Instance;
 #endif
+        _chatGui = chatGui;
+        _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
         Task.Run(() => PlaylistManager.AddAsync(config.Playlist.ToArray(), true));
 
@@ -213,7 +217,7 @@ public class MidiBard : IDalamudPlugin
                     catch (Exception e)
                     {
                         PluginLog.Warning(e, "error when parsing or finding instrument strings");
-                        ChatGui.PrintError($"failed parsing command argument \"{args}\"");
+                        _chatGui.PrintError($"failed parsing command argument \"{args}\"");
                     }
 
                     break;
@@ -357,6 +361,7 @@ public class MidiBard : IDalamudPlugin
         {
             PluginLog.Error(e, "error when saving config file");
         }
+        _chatGui.ChatMessage -= ChatCommand.OnChatMessage;
 
         FreeUnmanagedResources();
         GC.SuppressFinalize(this);
