@@ -9,6 +9,7 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using System.Threading.Tasks;
+using static MidiBard.MidiBard;
 
 namespace MidiBard
 {
@@ -45,6 +46,7 @@ namespace MidiBard
 				}
 
 				MidiPlayerControl.SwitchSong(number - 1);
+				Ui.Open();
 			}
 			else if (cmd == "reloadplaylist") // reload the playlist from saved config
 			{

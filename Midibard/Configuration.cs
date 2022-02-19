@@ -105,7 +105,7 @@ public class Configuration : IPluginConfiguration
 
 
     //public List<EnsembleTrack> EnsembleTracks = new List<EnsembleTrack>();
-    public bool StopPlayingWhenEnsembleEnds = true;
+    public bool StopPlayingWhenEnsembleEnds = false;
     //public bool SyncPlaylist = false;
     //public bool SyncSongSelection = false;
     //public bool SyncMuteUnMute = false;
