@@ -61,7 +61,10 @@ public partial class PluginUI
                         ImGui.PushStyleColor(ImGuiCol.Text, color);
                         ImGui.PushStyleColor(ImGuiCol.CheckMark, colorCheckmark);
 
-                        ImGui.Checkbox("##checkbox", ref MidiBard.config.EnabledTracks[i]);
+                        if (ImGui.Checkbox("##checkbox", ref MidiBard.config.EnabledTracks[i]))
+                        {
+                            JudgeSwitchInstrument(i);
+                        }
 
                         if (MidiBard.config.EnableTransposePerTrack)
                         {
@@ -83,21 +86,7 @@ public partial class PluginUI
 
                         if (ImGui.IsItemClicked())
                         {
-                            MidiBard.config.EnabledTracks[i] ^= true;
-                            if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying)
-                            {
-                                var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i)
-                                    .FirstOrDefault(i => i.trackInfo.IsEnabled);
-                                if (firstEnabledTrack.trackInfo != null && firstEnabledTrack.trackInfo.InstrumentIDFromTrackName != null)
-                                {
-                                    SwitchInstrument.SwitchTo((uint)firstEnabledTrack.trackInfo
-                                        .InstrumentIDFromTrackName);
-                                }
-                                else
-                                {
-                                    SwitchInstrument.SwitchTo(0);
-                                }
-                            }
+                            JudgeSwitchInstrument(i);
                         }
 
                         if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -200,6 +189,24 @@ public partial class PluginUI
 
             ImGui.EndChild();
             ImGui.PopStyleColor();
+        }
+    }
+
+    private void JudgeSwitchInstrument(int idx)
+    {
+        if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying)
+        {
+            var firstEnabledTrack = MidiBard.CurrentTracks.Select(idx => idx)
+                .FirstOrDefault(idx => idx.trackInfo.IsEnabled);
+            if (firstEnabledTrack.trackInfo != null && firstEnabledTrack.trackInfo.InstrumentIDFromTrackName != null)
+            {
+                SwitchInstrument.SwitchTo((uint)firstEnabledTrack.trackInfo
+                    .InstrumentIDFromTrackName);
+            }
+            else
+            {
+                SwitchInstrument.SwitchTo(0);
+            }
         }
     }
 }
