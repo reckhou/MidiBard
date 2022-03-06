@@ -64,6 +64,7 @@ public record TrackInfo
         }
 
         name = name.ToLower();
+        name = String.Concat(name.Where(c => !Char.IsWhiteSpace(c)));
 
         // below are to be compatible with BMP-ready MIDI files.
         if (name.Contains("harp"))
@@ -110,11 +111,11 @@ public record TrackInfo
         {
             return 11;
         }
-        else if (name.Contains("bass drum"))
+        else if (name.Contains("bassdrum"))
         {
             return 12;
         }
-        else if (name.Contains("snare drum"))
+        else if (name.Contains("snaredrum"))
         {
             return 13;
         }
@@ -154,7 +155,7 @@ public record TrackInfo
         {
             return 22;
         }
-        else if (name.Contains("double bass"))
+        else if (name.Contains("doublebass"))
         {
             return 23;
         }
