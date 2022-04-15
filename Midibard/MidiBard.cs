@@ -17,7 +17,7 @@ using Lumina.Excel.GeneratedSheets;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Composing;
 using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Devices;
+using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.MusicTheory;
 using Melanchall.DryWetMidi.Standards;

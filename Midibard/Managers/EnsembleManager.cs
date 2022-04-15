@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Hooking;
 using Dalamud.Logging;
-using Melanchall.DryWetMidi.Devices;
+using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
