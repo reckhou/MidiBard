@@ -130,6 +130,7 @@ namespace MidiBard.Control.CharacterControl
 
             if (config.bmpTrackNames)
             {
+                var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);
                 if (config.EnableTransposePerTrack)
                 {
                     var currentTracks = MidiBard.CurrentTracks;
@@ -147,21 +148,15 @@ namespace MidiBard.Control.CharacterControl
                 }
                 else
                 {
-                    var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);
-                    var transpose = firstEnabledTrack != null ? firstEnabledTrack.TransposeFromTrackName : 0;
+                    var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
                     config.TransposeGlobal = transpose;
                 }
-            }
 
-            if (config.bmpTrackNames)
-            {
-                //MidiBard.config.OverrideGuitarTones = true;
-
-                var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);
+                
                 var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
                 if (idFromTrackName != null)
                 {
-                    await SwitchTo((uint)idFromTrackName);
+                    await SwitchTo((uint)idFromTrackName); // switch instrument when switching songs
                 }
 
                 return;
