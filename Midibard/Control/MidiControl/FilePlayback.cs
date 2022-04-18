@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Dalamud.Logging;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Devices;
+using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Standards;
 using Melanchall.DryWetMidi.Tools;
@@ -38,7 +38,7 @@ public static class FilePlayback
             PluginLog.Warning("[LoadPlayback] error when getting file TempoMap, using default TempoMap instead.");
             CurrentTMap = TempoMap.Default;
         }
-
+        PluginLog.Information($"[LoadPlayback] -> {trackName} 1 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         try
         {
             CurrentTracks = midifile.GetTrackChunks()
@@ -78,7 +78,7 @@ public static class FilePlayback
                 throw;
             }
         }
-
+        PluginLog.Information($"[LoadPlayback] -> {trackName} 2 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         //int givenIndex = 0;
         //CurrentTracks.ForEach(tuple => tuple.trackInfo.Index = givenIndex++);
 
@@ -99,7 +99,7 @@ public static class FilePlayback
             .OrderBy(e => e.timedEvent.Time)
             .ThenBy(i => i.compareValue)
             .Select(i => i.timedEvent);
-
+        PluginLog.Information($"[LoadPlayback] -> {trackName} 3 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         //var (programTrackChunk, programTrackInfo) =
         //    CurrentTracks.FirstOrDefault(i => Regex.IsMatch(i.trackInfo.TrackName, @"^Program:.+$", RegexOptions.Compiled | RegexOptions.IgnoreCase));
 
@@ -131,7 +131,7 @@ public static class FilePlayback
         //		CurrentOutputDevice.Channels[i].Program = prog;
         //	}
         //}
-
+        PluginLog.Information($"[LoadPlayback] -> {trackName} 3.1 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         var playback = new BardPlayback(timedEvents, CurrentTMap, new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() })
         {
             InterruptNotesOnStop = true,
@@ -145,7 +145,7 @@ public static class FilePlayback
             }
 #endif
         };
-
+        PluginLog.Information($"[LoadPlayback] -> {trackName} 4 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         PluginLog.Information($"[LoadPlayback] Channels for {trackName}:");
         for (int i = 0; i < CurrentOutputDevice.Channels.Length; i++)
         {
