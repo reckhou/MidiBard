@@ -162,7 +162,7 @@ internal class BardPlayDevice : IOutputDevice
                             //SevenBitNumber currentProgram = Channels[PCChannel].Program;
                             //SevenBitNumber newProgram = @event.ProgramNumber;
 
-                            PluginLog.Verbose($"[N][ProgramChange][{trackIndex}:{@event.Channel}] {@event.ProgramNumber,-3} {@event.GetGMProgramName()}");
+                            //PluginLog.Verbose($"[N][ProgramChange][{trackIndex}:{@event.Channel}] {@event.ProgramNumber,-3} {@event.GetGMProgramName()}");
 
                             //if (currentProgram == newProgram) break;
 
@@ -205,7 +205,7 @@ internal class BardPlayDevice : IOutputDevice
                     if (noteNum is < 0 or > 36)
                     {
                         s += "(out of range)";
-                        PluginLog.Verbose(s);
+                        //PluginLog.Verbose(s);
                         return false;
                     }
 
@@ -223,7 +223,7 @@ internal class BardPlayDevice : IOutputDevice
                             }
                         }
 
-                        PluginLog.Verbose(s);
+                        //PluginLog.Verbose(s);
 
                         if (playlib.PressKey(noteNum, ref MidiBard.AgentPerformance.Struct->NoteOffset,
                                 ref MidiBard.AgentPerformance.Struct->OctaveOffset))

@@ -27,8 +27,8 @@ static class InputDeviceManager
                         Devices = InputDevice.GetAll().OrderBy(i => i.Name).ToArray();
                         var devicesNames = Devices.Select(i => i.DeviceName()).ToArray();
 
-                        PluginLog.Information(string.Join(", ", devicesNames));
-                        PluginLog.Information(MidiBard.config.lastUsedMidiDeviceName);
+                        //PluginLog.Information(string.Join(", ", devicesNames));
+                        //PluginLog.Information(MidiBard.config.lastUsedMidiDeviceName);
                         if (CurrentInputDevice is not null)
                         {
                             if (!devicesNames.Contains(CurrentInputDevice.DeviceName()))
@@ -146,7 +146,7 @@ static class InputDeviceManager
 
     private static void InputDevice_EventReceived(object sender, MidiEventReceivedEventArgs e)
     {
-        PluginLog.Verbose($"[{sender}]{e.Event}");
+        //PluginLog.Verbose($"[{sender}]{e.Event}");
         MidiBard.CurrentOutputDevice.SendEvent(e.Event);
     }
 }

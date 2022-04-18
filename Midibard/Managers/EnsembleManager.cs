@@ -142,7 +142,7 @@ namespace MidiBard.Managers
                         }
                     }
 
-                    PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
+                    //PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
                 }
 
                 return original;
