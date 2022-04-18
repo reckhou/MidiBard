@@ -183,7 +183,11 @@ public class MidiBard : IDalamudPlugin
                  "/mbard perform [instrument name|instrument ID] → switch to specified instrument\n" +
                  "/mbard cancel → quit performance mode\n" +
                  "/mbard visual [on|off|toggle] → midi tracks visualization\n" +
-                 "/mbard [play|pause|playpause|stop|next|prev|rewind (seconds)|fastforward (seconds)] → playback control")]
+                 "/mbard [play|pause|playpause|stop|next|prev|rewind (seconds)|fastforward (seconds)] → playback control" +
+                 "Party commands: Type commands below on party chat to control all bards in the party.\n" +
+                 "switchto <track number> → Switch to <track number> on the play list. e.g. switchto 3 = Switch to the 3rd song.\n" +
+                 "close → Stop playing and exit perform mode.\n" +
+                 "reloadplaylist → Reload playlist on all clients from the same PC, use after making any changes on the playlist.")]
     public void Command2(string command, string args) => OnCommand(command, args);
 
     async Task OnCommand(string command, string args)
