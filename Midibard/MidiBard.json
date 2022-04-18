@@ -2,13 +2,13 @@
   "Author": "akira0245, modified by Ori",
   "Name": "MidiBard",
   "Punchline": "Bard performance using midi files or keyboard.",
-  "Description": "使用MIDI文件或MIDI键盘进行诗人演奏。\nBard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch",
-  "RepoUrl": "https://github.com/akira0245/MidiBard",
+  "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch",
+  "RepoUrl": "https://github.com/reckhou/MidiBard",
   "Tags": [
-    "akira",
-    "perform",
-    "instrument"
+    "bard",
+	"sound",
+    "utility"
   ],
   "DalamudApiLevel": 6,
-  "IconUrl": "https://i.loli.net/2021/09/09/L1fkrwElUKYMtN3.png"
+  "IconUrl": "https://i.imgur.com/drMuEor.png"
 }
