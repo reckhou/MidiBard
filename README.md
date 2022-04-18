@@ -1,5 +1,7 @@
 # **MidiBard**
 
+Please join our [Discord Server](https://discord.gg/zHHEuJ5KV6)!
+
 MidiBard是基于[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)的强大且易用的诗人midi演奏插件。目前版本兼容国服及国际服。
 
 # 主要特性
@@ -14,27 +16,29 @@ MidiBard是基于[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB
 * 良好的MIDI设备支持，自动扫描可用MIDI设备并连接，最佳的MIDI键盘演奏体验
 * 为每个音轨指定不同的电吉他音色并单人演奏！
 
-# 插件界面
-![image](https://user-images.githubusercontent.com/33274390/152686485-cc882039-3395-4e88-8568-efaf2b838406.png)
+# Recommend Settings / 建议配置
+![image](https://i.imgur.com/wFsYNDy.png)
 
-[![2NWbuT.png](https://z3.ax1x.com/2021/06/05/2NWbuT.png)](https://imgtu.com/i/2NWbuT)
-[![2NhtTe.png](https://z3.ax1x.com/2021/06/05/2NhtTe.png)](https://imgtu.com/i/2NhtTe)
+# How to Install
+Please install XIVLauncher first. You need to add my custom plugin repository to install MidiBard.  
+`https://raw.githubusercontent.com/reckhou/DalamudPlugins-Ori/api6/pluginmaster.json` 
+
+[![DD5JTJH.png](https://i.imgur.com/DD5JTJH.png)](https://i.imgur.com/DD5JTJH.png)
+
+search `Midibard` on Plugin Installer.
 
 # 安装方法
 > MidiBard需要[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)，如未安装请参考[原帖](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)安装后继续。
 
 正确安装卫月框架并注入后在游戏聊天框中输入`/xlsettings`打开Dalamud 设置窗口，复制该源  
-`https://raw.githubusercontent.com/akira0245/DalamudPlugins/api4/pluginmaster.json` 并将其添加到插件仓库  
+`https://raw.githubusercontent.com/reckhou/DalamudPlugins-Ori/api6/pluginmaster.json` 并将其添加到插件仓库  
 
-[![gw7vxx.png](https://z3.ax1x.com/2021/05/12/gw7vxx.png)](https://imgtu.com/i/gw7vxx)
 
 成功添加后在`/xlplugins`中搜索MidiBard并安装即可。
 
-# How to install
-You need to add my custom plugin repository to install MidiBard.  
-`https://raw.githubusercontent.com/akira0245/DalamudPlugins/api4/pluginmaster.json`  
-Click the link below for more detailed instructions.  
-https://github.com/akira0245/DalamudPlugins
+ 
+
+
 
 # 使用FAQ
 * **如何开始使用MIDIBARD演奏？**  
@@ -56,8 +60,6 @@ MIDIBARD使用游戏中的合奏助手来完成合奏，请在合奏时打开游
 
 ---
 > 本项目遵循 GNU Affero General Public License v3.0 协议开源。  
-> 项目源码可在 https://github.com/akira0245/MidiBard 查看（写的很烂被迫开源  
-> 欢迎补充英文翻译和pr
 
 
 # 其他问题
