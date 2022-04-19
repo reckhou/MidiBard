@@ -9,6 +9,7 @@ MidiBard is an FF14 Bard plugin based on the Dalamud framework, which supports b
 
 # Why MidiBard?
 
+* No need to set key bindings and hotbars on your every bards. 
 * Minimal delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
 * Based on in-game detection of bard ensemble mode, almost perfect sync between bards. Also supports manual sync if you wish to add a little bit of flavour to your song.
 *  Automatically switches instruments by track names following BMP rules, all songs from [BMP MIDI repository](https://bmp.trotlinebeercan.com/) are supported.
