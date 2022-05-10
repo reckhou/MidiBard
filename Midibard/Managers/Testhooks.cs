@@ -14,7 +14,7 @@ using MidiBard.DalamudApi;
 using MidiBard.Managers.Agents;
 
 namespace MidiBard.Managers;
-#if DEBUG
+#if true
 	unsafe class Testhooks : IDisposable
 	{
 		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
@@ -59,7 +59,7 @@ namespace MidiBard.Managers;
 			{
 				throw new ArgumentOutOfRangeException("note", "note must in range of 39-75 (c3-c6)");
 			}
-
+       
 			playnoteHook.Original(MidiBard.AgentPerformance.Pointer, note, 1);
 		}
 
@@ -152,7 +152,7 @@ namespace MidiBard.Managers;
 				}
 			});
 
-			//playnoteHook.Enable();
+			playnoteHook.Enable();
 		}
 
 		public static Testhooks Instance { get; } = new Testhooks();
