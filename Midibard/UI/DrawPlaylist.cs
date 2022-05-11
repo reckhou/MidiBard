@@ -119,6 +119,9 @@ public partial class PluginUI
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 MidiPlayerControl.SwitchSong(i);
+                ChatCommand.IgnoreSwitchSongFlag = true;
+                string msg = $"/p switchto {i + 1}";
+                MidiBard.Cbase.Functions.Chat.SendMessage(msg);
             }
             else
             {

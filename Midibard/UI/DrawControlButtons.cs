@@ -64,6 +64,7 @@ namespace MidiBard
             ImGui.SameLine();
             if (ImGui.Button(FontAwesomeIcon.Stop.ToIconString()))
             {
+                MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
                 if (FilePlayback.isWaiting)
                 {
                     FilePlayback.CancelWaiting();

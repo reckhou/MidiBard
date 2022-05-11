@@ -32,6 +32,7 @@ using MidiBard.Util;
 using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
+using XivCommon;
 
 namespace MidiBard;
 
@@ -76,6 +77,9 @@ public class MidiBard : IDalamudPlugin
     public string Name => nameof(MidiBard);
     private static ChatGui _chatGui;
 
+    public static XivCommonBase Cbase;
+
+
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
         DalamudApi.api.Initialize(this, pi);
@@ -117,6 +121,8 @@ public class MidiBard : IDalamudPlugin
         playlib.init(this);
         OffsetManager.Setup(api.SigScanner);
         GuitarTonePatch.InitAndApply();
+        Cbase = new XivCommonBase();
+
 
         AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.MetronomeAgent));
         AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.PerformanceAgent));
@@ -366,7 +372,7 @@ public class MidiBard : IDalamudPlugin
             PluginLog.Error(e, "error when saving config file");
         }
         _chatGui.ChatMessage -= ChatCommand.OnChatMessage;
-
+        Cbase.Dispose();
         FreeUnmanagedResources();
         GC.SuppressFinalize(this);
     }
