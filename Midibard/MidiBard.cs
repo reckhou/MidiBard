@@ -330,9 +330,9 @@ public class MidiBard : IDalamudPlugin
     {
         try
         {
-#if DEBUG
-				Testhooks.Instance?.Dispose();
-#endif
+
+			Testhooks.Instance?.Dispose();
+
             GuitarTonePatch.Dispose();
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             Framework.Update -= Tick;

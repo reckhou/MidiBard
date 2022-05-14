@@ -35,14 +35,12 @@ namespace playlibnamespace
             }
             catch (Exception)
             {
-                PluginLog.LogWarning("Exception!");
+                //PluginLog.LogWarning("Exception!");
                 ptr = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B 44 24 20 C1 E8 05");
             }
 
-            PluginLog.LogWarning("SendActionNative ADDR: " + MainModuleRva(ptr)); // v6.11 +0x50CE50 void Component::GUI::AtkUnitBase.FireCallback(longlong* param_1, undefined4 param_2, undefined8 param_3, char param_4)
+            // SendActionNative: v6.11 +0x50CE50 void Component::GUI::AtkUnitBase.FireCallback(longlong* param_1, undefined4 param_2, undefined8 param_3, char param_4)
             SendActionNative = Marshal.GetDelegateForFunctionPointer<SendActionDelegate>(ptr);
-            PluginLog.LogWarning("SetToneUI ADDR: " + MainModuleRva(sigScanner.ScanText("83 FA 04 77 4E")));
-            PluginLog.LogWarning("SetToneUI ADDR2: " + sigScanner.ScanText("83 FA 04 77 4E").ToString("X8"));
             SetToneUI = Marshal.GetDelegateForFunctionPointer<SetToneUIDelegate>(sigScanner.ScanText("83 FA 04 77 4E"));
         }
 

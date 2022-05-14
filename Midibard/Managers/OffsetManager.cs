@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Game;
 using Dalamud.Logging;
+using playlibnamespace;
 
 namespace MidiBard.Managers;
 
@@ -52,6 +53,7 @@ public static class OffsetManager
                 address += sigAttribute.Offset;
                 propertyInfo.SetValue(null, address);
                 PluginLog.Information($"[{nameof(OffsetManager)}][{propertyInfo.Name}] {address.ToInt64():X}");
+                PluginLog.Information($"[{nameof(OffsetManager)}][{propertyInfo.Name}] {playlib.MainModuleRva(address)}");
             }
             catch (Exception e)
             {
