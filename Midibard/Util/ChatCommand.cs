@@ -16,6 +16,7 @@ namespace MidiBard
 	public class ChatCommand
 	{
 		public static bool IgnoreSwitchSongFlag;
+		public static bool IgnoreReloadPlaylist;
 		public static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
 			if (isHandled)
@@ -64,6 +65,12 @@ namespace MidiBard
 					PluginLog.LogInformation("Reload playlist is not allowed while playing.");
 					return;
 				}
+
+				if (IgnoreReloadPlaylist)
+                {
+					IgnoreReloadPlaylist = false;
+					return;
+                }
 
 				Configuration.Load();
 				Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));

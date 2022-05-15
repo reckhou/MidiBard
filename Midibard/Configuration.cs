@@ -123,7 +123,7 @@ public class Configuration : IPluginConfiguration
     //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
     //}
 
-    public void Save()
+    public void Save(bool reloadplaylist = false)
     {
         Task.Run(() =>
         {
@@ -132,6 +132,10 @@ public class Configuration : IPluginConfiguration
                 var startNew = Stopwatch.StartNew();
                 DalamudApi.api.PluginInterface.SavePluginConfig(this);
                 PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
+                if (reloadplaylist && config.autoPostPartyChatCommand)
+                {
+                    MidiBard.SendReloadPlaylistCMD = true;
+                }
             }
             catch (Exception e)
             {

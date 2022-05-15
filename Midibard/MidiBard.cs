@@ -75,6 +75,7 @@ public class MidiBard : IDalamudPlugin
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
+    public static bool SendReloadPlaylistCMD;
 
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
@@ -150,6 +151,12 @@ public class MidiBard : IDalamudPlugin
     private void Tick(Dalamud.Game.Framework framework)
     {
         PerformanceEvents.Instance.InPerformanceMode = AgentPerformance.InPerformanceMode;
+
+        if (SendReloadPlaylistCMD)
+        {
+            SendReloadPlaylistCMD = false;
+            MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadplaylist");
+        }
 
         if (!Configuration.config.MonitorOnEnsemble) return;
 
