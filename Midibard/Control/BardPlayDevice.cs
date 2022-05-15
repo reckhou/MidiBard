@@ -72,7 +72,7 @@ internal class BardPlayDevice : IOutputDevice
         var trackIndex = (int?)metadata;
         if (trackIndex is { } trackIndexValue)
         {
-            if (MidiBard.config.SoloedTrack is { } soloing)
+            if (Configuration.config.SoloedTrack is { } soloing)
             {
                 if (trackIndexValue != soloing)
                 {
@@ -81,7 +81,7 @@ internal class BardPlayDevice : IOutputDevice
             }
             else
             {
-                if (!MidiBard.config.EnabledTracks[trackIndexValue])
+                if (!Configuration.config.EnabledTracks[trackIndexValue])
                 {
                     return false;
                 }
@@ -91,7 +91,7 @@ internal class BardPlayDevice : IOutputDevice
             {
                 if (MidiBard.PlayingGuitar)
                 {
-                    switch (MidiBard.config.GuitarToneMode)
+                    switch (Configuration.config.GuitarToneMode)
                     {
                         case GuitarToneMode.Off:
                             break;
@@ -108,7 +108,7 @@ internal class BardPlayDevice : IOutputDevice
                             }
                         case GuitarToneMode.Override:
                             {
-                                int tone = MidiBard.config.TonesPerTrack[trackIndexValue];
+                                int tone = Configuration.config.TonesPerTrack[trackIndexValue];
                                 playlib.GuitarSwitchTone(tone);
 
                                 // PluginLog.Verbose($"[N][NoteOn][{trackIndex}:{noteOnEvent.Channel}] Overriding guitar tone {tone}");
@@ -151,7 +151,7 @@ internal class BardPlayDevice : IOutputDevice
         {
             case ProgramChangeEvent @event:
                 {
-                    switch (MidiBard.config.GuitarToneMode)
+                    switch (Configuration.config.GuitarToneMode)
                     {
                         case GuitarToneMode.Off:
                             break;
@@ -269,11 +269,11 @@ internal class BardPlayDevice : IOutputDevice
     public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave)
     {
         noteNumber = noteNumber - 48 +
-                     MidiBard.config.TransposeGlobal +
-                     (MidiBard.config.EnableTransposePerTrack && trackIndex is { } index ? MidiBard.config.TransposePerTrack[index] : 0);
+                     Configuration.config.TransposeGlobal +
+                     (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
 
         octave = 0;
-        if (MidiBard.config.AdaptNotesOOR)
+        if (Configuration.config.AdaptNotesOOR)
         {
             while (noteNumber < 0)
             {
@@ -296,9 +296,9 @@ internal class BardPlayDevice : IOutputDevice
     //	octave = 0;
 
     //	key = midiNoteNumber - 48 +
-    //	          MidiBard.config.TransposeGlobal +
-    //	          (MidiBard.config.EnableTransposePerTrack ? MidiBard.config.TransposePerTrack[trackIndex] : 0);
-    //	if (MidiBard.config.AdaptNotesOOR)
+    //	          Configuration.config.TransposeGlobal +
+    //	          (Configuration.config.EnableTransposePerTrack ? Configuration.config.TransposePerTrack[trackIndex] : 0);
+    //	if (Configuration.config.AdaptNotesOOR)
     //	{
     //		while (key < 0)
     //		{

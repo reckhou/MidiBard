@@ -32,7 +32,7 @@ namespace MidiBard.Control.CharacterControl
 
         public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
         {
-            if (MidiBard.config.bmpTrackNames)
+            if (Configuration.config.bmpTrackNames)
             {
                 UpdateGuitarToneByConfig();
             }
@@ -126,7 +126,7 @@ namespace MidiBard.Control.CharacterControl
 
         internal static async Task WaitSwitchInstrumentForSong(string songName)
         {
-            var config = MidiBard.config;
+            var config = Configuration.config;
 
             if (config.bmpTrackNames)
             {
@@ -194,13 +194,13 @@ namespace MidiBard.Control.CharacterControl
 
             for (int track = 0; track < MidiBard.CurrentTracks.Count; track++)
             {
-                if (MidiBard.config.EnabledTracks[track] && MidiBard.CurrentTracks[track].trackInfo != null)
+                if (Configuration.config.EnabledTracks[track] && MidiBard.CurrentTracks[track].trackInfo != null)
                 {
                     var curInstrument = MidiBard.CurrentTracks[track].trackInfo?.InstrumentIDFromTrackName;
                     if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))
                     {
                         var toneID = curInstrument - MidiBard.guitarGroup[0];
-                        MidiBard.config.TonesPerTrack[track] = (int)toneID;
+                        Configuration.config.TonesPerTrack[track] = (int)toneID;
                     }
                 }
             }

@@ -12,7 +12,7 @@ namespace MidiBard.UI;
 public class MyFileDialogManager
 {
     private MyFileDialog dialog;
-    private ref string savedPath => ref MidiBard.config.lastOpenedFolderPath;
+    private ref string savedPath => ref Configuration.config.lastOpenedFolderPath;
     private Action<bool, string[]> callback;
 
     ///// <summary>

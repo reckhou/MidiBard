@@ -18,7 +18,7 @@ public partial class PluginUI
         ImGui.PushStyleColor(ImGuiCol.Button, 0);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
-        ImGui.PushStyleColor(ImGuiCol.Header, MidiBard.config.themeColorTransparent);
+        ImGui.PushStyleColor(ImGuiCol.Header, Configuration.config.themeColorTransparent);
         if (ImGui.BeginChild("child",
                 new Vector2(x: -1,
                     y: ImGui.GetTextLineHeightWithSpacing() *
@@ -38,7 +38,7 @@ public partial class PluginUI
                     clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
                 }
 
-                if (MidiBard.config.enableSearching && !string.IsNullOrEmpty(PlaylistSearchString))
+                if (Configuration.config.enableSearching && !string.IsNullOrEmpty(PlaylistSearchString))
                 {
                     clipper.Begin(searchedPlaylistIndexs.Count);
                     while (clipper.Step())
@@ -118,10 +118,13 @@ public partial class PluginUI
         {
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-                MidiPlayerControl.SwitchSong(i);
-                ChatCommand.IgnoreSwitchSongFlag = true;
-                string msg = $"/p switchto {i + 1}";
-                MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                MidiPlayerControl.SwitchSong(i);               
+                if (Configuration.config.autoPostPartyChatCommand)
+                {
+                    ChatCommand.IgnoreSwitchSongFlag = true;
+                    string msg = $"/p switchto {i + 1}";
+                    MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                }
             }
             else
             {
@@ -173,17 +176,17 @@ public partial class PluginUI
                     searchedPlaylistIndexs.Add(i);
                 }
             }
-            //MidiBard.config.enableSearching = false;
+            //Configuration.config.enableSearching = false;
         }
     }
 
     private unsafe void ButtonSearch()
     {
         ImGui.PushStyleColor(ImGuiCol.Text,
-            MidiBard.config.enableSearching ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
+            Configuration.config.enableSearching ? Configuration.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
         if (IconButton(FontAwesomeIcon.Search, "searchbutton"))
         {
-            MidiBard.config.enableSearching ^= true;
+            Configuration.config.enableSearching ^= true;
         }
 
         ImGui.PopStyleColor();

@@ -57,24 +57,24 @@ namespace MidiBard
 
         public static void Clear()
         {
-            MidiBard.config.Playlist.Clear();
+            Configuration.config.Playlist.Clear();
             FilePathList.Clear();
             CurrentPlaying = -1;
-            MidiBard.SaveConfig();
+            Configuration.config.Save();
         }
 
         public static void Remove(int index)
         {
             try
             {
-                MidiBard.config.Playlist.RemoveAt(index);
+                Configuration.config.Playlist.RemoveAt(index);
                 FilePathList.RemoveAt(index);
                 PluginLog.Information($"removing {index}");
                 if (index < currentPlaying)
                 {
                     currentPlaying--;
                 }
-                MidiBard.SaveConfig();
+                Configuration.config.Save();
             }
             catch (Exception e)
             {
@@ -95,7 +95,7 @@ namespace MidiBard
             ExtraTrackChunkPolicy = ExtraTrackChunkPolicy.Read,
             UnknownChunkIdPolicy = UnknownChunkIdPolicy.ReadAsUnknownChunk,
             SilentNoteOnPolicy = SilentNoteOnPolicy.NoteOff,
-            TextEncoding = MidiBard.config.uiLang == 1 ? Encoding.GetEncoding("gb18030") : Encoding.Default,
+            TextEncoding = Configuration.config.uiLang == 1 ? Encoding.GetEncoding("gb18030") : Encoding.Default,
             InvalidSystemCommonEventParameterValuePolicy = InvalidSystemCommonEventParameterValuePolicy.SnapToLimits
         };
 
@@ -104,14 +104,14 @@ namespace MidiBard
         //	//if (alsoReloadConfig)
         //	//{
         //	//	// back up since we don't want the enabled tracks to be overwritten by the shared config between bards.
-        //	//	bool[] enabledTracks = MidiBard.config.EnabledTracks;
+        //	//	bool[] enabledTracks = Configuration.config.EnabledTracks;
         //	//	MidiBard.LoadConfig();
-        //	//	MidiBard.config.EnabledTracks = enabledTracks;
+        //	//	Configuration.config.EnabledTracks = enabledTracks;
         //	//}
 
 
         //	// update playlist in case any files is being deleted
-        //	Task.Run(async () => await Reload(MidiBard.config.Playlist.ToArray()));
+        //	Task.Run(async () => await Reload(Configuration.config.Playlist.ToArray()));
         //}
 
         internal static async Task AddAsync(string[] filePaths, bool reload = false)
@@ -119,7 +119,7 @@ namespace MidiBard
             if (reload)
             {
                 FilePathList.Clear();
-                MidiBard.config.Playlist.Clear();
+                Configuration.config.Playlist.Clear();
             }
 
             var count = filePaths.Length;
@@ -127,7 +127,7 @@ namespace MidiBard
 
             await foreach (var path in GetPathsAvailable(filePaths))
             {
-                MidiBard.config.Playlist.Add(path);
+                Configuration.config.Playlist.Add(path);
                 string fileName = Path.GetFileNameWithoutExtension(path);
                 FilePathList.Add((path, fileName, SwitchInstrument.ParseSongName(fileName, out _, out _)));
                 success++;

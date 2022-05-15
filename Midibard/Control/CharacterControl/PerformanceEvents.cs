@@ -18,7 +18,7 @@ class PerformanceEvents
 
     private void EnteringPerformance()
     {
-        if (config.AutoOpenPlayerWhenPerforming)
+        if (Configuration.config.AutoOpenPlayerWhenPerforming)
             if (!SwitchInstrument.SwitchingInstrument)
                 Ui.Open();
 
@@ -29,7 +29,7 @@ class PerformanceEvents
 
     private void ExitingPerformance()
     {
-        if (config.AutoOpenPlayerWhenPerforming)
+        if (Configuration.config.AutoOpenPlayerWhenPerforming)
             if (!SwitchInstrument.SwitchingInstrument)
                 Ui.Close();
 

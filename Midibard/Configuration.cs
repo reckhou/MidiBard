@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Configuration;
 using Dalamud.Logging;
@@ -36,6 +37,8 @@ public enum UILang
 
 public class Configuration : IPluginConfiguration
 {
+    public static Configuration config;
+
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
@@ -71,6 +74,7 @@ public class Configuration : IPluginConfiguration
     public bool autoTransposeBySongName = true;
 
     public bool bmpTrackNames = false;
+    public bool autoPostPartyChatCommand = false;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
@@ -112,10 +116,34 @@ public class Configuration : IPluginConfiguration
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
     [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
+    //public void Save()
+    //{
+    //    var startNew = Stopwatch.StartNew();
+    //    DalamudApi.api.PluginInterface.SavePluginConfig(this);
+    //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
+    //}
+
     public void Save()
     {
-        var startNew = Stopwatch.StartNew();
-        DalamudApi.api.PluginInterface.SavePluginConfig(this);
-        PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
+        Task.Run(() =>
+        {
+            try
+            {
+                var startNew = Stopwatch.StartNew();
+                DalamudApi.api.PluginInterface.SavePluginConfig(this);
+                PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error(e, "Error when saving config");
+                ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving config");
+            }
+        });
     }
+
+    public static void Load()
+    {
+        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
+    }
+
 }

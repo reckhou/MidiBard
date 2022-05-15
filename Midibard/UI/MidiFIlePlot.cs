@@ -24,8 +24,8 @@ public partial class PluginUI
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         ImGui.SetNextWindowBgAlpha(0);
         ImGui.SetNextWindowSize(ImGuiHelpers.ScaledVector2(640, 480), ImGuiCond.FirstUseEver);
-        if (ImGui.Begin("Midi tracks##MIDIBARD", ref MidiBard.config.PlotTracks,
-                MidiBard.config.LockPlot
+        if (ImGui.Begin("Midi tracks##MIDIBARD", ref Configuration.config.PlotTracks,
+                Configuration.config.LockPlot
                     ? ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoFocusOnAppearing
                     : 0))
         {
@@ -77,7 +77,7 @@ public partial class PluginUI
             }
         }
 
-        if (MidiBard.config.LockPlot)
+        if (Configuration.config.LockPlot)
         {
             ImPlot.SetNextPlotLimitsX(timelinePos - timeWindow, timelinePos + timeWindow, ImGuiCond.Always);
         }
@@ -99,7 +99,7 @@ public partial class PluginUI
             var xMin = ImPlot.GetPlotLimits().X.Min;
             var xMax = ImPlot.GetPlotLimits().X.Max;
 
-            //if (!MidiBard.config.LockPlot) timeWindow = (xMax - xMin) / 2;
+            //if (!Configuration.config.LockPlot) timeWindow = (xMax - xMin) / 2;
 
             ImPlot.PushPlotClipRect();
             var cp = ImGuiColors.ParsedBlue;
@@ -151,7 +151,7 @@ public partial class PluginUI
 
     public unsafe void RefreshPlotData()
     {
-        if (!MidiBard.config.PlotTracks) return;
+        if (!Configuration.config.PlotTracks) return;
         Task.Run(() =>
         {
             try

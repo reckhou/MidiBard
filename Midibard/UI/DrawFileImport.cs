@@ -25,13 +25,13 @@ public partial class PluginUI
     {
         if (ImGui.BeginPopup("OpenFileDialog_selection"))
         {
-            if (ImGui.MenuItem("Win32 file dialog".Localize(), null, MidiBard.config.useLegacyFileDialog))
+            if (ImGui.MenuItem("Win32 file dialog".Localize(), null, Configuration.config.useLegacyFileDialog))
             {
-                MidiBard.config.useLegacyFileDialog = true;
+                Configuration.config.useLegacyFileDialog = true;
             }
-            else if (ImGui.MenuItem("ImGui file dialog".Localize(), null, !MidiBard.config.useLegacyFileDialog))
+            else if (ImGui.MenuItem("ImGui file dialog".Localize(), null, !Configuration.config.useLegacyFileDialog))
             {
-                MidiBard.config.useLegacyFileDialog = false;
+                Configuration.config.useLegacyFileDialog = false;
             }
 
             ImGui.EndPopup();
@@ -84,7 +84,7 @@ public partial class PluginUI
 
         if (ImGuiUtil.IconButton((FontAwesomeIcon)FontAwesomeIcon.Plus, (string)"buttonimport"))
         {
-            if (MidiBard.config.useLegacyFileDialog)
+            if (Configuration.config.useLegacyFileDialog)
             {
                 RunImportTaskLegacy();
             }
@@ -146,7 +146,7 @@ public partial class PluginUI
                     Task.Run(async () =>
                     {
                         await PlaylistManager.AddAsync(filePath);
-                        MidiBard.SaveConfig();
+                        Configuration.config.Save();
                     });
                 }
 
@@ -170,7 +170,7 @@ public partial class PluginUI
                 if (b) Task.Run(async () =>
                 {
                     await PlaylistManager.AddAsync(strings);
-                    MidiBard.SaveConfig();
+                    Configuration.config.Save();
                 });
                 _isImportRunning = false;
             });

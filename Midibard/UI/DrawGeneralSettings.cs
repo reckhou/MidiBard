@@ -16,11 +16,11 @@ namespace MidiBard
 
         private void DrawPanelGeneralSettings()
         {
-            //ImGui.SliderInt("Playlist size".Localize(), ref config.playlistSizeY, 2, 50,
+            //ImGui.SliderInt("Playlist size".Localize(), ref Configuration.config.playlistSizeY, 2, 50,
             //	config.playlistSizeY.ToString(), ImGuiSliderFlags.AlwaysClamp);
             //ToolTip("Play list rows number.".Localize());
 
-            //ImGui.SliderInt("Player width".Localize(), ref config.playlistSizeX, 356, 1000, config.playlistSizeX.ToString(), ImGuiSliderFlags.AlwaysClamp);
+            //ImGui.SliderInt("Player width".Localize(), ref Configuration.config.playlistSizeX, 356, 1000, config.playlistSizeX.ToString(), ImGuiSliderFlags.AlwaysClamp);
             //ToolTip("Player window max width.".Localize());
 
             //var inputDevices = InputDevice.GetAll().ToList();
@@ -60,65 +60,101 @@ namespace MidiBard
 
             ImGuiUtil.ToolTip("Choose external midi input device. right click to reset.".Localize());
 
-            ImGui.Checkbox("Auto restart listening".Localize(), ref MidiBard.config.autoRestoreListening);
+            if (ImGui.Checkbox("Auto restart listening".Localize(), ref Configuration.config.autoRestoreListening))
+            {
+                Configuration.config.Save();
+            }
+
             ImGuiUtil.ToolTip("Try auto restart listening last used midi device".Localize());
             //ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
-            //ImGui.Checkbox("Auto listening new device".Localize(), ref MidiBard.config.autoStartNewListening);
+            //ImGui.Checkbox("Auto listening new device".Localize(), ref Configuration.config.autoStartNewListening);
             //ImGuiUtil.ToolTip("Auto start listening new midi input device when idle.".Localize());
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
 
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth() / 3.36f);
-            ImGuiUtil.EnumCombo("Tone mode".Localize(), ref MidiBard.config.GuitarToneMode, _toolTips);
+            if (ImGuiUtil.EnumCombo("Tone mode".Localize(), ref Configuration.config.GuitarToneMode, _toolTips))
+            {
+                Configuration.config.Save();
+            }
+
             ImGuiUtil.ToolTip("Choose how MidiBard will handle MIDI channels and ProgramChange events(current only affects guitar tone changing)".Localize());
 
-            ImGui.Checkbox("Tracks visualization".Localize(), ref MidiBard.config.PlotTracks);
+            if (ImGui.Checkbox("Tracks visualization".Localize(), ref Configuration.config.PlotTracks))
+            {
+                Configuration.config.Save();
+            }
+
             ImGuiUtil.ToolTip("Draw midi tracks in a new window\nshowing the on/off and actual transposition of each track".Localize());
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
 
-            ImGui.Checkbox("Follow playback".Localize() + $" ({timeWindow:F2}s)###followPlayBack", ref MidiBard.config.LockPlot);
+            if (ImGui.Checkbox("Follow playback".Localize() + $" ({timeWindow:F2}s)###followPlayBack", ref Configuration.config.LockPlot))
+            {
+                Configuration.config.Save();
+            }
+
             if (ImGui.IsItemHovered())
             {
                 timeWindow *= Math.Pow(Math.E, ImGui.GetIO().MouseWheel * -0.1);
             }
             ImGuiUtil.ToolTip(
-                MidiBard.config.LockPlot
+                Configuration.config.LockPlot
                     ? "Lock tracks window and auto following current playback progress\nScroll mouse here to adjust view timeline scale".Localize()
                     : "Lock tracks window and auto following current playback progress".Localize());
 
-            ImGui.Checkbox("Auto open MidiBard".Localize(), ref MidiBard.config.AutoOpenPlayerWhenPerforming);
+            if (ImGui.Checkbox("Auto open MidiBard".Localize(), ref Configuration.config.AutoOpenPlayerWhenPerforming))
+            {
+                Configuration.config.Save();
+            }
+
             ImGuiUtil.ToolTip("Open MidiBard window automatically when entering performance mode".Localize());
-            //ImGui.Checkbox("Auto Confirm Ensemble Ready Check".Localize(), ref config.AutoConfirmEnsembleReadyCheck);
+            //ImGui.Checkbox("Auto Confirm Ensemble Ready Check".Localize(), ref Configuration.config.AutoConfirmEnsembleReadyCheck);
             //if (localizer.Language == UILang.CN) HelpMarker("在收到合奏准备确认时自动选择确认。");
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
 
-            ImGui.Checkbox("Monitor ensemble".Localize(), ref MidiBard.config.MonitorOnEnsemble);
+            if (ImGui.Checkbox("Monitor ensemble".Localize(), ref Configuration.config.MonitorOnEnsemble))
+            {
+                Configuration.config.Save();
+            }
+
             ImGuiUtil.ToolTip("Auto start ensemble when entering in-game party ensemble mode.".Localize());
 
-            ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.autoSwitchInstrumentBySongName);
-            ImGuiUtil.ToolTip("Auto switch instrument on demand. If you need this, \nplease add #instrument name# before file name.\nE.g. #harp#demo.mid".Localize());
+            if (ImGui.Checkbox("Auto switch instrument by track name(BMP Rules)".Localize(), ref Configuration.config.bmpTrackNames))
+            {
+                Configuration.config.Save();
+            }
+            ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
+            {
+                Configuration.config.Save();
+            }
 
-            ImGui.Checkbox("Auto transpose".Localize(), ref MidiBard.config.autoTransposeBySongName);
             ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
 
-            //ImGui.Checkbox("Override guitar tones".Localize(), ref MidiBard.config.OverrideGuitarTones);
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            if (ImGui.Checkbox("Auto post command".Localize(), ref Configuration.config.autoPostPartyChatCommand))
+            {
+                Configuration.config.Save();
+            }
+            ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
+
+            //ImGui.Checkbox("Override guitar tones".Localize(), ref Configuration.config.OverrideGuitarTones);
             //ImGuiUtil.ToolTip("Assign different guitar tones for each midi tracks".Localize());
 
 
-            ImGuiUtil.ColorPickerWithPalette(1000, "Theme color".Localize(), ref MidiBard.config.themeColor, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-            //if (ImGui.ColorEdit4("Theme color".Localize(), ref MidiBard.config.themeColor,
+            ImGuiUtil.ColorPickerWithPalette(1000, "Theme color".Localize(), ref Configuration.config.themeColor, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+            //if (ImGui.ColorEdit4("Theme color".Localize(), ref Configuration.config.themeColor,
             //	ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs))
-            MidiBard.config.themeColorDark = MidiBard.config.themeColor * new Vector4(0.25f, 0.25f, 0.25f, 1);
-            MidiBard.config.themeColorTransparent = MidiBard.config.themeColor * new Vector4(1, 1, 1, 0.33f);
+            Configuration.config.themeColorDark = Configuration.config.themeColor * new Vector4(0.25f, 0.25f, 0.25f, 1);
+            Configuration.config.themeColorTransparent = Configuration.config.themeColor * new Vector4(1, 1, 1, 0.33f);
 
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
-                MidiBard.config.themeColor = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E);
-                MidiBard.config.themeColorDark = MidiBard.config.themeColor * new Vector4(0.25f, 0.25f, 0.25f, 1);
-                MidiBard.config.themeColorTransparent = MidiBard.config.themeColor * new Vector4(1, 1, 1, 0.33f);
+                Configuration.config.themeColor = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E);
+                Configuration.config.themeColorDark = Configuration.config.themeColor * new Vector4(0.25f, 0.25f, 0.25f, 1);
+                Configuration.config.themeColorTransparent = Configuration.config.themeColor * new Vector4(1, 1, 1, 0.33f);
             }
             ImGui.SameLine();
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - ImGui.GetStyle().ItemInnerSpacing.X);
@@ -126,13 +162,18 @@ namespace MidiBard
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth() / 3.36f);
-            if (ImGui.Combo("UI Language".Localize(), ref MidiBard.config.uiLang, uilangStrings, 2))
-                MidiBard.Localizer = new Localizer((UILang)MidiBard.config.uiLang);
+            if (ImGui.Combo("UI Language".Localize(), ref Configuration.config.uiLang, uilangStrings, 2))
+            {
+                MidiBard.Localizer = new Localizer((UILang)Configuration.config.uiLang);
+                Configuration.config.Save();
+            }
 
-            //#if DEBUG
-            ImGui.Checkbox("BMP track name compatible(testing)".Localize(), ref MidiBard.config.bmpTrackNames);
-            ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
-            //#endif
+            if (ImGui.Checkbox("Auto switch instrument by file name".Localize(), ref Configuration.config.autoSwitchInstrumentBySongName))
+            {
+                Configuration.config.Save();
+            }
+
+            ImGuiUtil.ToolTip("Auto switch instrument on demand. If you need this, \nplease add #instrument name# before file name.\nE.g. #harp#demo.mid".Localize());
         }
     }
 }

@@ -63,7 +63,7 @@ public partial class PluginUI
         {
             DrawMainPluginWindow();
 
-            if (MidiBard.config.PlotTracks)
+            if (Configuration.config.PlotTracks)
             {
                 DrawPlotWindow();
             }
@@ -91,7 +91,7 @@ public partial class PluginUI
             //var title = string.Format("MidiBard{0}{1}###midibard",
             //	ensembleModeRunning ? " - Ensemble Running" : string.Empty,
             //	isListeningForEvents ? " - Listening Events" : string.Empty);
-            var flag = config.miniPlayer ? ImGuiWindowFlags.NoDecoration : ImGuiWindowFlags.None;
+            var flag = Configuration.config.miniPlayer ? ImGuiWindowFlags.NoDecoration : ImGuiWindowFlags.None;
             ImGui.SetNextWindowSizeConstraints(new Vector2(ImGui.GetIO().FontGlobalScale * 357, 0),
                 new Vector2(ImGui.GetIO().FontGlobalScale * 357, float.MaxValue));
 #if DEBUG
@@ -119,7 +119,7 @@ public partial class PluginUI
                         "Listening input device: ".Localize() + InputDeviceManager.CurrentInputDevice.DeviceName());
                 }
 
-                if (!config.miniPlayer)
+                if (!Configuration.config.miniPlayer)
                 {
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 4));
                     ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(15, 4));
@@ -151,7 +151,7 @@ public partial class PluginUI
 
                     ImGui.PopStyleVar(2);
 
-                    if (config.enableSearching)
+                    if (Configuration.config.enableSearching)
                     {
                         TextBoxSearch();
                     }
@@ -161,7 +161,7 @@ public partial class PluginUI
                         if (ImGui.Button("Import midi files to start performing!".Localize(),
                                 new Vector2(-1, ImGui.GetFrameHeight())))
                         {
-                            if (MidiBard.config.useLegacyFileDialog)
+                            if (Configuration.config.useLegacyFileDialog)
                             {
                                 RunImportTaskLegacy();
                             }
@@ -202,14 +202,14 @@ public partial class PluginUI
                 ImGui.PopFont();
                 ImGui.PopStyleVar(2);
 
-                if (config.showMusicControlPanel)
+                if (Configuration.config.showMusicControlPanel)
                 {
                     DrawTrackTrunkSelectionWindow();
                     ImGui.Separator();
                     DrawPanelMusicControl();
                 }
 
-                if (config.showSettingsPanel)
+                if (Configuration.config.showSettingsPanel)
                 {
                     ImGui.Separator();
                     DrawPanelGeneralSettings();
@@ -225,7 +225,7 @@ public partial class PluginUI
 
     private static unsafe void ToggleButton(ref bool b)
     {
-        ImGui.PushStyleColor(ImGuiCol.Text, b ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
+        ImGui.PushStyleColor(ImGuiCol.Text, b ? Configuration.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
         if (ImGui.Button(((FontAwesomeIcon)62800).ToIconString())) b ^= true;
         ImGui.PopStyleColor();
     }

@@ -135,7 +135,7 @@ public static class FilePlayback
         var playback = new BardPlayback(timedEvents, CurrentTMap, new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() })
         {
             InterruptNotesOnStop = true,
-            Speed = config.playSpeed,
+            Speed = Configuration.config.playSpeed,
             TrackProgram = true,
 #if DEBUG
             NoteCallback = (data, time, length, playbackTime) =>
@@ -223,14 +223,14 @@ public static class FilePlayback
                 if (!PlaylistManager.FilePathList.Any())
                     return;
 
-                PerformWaiting(config.secondsBetweenTracks);
+                PerformWaiting(Configuration.config.secondsBetweenTracks);
                 if (needToCancel)
                 {
                     needToCancel = false;
                     return;
                 }
 
-                switch ((PlayMode)config.PlayMode)
+                switch ((PlayMode)Configuration.config.PlayMode)
                 {
                     case PlayMode.Single:
                         break;

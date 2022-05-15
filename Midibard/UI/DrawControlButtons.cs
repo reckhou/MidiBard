@@ -16,8 +16,8 @@ namespace MidiBard
             //mini player
 
             ImGui.SameLine();
-            if (ImGui.Button(((FontAwesomeIcon)(MidiBard.config.miniPlayer ? 0xF424 : 0xF422)).ToIconString()))
-                MidiBard.config.miniPlayer ^= true;
+            if (ImGui.Button(((FontAwesomeIcon)(Configuration.config.miniPlayer ? 0xF424 : 0xF422)).ToIconString()))
+                Configuration.config.miniPlayer ^= true;
 
             ToolTip("Mini player".Localize());
         }
@@ -26,12 +26,12 @@ namespace MidiBard
         {
             ImGui.SameLine();
             ImGui.PushStyleColor(ImGuiCol.Text,
-                MidiBard.config.showMusicControlPanel
-                    ? MidiBard.config.themeColor
+                Configuration.config.showMusicControlPanel
+                    ? Configuration.config.themeColor
                     : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
 
             if (ImGui.Button((FontAwesomeIcon.Music).ToIconString()))
-                MidiBard.config.showMusicControlPanel ^= true;
+                Configuration.config.showMusicControlPanel ^= true;
 
             ImGui.PopStyleColor();
             ToolTip("Music control panel".Localize());
@@ -40,10 +40,10 @@ namespace MidiBard
         private static unsafe void DrawButtonShowSettingsPanel()
         {
             ImGui.SameLine();
-            ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.config.showSettingsPanel ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
+            ImGui.PushStyleColor(ImGuiCol.Text, Configuration.config.showSettingsPanel ? Configuration.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
 
             if (ImGui.Button(FontAwesomeIcon.Cog.ToIconString()))
-                MidiBard.config.showSettingsPanel ^= true;
+                Configuration.config.showSettingsPanel ^= true;
 
             ImGui.PopStyleColor();
             ToolTip("Settings panel".Localize());
@@ -64,7 +64,11 @@ namespace MidiBard
             ImGui.SameLine();
             if (ImGui.Button(FontAwesomeIcon.Stop.ToIconString()))
             {
-                MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+                if (Configuration.config.autoPostPartyChatCommand)
+                {
+                    MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+                }
+
                 if (FilePlayback.isWaiting)
                 {
                     FilePlayback.CancelWaiting();
@@ -94,7 +98,7 @@ namespace MidiBard
         {
             ImGui.SameLine();
             FontAwesomeIcon icon;
-            switch ((PlayMode)MidiBard.config.PlayMode)
+            switch ((PlayMode)Configuration.config.PlayMode)
             {
                 case PlayMode.Single:
                     icon = (FontAwesomeIcon)0xf3e5;
@@ -117,18 +121,18 @@ namespace MidiBard
 
             if (ImGui.Button(icon.ToIconString()))
             {
-                MidiBard.config.PlayMode += 1;
-                MidiBard.config.PlayMode %= 5;
+                Configuration.config.PlayMode += 1;
+                Configuration.config.PlayMode %= 5;
             }
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
-                MidiBard.config.PlayMode += 4;
-                MidiBard.config.PlayMode %= 5;
+                Configuration.config.PlayMode += 4;
+                Configuration.config.PlayMode %= 5;
             }
 
             ToolTip("Playmode: ".Localize() +
-                    $"{(PlayMode)MidiBard.config.PlayMode}".Localize());
+                    $"{(PlayMode)Configuration.config.PlayMode}".Localize());
         }
     }
 }

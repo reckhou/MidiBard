@@ -28,7 +28,7 @@ static class InputDeviceManager
                         var devicesNames = Devices.Select(i => i.DeviceName()).ToArray();
 
                         //PluginLog.Information(string.Join(", ", devicesNames));
-                        //PluginLog.Information(MidiBard.config.lastUsedMidiDeviceName);
+                        //PluginLog.Information(Configuration.config.lastUsedMidiDeviceName);
                         if (CurrentInputDevice is not null)
                         {
                             if (!devicesNames.Contains(CurrentInputDevice.DeviceName()))
@@ -39,13 +39,13 @@ static class InputDeviceManager
                         }
                         else if (CurrentInputDevice is null)
                         {
-                            if (MidiBard.config.autoRestoreListening)
+                            if (Configuration.config.autoRestoreListening)
                             {
-                                if (devicesNames.Contains(MidiBard.config.lastUsedMidiDeviceName))
+                                if (devicesNames.Contains(Configuration.config.lastUsedMidiDeviceName))
                                 {
-                                    PluginLog.Warning($"try restoring midi device: \"{MidiBard.config.lastUsedMidiDeviceName}\"");
+                                    PluginLog.Warning($"try restoring midi device: \"{Configuration.config.lastUsedMidiDeviceName}\"");
                                     var newDevice = Devices?.FirstOrDefault(i =>
-                                        i.Name == MidiBard.config.lastUsedMidiDeviceName);
+                                        i.Name == Configuration.config.lastUsedMidiDeviceName);
                                     if (newDevice != null)
                                     {
                                         SetDevice(newDevice);
@@ -100,7 +100,7 @@ static class InputDeviceManager
     internal static void SetDevice(InputDevice device)
     {
         DisposeCurrentInputDevice();
-        MidiBard.config.lastUsedMidiDeviceName = device?.DeviceName();
+        Configuration.config.lastUsedMidiDeviceName = device?.DeviceName();
         if (device is null) return;
 
         try

@@ -46,12 +46,12 @@ namespace MidiBard
 		{
 			if (Begin("MIDIBARD DEBUG"))
 			{
-				Checkbox("AgentInfo", ref config.DebugAgentInfo);
-				Checkbox("DeviceInfo", ref config.DebugDeviceInfo);
-				Checkbox("Offsets", ref config.DebugOffsets);
-				Checkbox("KeyStroke", ref config.DebugKeyStroke);
-				Checkbox("Misc", ref config.DebugMisc);
-				Checkbox("EnsembleConductor", ref config.DebugEnsemble);
+				Checkbox("AgentInfo", ref Configuration.config.DebugAgentInfo);
+				Checkbox("DeviceInfo", ref Configuration.config.DebugDeviceInfo);
+				Checkbox("Offsets", ref Configuration.config.DebugOffsets);
+				Checkbox("KeyStroke", ref Configuration.config.DebugKeyStroke);
+				Checkbox("Misc", ref Configuration.config.DebugMisc);
+				Checkbox("EnsembleConductor", ref Configuration.config.DebugEnsemble);
 				Checkbox("fontwindow", ref fontwindow);
 				Checkbox("midiChannels", ref midiChannels);
 
@@ -241,9 +241,9 @@ namespace MidiBard
 
 					//if (ImGui.BeginChild("Generate", new Vector2(size - 5, 150), false, ImGuiWindowFlags.NoDecoration))
 					//{
-					//	ImGui.DragInt("length##keyboard", ref config.testLength, 0.05f);
-					//	ImGui.DragInt("interval##keyboard", ref config.testInterval, 0.05f);
-					//	ImGui.DragInt("repeat##keyboard", ref config.testRepeat, 0.05f);
+					//	ImGui.DragInt("length##keyboard", ref Configuration.config.testLength, 0.05f);
+					//	ImGui.DragInt("interval##keyboard", ref Configuration.config.testInterval, 0.05f);
+					//	ImGui.DragInt("repeat##keyboard", ref Configuration.config.testRepeat, 0.05f);
 					//	if (config.testLength < 0)
 					//	{
 					//		config.testLength = 0;
@@ -599,7 +599,7 @@ namespace MidiBard
 				}
 				End();
 #if false
-				if (MidiBard.config.DebugMisc && ImGui.Begin(nameof(MidiBard) + "Misc"))
+				if (Configuration.config.DebugMisc && ImGui.Begin(nameof(MidiBard) + "Misc"))
 				{
 					if (ImGui.Button("showPerformance")) AgentPerformance.Instance.Struct->AgentInterface.Show();
 					ImGui.SameLine();
@@ -607,7 +607,7 @@ namespace MidiBard
 					if (ImGui.Button("showMetronome")) AgentMetronome.Instance.Struct->AgentInterface.Show();
 					ImGui.SameLine();
 					if (ImGui.Button("hideMetronome")) AgentMetronome.Instance.Struct->AgentInterface.Hide();
-					ImGui.Checkbox("lazyReleaseKey", ref MidiBard.config.lazyNoteRelease);
+					ImGui.Checkbox("lazyReleaseKey", ref Configuration.config.lazyNoteRelease);
 					//var systemConfig = &(FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->SystemConfig);
 					//var CommonSystemConfig = &(FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->SystemConfig.CommonSystemConfig);
 					//var ConfigBase = &(FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->SystemConfig.CommonSystemConfig.ConfigBase);
@@ -665,7 +665,7 @@ namespace MidiBard
 				ImGui.End();
 #endif
 
-				//if (MidiBard.config.DebugMisc && Begin(nameof(MidiBard) + "Rpc"))
+				//if (Configuration.config.DebugMisc && Begin(nameof(MidiBard) + "Rpc"))
 				//{
 				//	//if (Button("SetupBroadcastingRPCBuffers"))
 				//	//{
@@ -699,7 +699,7 @@ namespace MidiBard
 				//	TextUnformatted($"RpcClient:\n\t{RPCManager.Instance.RpcClient}");
 				//}
 
-				//if (MidiBard.config.DebugEnsemble)
+				//if (Configuration.config.DebugEnsemble)
 				//{
 				//	EnsemblePartyList();
 				//}

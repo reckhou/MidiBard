@@ -113,7 +113,7 @@ internal static class MidiPlayerControl
                 CurrentPlayback = null;
                 int next = PlaylistManager.CurrentPlaying;
 
-                switch ((PlayMode)config.PlayMode)
+                switch ((PlayMode)Configuration.config.PlayMode)
                 {
                     case PlayMode.Single:
                     case PlayMode.SingleRepeat:
@@ -160,7 +160,7 @@ internal static class MidiPlayerControl
                 CurrentPlayback = null;
                 int prev = PlaylistManager.CurrentPlaying;
 
-                switch ((PlayMode)config.PlayMode)
+                switch ((PlayMode)Configuration.config.PlayMode)
                 {
                     case PlayMode.Single:
                     case PlayMode.SingleRepeat:

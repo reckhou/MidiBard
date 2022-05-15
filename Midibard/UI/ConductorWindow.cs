@@ -39,9 +39,9 @@ namespace MidiBard
 			{
 				if (Begin("EnsemblePartyList"))
 				{
-					Checkbox(nameof(config.SyncPlaylist), ref config.SyncPlaylist);
-					Checkbox(nameof(config.SyncSongSelection), ref config.SyncSongSelection);
-					//Checkbox(nameof(config.SyncPlaylist),ref config.SyncPlaylist);
+					Checkbox(nameof(config.SyncPlaylist), ref Configuration.config.SyncPlaylist);
+					Checkbox(nameof(config.SyncSongSelection), ref Configuration.config.SyncSongSelection);
+					//Checkbox(nameof(config.SyncPlaylist),ref Configuration.config.SyncPlaylist);
 					//var connected = RPCManager.Instance.BroadcastingRPCBuffers.Select(i => i.CID).ToArray();
 					//var Intersect = Enumerable.Intersect(party, connected).ToArray();
 

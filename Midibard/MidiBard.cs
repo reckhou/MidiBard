@@ -38,7 +38,6 @@ namespace MidiBard;
 
 public class MidiBard : IDalamudPlugin
 {
-    public static Configuration config { get; private set; }
     internal static PluginUI Ui { get; set; }
 #if DEBUG
 		public static bool Debug = true;
@@ -54,8 +53,6 @@ public class MidiBard : IDalamudPlugin
     internal static AgentMetronome AgentMetronome { get; set; }
     internal static AgentPerformance AgentPerformance { get; set; }
     //internal static AgentConfigSystem AgentConfigSystem { get; set; }
-
-    private static int configSaverTick;
 
     private static bool wasEnsembleModeRunning = false;
 
@@ -115,8 +112,9 @@ public class MidiBard : IDalamudPlugin
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        LoadConfig();
-        Localizer = new Localizer((UILang)config.uiLang);
+        Configuration.Load();
+
+        Localizer = new Localizer((UILang)Configuration.config.uiLang);
 
         playlib.init(this);
         OffsetManager.Setup(api.SigScanner);
@@ -136,7 +134,7 @@ public class MidiBard : IDalamudPlugin
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
-        Task.Run(() => PlaylistManager.AddAsync(config.Playlist.ToArray(), true));
+        Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
         CurrentOutputDevice = new BardPlayDevice();
         InputDeviceManager.ScanMidiDeviceThread.Start();
@@ -153,16 +151,7 @@ public class MidiBard : IDalamudPlugin
     {
         PerformanceEvents.Instance.InPerformanceMode = AgentPerformance.InPerformanceMode;
 
-        if (Ui.MainWindowOpened)
-        {
-            if (configSaverTick++ == 3600)
-            {
-                configSaverTick = 0;
-                SaveConfig();
-            }
-        }
-
-        if (!config.MonitorOnEnsemble) return;
+        if (!Configuration.config.MonitorOnEnsemble) return;
 
         if (AgentPerformance.InPerformanceMode)
         {
@@ -170,7 +159,7 @@ public class MidiBard : IDalamudPlugin
 
             if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
             {
-                if (config.StopPlayingWhenEnsembleEnds)
+                if (Configuration.config.StopPlayingWhenEnsembleEnds)
                 {
                     MidiPlayerControl.Stop();
                 }
@@ -252,16 +241,16 @@ public class MidiBard : IDalamudPlugin
                 case "visual":
                     try
                     {
-                        config.PlotTracks = argStrings[1] switch
+                        Configuration.config.PlotTracks = argStrings[1] switch
                         {
                             "on" => true,
                             "off" => false,
-                            _ => !config.PlotTracks
+                            _ => !Configuration.config.PlotTracks
                         };
                     }
                     catch (Exception e)
                     {
-                        config.PlotTracks ^= true;
+                        Configuration.config.PlotTracks ^= true;
                     }
                     break;
                 case "rewind":
@@ -299,30 +288,6 @@ public class MidiBard : IDalamudPlugin
             Ui.Toggle();
         }
     }
-
-    internal static void SaveConfig()
-    {
-        Task.Run(() =>
-        {
-            try
-            {
-                var startNew = Stopwatch.StartNew();
-                PluginInterface.SavePluginConfig(config);
-                PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-            }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, "Error when saving config");
-                ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
-            }
-        });
-    }
-
-    internal static void LoadConfig()
-    {
-        config = (Configuration)PluginInterface.GetPluginConfig() ?? new Configuration();
-    }
-
 
     #region IDisposable Support
 
@@ -363,14 +328,6 @@ public class MidiBard : IDalamudPlugin
 
     public void Dispose()
     {
-        try
-        {
-            SaveConfig();
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error(e, "error when saving config file");
-        }
         _chatGui.ChatMessage -= ChatCommand.OnChatMessage;
         Cbase.Dispose();
         FreeUnmanagedResources();
