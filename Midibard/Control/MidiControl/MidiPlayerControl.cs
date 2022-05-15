@@ -253,7 +253,7 @@ internal static class MidiPlayerControl
 			}
 			msTime += delta * 1000;
 			MetricTimeSpan newTime = new MetricTimeSpan(msTime);
-			//PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
+            //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
 			CurrentPlayback.MoveToTime(newTime);
 			playDeltaTime += delta;
 		}
