@@ -88,10 +88,10 @@ We have tested to run the game under 15 FPS, and MidiBard still sounds okay and 
 
 * **Where May I Find Support?**
 
-Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support. After joined the server, head to `role-assign` channel and react to this message show below. Please click the guitar icon so you will be granted `Solo Bard` role, and see the technical channels on our server:
+Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support. After joined the server, head to `role-assign` channel and react to this message show below. Please click the MidiBard so you will be granted `MidiBard User` role:
 
-![enter image description here](https://i.imgur.com/VK8Iz0S.png)
-![enter image description here](https://i.imgur.com/6mEBWmY.png)
+![enter image description here](https://i.imgur.com/lccLSDv.png)
+![enter image description here]https://i.imgur.com/2vMGfnP.png)
 
 # Party Chat Command References
 
