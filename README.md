@@ -4,6 +4,10 @@
 
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
 
+**Buy me a coffee if you wish:**
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
+
 MidiBard is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It was originally authored by [akira0245](https://github.com/akira0245/MidiBard), now developed by [Ori](https://github.com/reckhou/MidiBard) and other developers after he quit for real-life reasons.
 
 
@@ -40,12 +44,14 @@ Back to `Plugin Installer`, search `Midibard` and install.
 # Recommend Settings
 
 If you are new to `MidiBard`, please use those settings below. Those settings are recommended for the band.
+
 ![image](https://i.imgur.com/wFsYNDy.png)
 
 # How to Use
 * **Where to Start?**  
 
 Type `/midibard` in the chatbox and the window will show up. Press the `+` icon to add MIDI files to the playlist(hold `Ctrl` or `Shift` key to choose multiple files).  Double click any songs on the playlist to switch. Select the tracks you wish to play, and choose the instrument you wish to use. 
+
 ![enter image description here](https://i.imgur.com/pSBChDZ.png)
 
 Press the triangle icon to start playing.
@@ -91,7 +97,7 @@ We have tested to run the game under 15 FPS, and MidiBard still sounds okay and 
 Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support. After joined the server, head to `role-assign` channel and react to this message show below. Please click the MidiBard so you will be granted `MidiBard User` role:
 
 ![enter image description here](https://i.imgur.com/lccLSDv.png)
-![enter image description here]https://i.imgur.com/2vMGfnP.png)
+![enter image description here](https://i.imgur.com/2vMGfnP.png)
 
 # Party Chat Command References
 
