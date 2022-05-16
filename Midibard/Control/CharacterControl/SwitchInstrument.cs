@@ -194,7 +194,7 @@ namespace MidiBard.Control.CharacterControl
 
             for (int track = 0; track < MidiBard.CurrentTracks.Count; track++)
             {
-                if (Configuration.config.EnabledTracks[track] && MidiBard.CurrentTracks[track].trackInfo != null)
+                if (ConfigurationPrivate.config.EnabledTracks[track] && MidiBard.CurrentTracks[track].trackInfo != null)
                 {
                     var curInstrument = MidiBard.CurrentTracks[track].trackInfo?.InstrumentIDFromTrackName;
                     if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))

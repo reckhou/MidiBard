@@ -81,7 +81,7 @@ internal class BardPlayDevice : IOutputDevice
             }
             else
             {
-                if (!Configuration.config.EnabledTracks[trackIndexValue])
+                if (!ConfigurationPrivate.config.EnabledTracks[trackIndexValue])
                 {
                     return false;
                 }

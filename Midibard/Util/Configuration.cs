@@ -58,7 +58,6 @@ public class Configuration : IPluginConfiguration
 
     public bool MonitorOnEnsemble = true;
     public bool AutoOpenPlayerWhenPerforming = true;
-    public bool[] EnabledTracks = Enumerable.Repeat(true, 100).ToArray();
     public int? SoloedTrack = null;
     public int[] TonesPerTrack = new int[100];
     public bool EnableTransposePerTrack = false;
@@ -131,6 +130,7 @@ public class Configuration : IPluginConfiguration
             {
                 var startNew = Stopwatch.StartNew();
                 DalamudApi.api.PluginInterface.SavePluginConfig(this);
+                ConfigurationPrivate.config.Save();
                 PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
                 if (reloadplaylist && config.autoPostPartyChatCommand)
                 {
@@ -148,6 +148,7 @@ public class Configuration : IPluginConfiguration
     public static void Load()
     {
         config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
+        ConfigurationPrivate.Load();
     }
 
 }

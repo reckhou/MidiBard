@@ -28,7 +28,7 @@ public record TrackInfo
 
     public ChannelInfo[] ChannelInfos;
 
-    public bool IsEnabled => Configuration.config.EnabledTracks[Index];
+    public bool IsEnabled => ConfigurationPrivate.config.EnabledTracks[Index];
     public bool IsPlaying => Configuration.config.SoloedTrack is int t ? t == Index : IsEnabled;
     public int TransposeFromTrackName => GetTransposeByName(TrackName);
     public uint? InstrumentIDFromTrackName => GetInstrumentIDByName(TrackName);

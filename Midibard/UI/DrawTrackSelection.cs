@@ -48,7 +48,7 @@ public partial class PluginUI
                         ImGui.SetCursorPosX(0);
                         Vector4 color = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
                         Vector4 colorCheckmark = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
-                        if (!Configuration.config.EnabledTracks[i] || soloing)
+                        if (!ConfigurationPrivate.config.EnabledTracks[i] || soloing)
                         {
                             color = colorCheckmark = *ImGui.GetStyleColorVec4(ImGuiCol.TextDisabled);
                         }
@@ -61,9 +61,10 @@ public partial class PluginUI
                         ImGui.PushStyleColor(ImGuiCol.Text, color);
                         ImGui.PushStyleColor(ImGuiCol.CheckMark, colorCheckmark);
 
-                        if (ImGui.Checkbox("##checkbox", ref Configuration.config.EnabledTracks[i]))
+                        if (ImGui.Checkbox("##checkbox", ref ConfigurationPrivate.config.EnabledTracks[i]))
                         {
                             JudgeSwitchInstrument(i);
+                            Configuration.config.Save();
                         }
 
                         if (Configuration.config.EnableTransposePerTrack)
@@ -94,7 +95,7 @@ public partial class PluginUI
                             Configuration.config.SoloedTrack = Configuration.config.SoloedTrack == i ? null : i;
                             if (Configuration.config.bmpTrackNames && !MidiBard.IsPlaying &&
                                 Configuration.config.SoloedTrack != null
-                                && Configuration.config.EnabledTracks[(int)Configuration.config.SoloedTrack]
+                                && ConfigurationPrivate.config.EnabledTracks[(int)Configuration.config.SoloedTrack]
                                 && MidiBard.CurrentTracks[(int)Configuration.config.SoloedTrack].trackInfo
                                     .InstrumentIDFromTrackName != null)
                             {
