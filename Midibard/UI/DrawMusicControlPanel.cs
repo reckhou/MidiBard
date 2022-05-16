@@ -175,24 +175,24 @@ namespace MidiBard
 
         private static void ManualDelay()
         {
-            if (ImGui.Button("-50ms"))
-            {
-                MidiPlayerControl.ChangeDeltaTime(-50);
-            }
-            ImGui.SameLine();
             if (ImGui.Button("-10ms"))
             {
                 MidiPlayerControl.ChangeDeltaTime(-10);
             }
             ImGui.SameLine();
+            if (ImGui.Button("-2ms"))
+            {
+                MidiPlayerControl.ChangeDeltaTime(-2);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("+2ms"))
+            {
+                MidiPlayerControl.ChangeDeltaTime(2);
+            }
+            ImGui.SameLine();
             if (ImGui.Button("+10ms"))
             {
                 MidiPlayerControl.ChangeDeltaTime(10);
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("+50ms"))
-            {
-                MidiPlayerControl.ChangeDeltaTime(50);
             }
             ImGui.SameLine();
             ImGui.TextUnformatted("Manual Sync: " + $"{MidiPlayerControl.playDeltaTime} ms");
