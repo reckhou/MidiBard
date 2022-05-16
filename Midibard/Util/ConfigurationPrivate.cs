@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO;
 using System.Numerics;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Configuration;
@@ -24,18 +25,51 @@ public class ConfigurationPrivate : IPluginConfiguration
     public bool[] EnabledTracks = Enumerable.Repeat(false, 100).ToArray();
 
     // Only save/load when character is logged in.
-    private bool isLoaded;
+    private bool characterLoggedIn;
+
+    public static void Init()
+    {
+        Task.Run(() =>
+        {
+            bool loggedIn = false;
+            while (!loggedIn)
+            {
+                try
+                {
+                    var CS = DalamudApi.api.ClientState;
+                    if (CS != null && CS.IsLoggedIn)
+                    {
+                        var playerData = CS.LocalPlayer;
+                        var contentId = CS.LocalContentId;
+                        if (playerData == null || playerData.HomeWorld.GameData == null)
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                        
+                        Load();
+                        loggedIn = true;
+                        config.characterLoggedIn = true;
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    PluginLog.Error(e, "Error");
+                    return;
+                }
+
+                Thread.Sleep(500);
+            }
+        });
+    }
 
     public void Save()
     {
-        if (!isLoaded)
+        if (!characterLoggedIn)
         {
-            Load();
-            if (!isLoaded)
-            {
-                PluginLog.LogWarning("Private config loading failed, aborting...");
-                return;
-            }
+            PluginLog.LogWarning("Skip saving private config, character not logged in!");
+            return;
         }
 
         try
@@ -99,9 +133,15 @@ public class ConfigurationPrivate : IPluginConfiguration
                 {
                     config = new ConfigurationPrivate();
                 }
-
-               config.isLoaded = true;
                return;
+            }
+
+            if (playerData == null)
+            {
+                PluginLog.LogDebug("PlayerData NULL");
+            } else
+            {
+                PluginLog.LogDebug(playerData.HomeWorld.GameData == null ? "playerData.HomeWorld.GameData == null" : "");
             }
         }
 

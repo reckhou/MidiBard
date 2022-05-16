@@ -113,7 +113,7 @@ public class MidiBard : IDalamudPlugin
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        Configuration.Load();
+        Configuration.Init();
 
         Localizer = new Localizer((UILang)Configuration.config.uiLang);
 

@@ -122,6 +122,12 @@ public class Configuration : IPluginConfiguration
     //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
     //}
 
+    public static void Init()
+    {
+        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
+        ConfigurationPrivate.Init();
+    }
+
     public void Save(bool reloadplaylist = false)
     {
         Task.Run(() =>
