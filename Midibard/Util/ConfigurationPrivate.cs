@@ -24,9 +24,6 @@ public class ConfigurationPrivate : IPluginConfiguration
 
     public bool[] EnabledTracks = Enumerable.Repeat(false, 100).ToArray();
 
-    // Only save/load when character is logged in.
-    private bool characterLoggedIn;
-
     public static void Init()
     {
         Task.Run(() =>
@@ -49,7 +46,6 @@ public class ConfigurationPrivate : IPluginConfiguration
                         
                         Load();
                         loggedIn = true;
-                        config.characterLoggedIn = true;
                         return;
                     }
                 }
@@ -66,12 +62,6 @@ public class ConfigurationPrivate : IPluginConfiguration
 
     public void Save()
     {
-        if (!characterLoggedIn)
-        {
-            PluginLog.LogWarning("Skip saving private config, character not logged in!");
-            return;
-        }
-
         try
         {
             var PI = DalamudApi.api.PluginInterface;
