@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MidiBard.IPC.Messaging.Messages
+namespace MidiBard.Common.Messaging.Messages
 {
     public enum PlaylistMessageType { Reload }
 

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MidiBard.IPC.Messaging.Messages
+namespace MidiBard.Common.Messaging.Messages
 {
     public enum MidibardPipeMessageType { Playback, Playlist }
 
+    [Serializable]
     public class MidibardPipeMessage
     {
         public MidibardPipeMessageType Type { get; set; }

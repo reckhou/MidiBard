@@ -1,4 +1,4 @@
-﻿using MidiBard.IPC.Messaging.Messages;
+﻿using MidiBard.Common.Messaging.Messages;
 using NamedPipeWrapper;
 using System;
 using System.Collections.Generic;
