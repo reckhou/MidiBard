@@ -35,7 +35,7 @@ namespace MidiBard.HSC.Models.Playlist
 
         public string FullPath => GetFullPath();
 
-        public bool HasItems => this.Total > 0;
+        public bool IsEmpty => this.Total == 0;
 
         public IEnumerable<string> Files => Items.IsNullOrEmpty() ? null : Items.Select(i => i.Sequence.Info.FilePath);
 
