@@ -17,6 +17,7 @@ using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
+using System.IO;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -311,24 +312,38 @@ public static class FilePlayback
 
     private static async void LoadAndApplyHscPlaylistSettingsToTracks(string fileName)
     {
-        await HSC.Playlist.Playlist.OpenPlaylist(Configuration.config.HscPlayListPath, true);
+        PluginLog.Information($"Loading hsc playlist settings for '{fileName}'");
 
-        //exclude files from hsc playlist not in midibard one
-        var filesMissing = HSC.Settings.Playlist.Files.Where(f => !Configuration.config.Playlist.Contains(f));
-        HSC.Settings.Playlist.Remove(filesMissing);
-        HSC.Settings.PlaylistSettings.Remove(filesMissing);
-
-        var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
-
-        foreach (var track in curItemSettings.Tracks.Values)
+        try
         {
-            if (track.EnsembleMember == HSC.Settings.CharIndex && 
-                !ConfigurationPrivate.config.EnabledTracks[track.Index])
+            string path = Path.Combine(HSC.Helpers.AppHelpers.GetAppAbsolutePath(), Configuration.config.hscPlayListPath);
+
+            PluginLog.Information($"hsc playlist path: '{path}'");
+
+            await HSC.Playlist.Playlist.OpenPlaylist(path, true);
+
+            //exclude files from hsc playlist not in midibard one
+            var filesMissing = HSC.Settings.Playlist.Files.Where(f => !Configuration.config.Playlist.Contains(f));
+            HSC.Settings.Playlist.Remove(filesMissing);
+            HSC.Settings.PlaylistSettings.Remove(filesMissing);
+
+            var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
+
+            foreach (var track in curItemSettings.Tracks.Values)
+            {
+                if (track.EnsembleMember == HSC.Settings.CharIndex &&
+                    !ConfigurationPrivate.config.EnabledTracks[track.Index])
                     ConfigurationPrivate.config.EnabledTracks[track.Index] = true;
+            }
+        }
+
+        catch (Exception e)
+        {
+            PluginLog.Error(e, $"Loading hsc playlist failed. {e.Message}");
         }
     }
 
-    internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
+        internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
         CurrentPlayback?.Dispose();

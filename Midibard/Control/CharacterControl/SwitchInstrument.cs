@@ -32,15 +32,25 @@ namespace MidiBard.Control.CharacterControl
 
         public static async Task SwitchToFromHscPlaylist(string fileName)
         {
-            var songSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
+            try
+            {
+                PluginLog.Information($"Instrument switching from hsc playlist for '{fileName}'");
 
-            var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
-            if (firstTrack == null)
-                return;
+                var songSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
-            uint insId = TrackInfo.GetInstrumentIDByName(firstTrack.EnsembleInstrument).Value;
+                var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
+                if (firstTrack == null)
+                    return;
 
-            await SwitchTo(insId);
+                uint insId = TrackInfo.GetInstrumentIDByName(firstTrack.EnsembleInstrument).Value;
+
+                await SwitchTo(insId);
+            }
+
+            catch (Exception e)
+            {
+                PluginLog.Error(e, $"Instrument switching from hsc playlist failed. {e.Message}");
+            }
         }
 
         public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
