@@ -305,6 +305,29 @@ public static class FilePlayback
         });
     }
 
+    /// <summary>
+    /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
+    /// </summary>
+
+    private static async void LoadAndApplyHscPlaylistSettingsToTracks(string fileName)
+    {
+        await HSC.Playlist.Playlist.OpenPlaylist(Configuration.config.HscPlayListPath, true);
+
+        //exclude files from hsc playlist not in midibard one
+        var filesMissing = HSC.Settings.Playlist.Files.Where(f => !Configuration.config.Playlist.Contains(f));
+        HSC.Settings.Playlist.Remove(filesMissing);
+        HSC.Settings.PlaylistSettings.Remove(filesMissing);
+
+        var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
+
+        foreach (var track in curItemSettings.Tracks.Values)
+        {
+            if (track.EnsembleMember == HSC.Settings.CharIndex && 
+                !ConfigurationPrivate.config.EnabledTracks[track.Index])
+                    ConfigurationPrivate.config.EnabledTracks[track.Index] = true;
+        }
+    }
+
     internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
@@ -324,11 +347,15 @@ public static class FilePlayback
             CurrentPlayback = await Task.Run(() => GetFilePlayback(midiFile, PlaylistManager.FilePathList[index].displayName));
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
+
+            var songName = PlaylistManager.FilePathList[index].fileName;
+
+            LoadAndApplyHscPlaylistSettingsToTracks(songName);
+
             if (switchInstrument)
             {
                 try
                 {
-                    var songName = PlaylistManager.FilePathList[index].fileName;
                     await SwitchInstrument.WaitSwitchInstrumentForSong(songName);
                 }
                 catch (Exception e)
