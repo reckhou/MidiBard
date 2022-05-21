@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
+using MidiBard.HSC.Helpers;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
@@ -42,7 +43,7 @@ namespace MidiBard.Control.CharacterControl
                 if (firstTrack == null)
                     return;
 
-                uint insId = TrackInfo.GetInstrumentIDByName(firstTrack.EnsembleInstrument).Value;
+                uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(firstTrack.EnsembleInstrument).Value;
 
                 await SwitchTo(insId);
             }

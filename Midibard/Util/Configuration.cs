@@ -45,7 +45,7 @@ public class Configuration : IPluginConfiguration
 
     public bool switchInstrumentFromHscPlaylist  = true;
 
-    public string hscPlayListPath = "playlists\\playlist.pl";
+    public string hscPlayListPath = "playlists";
 
     public int Version { get; set; }
     public bool Debug;

@@ -10,15 +10,13 @@ namespace MidiBard.HSC
 {
     public static class Paths
     {
-        public static string MidiFilePath { get; private set; }
+        public static string MidiFilePath { get; set; }
 
-        public static string PlaylistPath { get; private set; }
+        public static string PlaylistPath { get; set; }
 
         static Paths()
         {
-            MidiFilePath = Path.Combine(AppHelpers.GetAppAbsolutePath(), "Midis");
-
-            PlaylistPath = Path.Combine(AppHelpers.GetAppAbsolutePath(), "Playlists");
+ 
         }
     }
 }

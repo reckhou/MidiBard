@@ -5,11 +5,11 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidiBard", "Midibard\MidiBard.csproj", "{07727526-FA4F-435C-85BF-2DE96BD41470}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidibardIPCTester", "MidibardIPCTester\MidibardIPCTester.csproj", "{4E78838D-E527-4B21-B7B1-D60E02D16241}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidibardHSCTester", "MidibardIPCTester\MidibardHSCTester.csproj", "{4E78838D-E527-4B21-B7B1-D60E02D16241}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBard.Common", "MidiBard.Common\MidiBard.Common.csproj", "{4451702D-2BA2-4899-A82E-307263A8C29E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBard.HSC", "MidiBard.HSC\MidiBard.HSC.csproj", "{38732045-14FD-49CC-96A5-92A8AB23A6F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidiBard.HSC", "MidiBard.HSC\MidiBard.HSC.csproj", "{38732045-14FD-49CC-96A5-92A8AB23A6F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
