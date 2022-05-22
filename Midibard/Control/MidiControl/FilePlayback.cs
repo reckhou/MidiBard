@@ -336,17 +336,21 @@ public static class FilePlayback
 
             var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
-            PluginLog.Information($"loaded playlist settings for '{curItemSettings.Info.Title}'");
+            PluginLog.Information($"loaded playlist settings for '{fileName}'");
 
             PluginLog.Information($"total tracks: '{curItemSettings.Tracks.Count}'");
 
             int index = 0;
             foreach (var track in curItemSettings.Tracks)
             {
-                if (track.Value.EnsembleMember == HSC.Settings.CharIndex)
+                if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
                     PluginLog.Information($"track {index} is assigned from hsc playlist");
                     ConfigurationPrivate.config.EnabledTracks[index] = true;
+                }
+                if (track.Value.Muted)
+                {
+                    ConfigurationPrivate.config.EnabledTracks[index] = false;
                 }
                 index++;
             }
