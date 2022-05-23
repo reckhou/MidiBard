@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace MidiBard.HSC
+namespace MidiBard.Common
 {
 
     public static class Extensions

@@ -33,9 +33,11 @@ using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
 using XivCommon;
-using NamedPipeWrapper;
 using MidiBard.Common.Messaging.Messages;
 using MidiBard.HSC;
+using System.IO.Pipes;
+using System.Threading;
+using MidiBard.Common.IPC;
 
 namespace MidiBard;
 
@@ -182,8 +184,6 @@ public partial class MidiBard : IDalamudPlugin
         PluginLog.Information($"IPC server pipe found.");
 
         clientPipe = new NamedPipeClient<MidibardPipeMessage>(ClientPipeName);
-
-        clientPipe.Disconnected += ClientPipe_Disconnected;
 
         clientPipe.Start();
 

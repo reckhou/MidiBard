@@ -25,7 +25,6 @@
     <PackageReference Include="DalamudPackager" Version="2.1.7" />
     <!--<PackageReference Include="ILRepack" Version="2.0.18" />-->
     <PackageReference Include="Melanchall.DryWetMidi" Version="6.0.1" />
-    <PackageReference Include="NamedPipeWrapper.NetCore" Version="1.0.0" />
     <PackageReference Include="SharedMemory" Version="2.3.2" />
     <PackageReference Include="XivCommon" Version="5.0.1-alpha.1" />
   </ItemGroup>

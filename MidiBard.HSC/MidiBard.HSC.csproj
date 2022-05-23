@@ -13,4 +13,8 @@
     <PackageReference Include="SharedMemory" Version="2.3.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MidiBard.Common\MidiBard.Common.csproj" />
+  </ItemGroup>
+
 </Project>
