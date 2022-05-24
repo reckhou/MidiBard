@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MidiBard.Common.Messaging.Messages;
+using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
@@ -11,14 +12,19 @@ namespace MidiBard.Common.IPC
     {
         public NamedPipeClient(string name) : base(name)
         {
-            stream = new NamedPipeClientStream(name);
+            stream = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous);
         }
 
         public override void Start()
         {
             ((NamedPipeClientStream)stream).Connect();
-
+          
             StartPipeThread();
+
+            //var okMsg = new MidibardPipeMessage() { Type = MidibardPipeMessageType.OK };
+
+            //Send(okMsg as T);
+
         }
     }
 }

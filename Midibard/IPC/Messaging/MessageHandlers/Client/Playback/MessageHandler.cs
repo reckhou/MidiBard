@@ -1,4 +1,5 @@
 ﻿
+
 using MidiBard.Common.IPC;
 using MidiBard.Common.Messaging.Messages;
 using System;
@@ -17,7 +18,7 @@ namespace Midibard.IPC.Messaging.Handlers.Client.Playback
 
         }
 
-        public event EventHandler<int> PlayMessageReceived;
+        public event EventHandler<string> PlayMessageReceived;
 
 
         protected override void HandleMessage(PlaybackMessage msg)
@@ -29,7 +30,7 @@ namespace Midibard.IPC.Messaging.Handlers.Client.Playback
             {
 
                 case PlaybackMessageType.Play:
-                    PlayMessageReceived.Invoke(this, (int)msg.Data[0]);
+                    PlayMessageReceived.Invoke(this, (string)msg.Data[0]);
                     break;
 
             }
