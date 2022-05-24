@@ -17,7 +17,7 @@ public partial class MidiBard
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="index"></param>
-    private static async void PlaylistMessageHandler_ReloadMessageReceived(object sender)
+    private static async void PlaylistMessageHandler_ReloadMessageReceived(object sender, EventArgs e)
     {
         await HSCPlaylistHelpers.Reload();
 
