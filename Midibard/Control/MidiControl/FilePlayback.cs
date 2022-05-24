@@ -311,57 +311,6 @@ public static class FilePlayback
     /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
     /// </summary>
 
-    private static  void LoadAndApplyHscPlaylistSettingsToTracks(string fileName)
-    {
-        PluginLog.Information($"Loading hsc playlist settings for '{fileName}'");
-
-        try
-        {
-
-            string path = Path.Join(HSC.Settings.AppSettings.CurrentAppPath, Configuration.config.hscPlayListPath);
-
-            var files = Directory.GetFiles(path, "*.pl");
-
-            if (files.IsNullOrEmpty()) {
-
-                PluginLog.Information($"no hsc playlists found.'");
-                return;
-            }
-
-            var playlistFile = files.First();
-
-            PluginLog.Information($"hsc playlist path: '{playlistFile}'");
-
-            HSC.Playlist.Playlist.OpenPlaylist(playlistFile, true);
-
-            var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
-
-            PluginLog.Information($"loaded playlist settings for '{fileName}'");
-
-            PluginLog.Information($"total tracks: '{curItemSettings.Tracks.Count}'");
-
-            int index = 0;
-            foreach (var track in curItemSettings.Tracks)
-            {
-                if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
-                {
-                    PluginLog.Information($"track {index} is assigned from hsc playlist");
-                    ConfigurationPrivate.config.EnabledTracks[index] = true;
-                }
-                if (track.Value.Muted || track.Value.EnsembleMember != HSC.Settings.CharIndex)
-                {
-                    ConfigurationPrivate.config.EnabledTracks[index] = false;
-                }
-                index++;
-            }
-        }
-
-        catch (Exception e)
-        {
-            PluginLog.Error(e, $"Loading hsc playlist failed. {e.Message}");
-        }
-    }
-
         internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
@@ -385,7 +334,7 @@ public static class FilePlayback
             var songName = PlaylistManager.FilePathList[index].fileName;
 
             if (Configuration.config.useHscOverride && Configuration.config.useHscPlaylist)
-                LoadAndApplyHscPlaylistSettingsToTracks(songName);
+               await HSCPlaylistHelpers.LoadAndApplyHscPlaylistSettings(songName);
 
             if (switchInstrument)
             {
