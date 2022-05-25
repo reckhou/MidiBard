@@ -55,7 +55,7 @@ namespace MidiBard
 
             await HSC.Playlist.Playlist.OpenPlaylist(playlistFile, true);
 
-            PluginLog.Information($"Load HSC playlist '{playlistFile}' success.");
+            PluginLog.Information($"Load HSC playlist '{playlistFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
 
         public static async Task Reload()
@@ -67,10 +67,17 @@ namespace MidiBard
             {
                 await OpenPlaylist();
 
-                PluginLog.Information($"Updating midibard playlist'");
+                PluginLog.Information($"Updating midibard playlist");
 
-                PlaylistManager.Clear();
-                await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray());
+                if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
+                {
+                    PlaylistManager.Clear();
+                    return;
+                }
+
+                await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray(), true);
+
+                PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
 
                 PluginLog.Information($"Updating tracks'");
 

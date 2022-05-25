@@ -12,7 +12,7 @@ namespace MidiBard.Common.IPC
     {
         public NamedPipeClient(string name) : base(name)
         {
-            stream = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous);
+            stream = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous, System.Security.Principal.TokenImpersonationLevel.Impersonation);
         }
 
         public override void Start()
