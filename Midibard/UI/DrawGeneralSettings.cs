@@ -135,7 +135,7 @@ namespace MidiBard
             {
                 Configuration.config.Save();
             }
-
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
             if (ImGui.Checkbox("Load HSC playlist".Localize(), ref Configuration.config.useHscPlaylist))
             {
                 Configuration.config.Save();
@@ -143,6 +143,13 @@ namespace MidiBard
             ImGuiUtil.ToolTip("This will load hsc playlist settings".Localize());
 
             if (ImGui.Checkbox("Use HSC note processing".Localize(), ref Configuration.config.useHscNoteProcessing))
+            {
+                Configuration.config.Save();
+            }
+
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+
+            if (ImGui.Checkbox("Use HSC transposing".Localize(), ref Configuration.config.useHscTransposing))
             {
                 Configuration.config.Save();
             }

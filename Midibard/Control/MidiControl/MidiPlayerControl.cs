@@ -229,11 +229,13 @@ internal static class MidiPlayerControl
             return;
         }
 
-        Configuration.config.loadedMidiFile = PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].fileName;
-        PluginLog.Error($"current song '{Configuration.config.loadedMidiFile}'.");
-
         PlaylistManager.CurrentPlaying = index;
-        Task.Run(async () =>
+
+            Configuration.config.loadedMidiFile = PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].fileName;
+            PluginLog.Information($"current song '{Configuration.config.loadedMidiFile}'.");
+
+
+            Task.Run(async () =>
         {
             await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying);
         });

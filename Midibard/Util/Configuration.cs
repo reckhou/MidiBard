@@ -47,6 +47,8 @@ public class Configuration : IPluginConfiguration
 
     public bool useHscNoteProcessing = true;
 
+    public bool useHscTransposing = true;
+
     public string hscPlayListPath = "playlists";
 
     public string loadedMidiFile = "";
