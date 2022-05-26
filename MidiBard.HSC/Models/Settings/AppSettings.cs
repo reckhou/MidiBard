@@ -33,6 +33,8 @@ namespace MidiBard.HSC.Models.Settings
 
         public string CurrentAppPath { get; set; }
 
+        public bool MidibardPlaylistChanged { get; set; }
 
+        public bool MidibardPlaylistSettingsChanged { get; set; }
     }
 }

@@ -26,12 +26,10 @@ namespace MidiBard.HSC.Playlist
         }
 
 
-        public static async Task LoadPlaylistSettings(Models.Playlist.Playlist playlist)
+        public static async Task LoadPlaylistSettings(string settingsFile)
         {
-            if (string.IsNullOrEmpty(playlist.SettingsFile))
+            if (string.IsNullOrEmpty(settingsFile))
                 return;
-
-            string settingsFile = Path.Join(Settings.AppSettings.CurrentAppPath, playlist.SettingsFile);
 
             var playlistSettings = await Task.Run(() => FileHelpers.Load<SongSettings>(settingsFile));
 
@@ -76,7 +74,7 @@ namespace MidiBard.HSC.Playlist
             MidiBard.HSC.Settings.Playlist = playlist;
 
             if (loadSettings)
-                 await LoadPlaylistSettings (playlist);
+                 await LoadPlaylistSettings (playlist.SettingsFile);
         }
 
     }

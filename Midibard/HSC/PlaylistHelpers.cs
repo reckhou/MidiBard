@@ -53,36 +53,78 @@ namespace MidiBard
 
             PluginLog.Information($"HSC playlist path: '{playlistFile}'");
 
-            await HSC.Playlist.Playlist.OpenPlaylist(playlistFile, true);
+            await HSC.Playlist.Playlist.OpenPlaylist(playlistFile, false);
 
             PluginLog.Information($"Load HSC playlist '{playlistFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
 
+        private static async Task OpenPlaylistSettings()
+        {
+            string path = Path.Join(HSC.Settings.AppSettings.CurrentAppPath, Configuration.config.hscPlayListPath);
+
+            var files = Directory.GetFiles(path, "*.json");
+
+            if (files.IsNullOrEmpty())
+            {
+
+                PluginLog.Information($"No HSC playlist settings found.'");
+                return;
+            }
+
+            var settingsFile = files.First();
+
+            PluginLog.Information($"HSC playlist settings path: '{settingsFile}'");
+
+            await HSC.Playlist.Playlist.LoadPlaylistSettings(settingsFile);
+
+            PluginLog.Information($"Load HSC playlist '{settingsFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
+        }
+
+        public static async Task ReloadSettings()
+        {
+            PluginLog.Information($"Reloading HSC playlist settings'");
+
+            try
+            {
+                HSC.Settings.PlaylistSettings.Settings.Clear();
+
+                await OpenPlaylistSettings();
+
+                if (HSC.Settings.PlaylistSettings.Settings.IsNullOrEmpty())
+                    return;
+
+                PluginLog.Information($"Updating tracks for {HSC.Settings.PlaylistSettings.Settings.Count} files");
+
+                foreach (var setting in HSC.Settings.PlaylistSettings.Settings)
+                    UpdateTracks(setting.Key, setting.Value.Tracks);
+
+            }
+
+            catch (Exception e)
+            {
+                PluginLog.Error(e, $"Reloading HSC playlist failed. {e.Message}");
+            }
+        }
+
         public static async Task Reload()
         {
-
             PluginLog.Information($"Reloading HSC playlist'");
 
             try
             {
+                HSC.Settings.Playlist.Clear();
+                PlaylistManager.Clear();
+
                 await OpenPlaylist();
+
+                if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
+                    return;
 
                 PluginLog.Information($"Updating midibard playlist");
 
-                if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
-                {
-                    PlaylistManager.Clear();
-                    return;
-                }
-
-                await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray(), true);
+                await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray());
 
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
-
-                PluginLog.Information($"Updating tracks'");
-
-                foreach (var setting in HSC.Settings.PlaylistSettings.Settings)
-                    UpdateTracks(setting.Key, setting.Value.Tracks);
 
             }
 
@@ -99,7 +141,7 @@ namespace MidiBard
             try
             {
 
-                await OpenPlaylist();
+                await OpenPlaylistSettings();
 
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
