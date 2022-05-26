@@ -1,14 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\Music\Chord.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Melanchall.DryWetMidi" Version="6.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SharedMemory" Version="2.3.2" />
   </ItemGroup>
