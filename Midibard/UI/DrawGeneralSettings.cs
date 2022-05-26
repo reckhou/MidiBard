@@ -142,6 +142,11 @@ namespace MidiBard
             }
             ImGuiUtil.ToolTip("This will load hsc playlist settings".Localize());
 
+            if (ImGui.Checkbox("Use HSC note processing".Localize(), ref Configuration.config.useHscNoteProcessing))
+            {
+                Configuration.config.Save();
+            }
+
             if (ImGui.InputText("", ref Configuration.config.hscPlayListPath, 1024))
             {
                 Configuration.config.Save();
