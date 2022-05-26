@@ -45,6 +45,8 @@ public class Configuration : IPluginConfiguration
 
     public bool switchInstrumentFromHscPlaylist  = true;
 
+    public bool useHscChordProcessing = true;
+
     public string hscPlayListPath = "playlists";
 
     public string loadedMidiFile = "";
