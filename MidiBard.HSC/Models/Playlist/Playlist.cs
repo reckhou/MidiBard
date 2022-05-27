@@ -22,6 +22,9 @@ namespace MidiBard.HSC.Models.Playlist
     {
 
         [JsonProperty]
+        public int SelectedIndex { get; set; }
+
+        [JsonProperty]
         public string SettingsFile { get; set; }
         
         [JsonProperty]

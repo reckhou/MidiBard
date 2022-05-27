@@ -139,7 +139,7 @@ public record TrackInfo
         {
             return 18;
         }
-        else if (name.Contains("saxophone"))
+        else if (name.Contains("saxophone") || name.Contains("sax"))
         {
             return 19;
         }
@@ -155,7 +155,7 @@ public record TrackInfo
         {
             return 22;
         }
-        else if (name.Contains("doublebass"))
+        else if (name.Contains("doublebass") || name.Contains("contrabass"))
         {
             return 23;
         }

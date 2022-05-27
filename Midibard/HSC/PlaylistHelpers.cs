@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
 using MidiBard.HSC.Models;
+using MidiBard.Control.MidiControl;
 
 namespace MidiBard
 {
@@ -98,6 +99,10 @@ namespace MidiBard
                 foreach (var setting in HSC.Settings.PlaylistSettings.Settings)
                     UpdateTracks(setting.Key, setting.Value.Tracks);
 
+                MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
+
+                MidiBard.Ui.Open();
+
             }
 
             catch (Exception e)
@@ -125,6 +130,12 @@ namespace MidiBard
                 await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray());
 
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
+
+                MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
+
+                MidiBard.Ui.Open();
+
+                PluginLog.Information($"switching to {HSC.Settings.Playlist.SelectedIndex} from HSC playlist.");
 
             }
 
