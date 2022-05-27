@@ -39,6 +39,20 @@ public class Configuration : IPluginConfiguration
 {
     public static Configuration config;
 
+    public bool useHscOverride = true;
+
+    public bool useHscPlaylist = true;
+
+    public bool switchInstrumentFromHscPlaylist  = true;
+
+    public bool useHscNoteProcessing = true;
+
+    public bool useHscTransposing = true;
+
+    public string hscPlayListPath = "playlists";
+
+    public string loadedMidiFile = "";
+
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;

@@ -17,6 +17,8 @@ using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
+using System.IO;
+using MidiBard.Common;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -81,6 +83,10 @@ public static class FilePlayback
         PluginLog.Information($"[LoadPlayback] -> {trackName} 2 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         //int givenIndex = 0;
         //CurrentTracks.ForEach(tuple => tuple.trackInfo.Index = givenIndex++);
+
+        if (Configuration.config.useHscNoteProcessing)
+            HSC.Music.MidiProcessor.ProcessChords(trackName, CurrentTracks.Select(t => t.trackChunk));
+
 
         var timedEvents = CurrentTracks.Select(i => i.trackChunk).AsParallel()
             .SelectMany((chunk, index) => chunk.GetTimedEvents().Select(e =>
@@ -305,7 +311,11 @@ public static class FilePlayback
         });
     }
 
-    internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
+    /// <summary>
+    /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
+    /// </summary>
+
+        internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
         CurrentPlayback?.Dispose();
@@ -324,11 +334,16 @@ public static class FilePlayback
             CurrentPlayback = await Task.Run(() => GetFilePlayback(midiFile, PlaylistManager.FilePathList[index].displayName));
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
+
+            var songName = PlaylistManager.FilePathList[index].fileName;
+
+            if (Configuration.config.useHscOverride && Configuration.config.useHscPlaylist)
+               await HSCPlaylistHelpers.LoadAndApplyHscPlaylistSettings(songName);
+
             if (switchInstrument)
             {
                 try
                 {
-                    var songName = PlaylistManager.FilePathList[index].fileName;
                     await SwitchInstrument.WaitSwitchInstrumentForSong(songName);
                 }
                 catch (Exception e)

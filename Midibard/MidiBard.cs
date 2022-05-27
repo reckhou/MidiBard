@@ -33,10 +33,16 @@ using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
 using XivCommon;
+using MidiBard.HSC;
+using System.IO.Pipes;
+using System.Threading;
+using MidiBard.Common.IPC;
+using MidiBard.Common.Messaging.Messages;
+using MidiBard.HSC.Helpers;
 
 namespace MidiBard;
 
-public class MidiBard : IDalamudPlugin
+public partial class MidiBard : IDalamudPlugin
 {
     internal static PluginUI Ui { get; set; }
 #if DEBUG
@@ -44,6 +50,8 @@ public class MidiBard : IDalamudPlugin
 #else
     public static bool Debug = false;
 #endif
+
+
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
     internal static Playback CurrentPlayback { get; set; }
@@ -76,7 +84,6 @@ public class MidiBard : IDalamudPlugin
 
     public static XivCommonBase Cbase;
     public static bool SendReloadPlaylistCMD;
-
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
@@ -129,8 +136,8 @@ public class MidiBard : IDalamudPlugin
         _ = EnsembleManager.Instance;
 
 #if DEBUG
-			_ = NetworkManager.Instance;
-			_ = Testhooks.Instance;
+        _ = NetworkManager.Instance;
+        _ = Testhooks.Instance;
 #endif
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
@@ -146,6 +153,10 @@ public class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
+
+        if (Configuration.config.useHscOverride)
+            InitHSCoverride();
+
     }
 
     private void Tick(Dalamud.Game.Framework framework)
@@ -326,6 +337,10 @@ public class MidiBard : IDalamudPlugin
                 PluginLog.Error($"{e}");
             }
             DalamudApi.api.Dispose();
+
+            midiBardPlaylistWatcher.Stop();
+            midiBardPlaylistWatcher.Dispose();
+            midiBardPlaylistWatcher = null;
         }
         catch (Exception e2)
         {
