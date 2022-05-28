@@ -29,8 +29,7 @@ namespace MidiBard
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
-                Configuration.config.playSpeed = 1;
-                SetSpeed();
+                MidiPlayerControl.SetSpeed(1);
             }
 
 
@@ -87,13 +86,7 @@ namespace MidiBard
 
         private static void SetSpeed()
         {
-            Configuration.config.playSpeed = Math.Max(0.1f, Configuration.config.playSpeed);
-            var currenttime = MidiBard.CurrentPlayback?.GetCurrentTime(TimeSpanType.Midi);
-            if (currenttime is not null)
-            {
-                MidiBard.CurrentPlayback.Speed = Configuration.config.playSpeed;
-                MidiBard.CurrentPlayback?.MoveToTime(currenttime);
-            }
+            MidiPlayerControl.SetSpeed();
         }
 
         private static string GetBpmString()
@@ -138,6 +131,7 @@ namespace MidiBard
                 if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
                 {
                     MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(0));
+                    MidiBard.InternalPlaybackMessageSender.ChangeTime(duration.Milliseconds);
                 }
             }
             else

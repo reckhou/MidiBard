@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using MidiBard.Common;
 using MidiBard.HSC.Models;
 using MidiBard.Control.MidiControl;
+using MidiBard.Control.CharacterControl;
 
 namespace MidiBard
 {
@@ -92,16 +93,19 @@ namespace MidiBard
                 await OpenPlaylistSettings();
 
                 if (HSC.Settings.PlaylistSettings.Settings.IsNullOrEmpty())
+                {
+                    PluginLog.Information($"Reloading HSC playlist settings failed'");
                     return;
+                }
 
                 PluginLog.Information($"Updating tracks for {HSC.Settings.PlaylistSettings.Settings.Count} files");
 
                 foreach (var setting in HSC.Settings.PlaylistSettings.Settings)
                     UpdateTracks(setting.Key, setting.Value.Tracks);
 
-                MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
+                PluginLog.Information($"Switching instrument for '{Configuration.config.loadedMidiFile}'...");
 
-                MidiBard.Ui.Open();
+                await SwitchInstrument.WaitSwitchInstrumentForSong(Configuration.config.loadedMidiFile);
 
             }
 
