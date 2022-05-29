@@ -18,6 +18,8 @@ namespace MidiBard
     public class HSCPlaylistHelpers
     {
 
+        static int currentPlaying;
+
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
         {
             PluginLog.Information($"Updating tracks for '{title}'");
@@ -122,6 +124,12 @@ namespace MidiBard
             try
             {
                 HSC.Settings.Playlist.Clear();
+
+                bool wasPlaying = MidiBard.IsPlaying;
+
+                if (wasPlaying)
+                    currentPlaying = PlaylistManager.CurrentPlaying;
+
                 PlaylistManager.Clear();
 
                 await OpenPlaylist();
@@ -135,7 +143,10 @@ namespace MidiBard
 
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
 
-                MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
+                PlaylistManager.CurrentPlaying = currentPlaying;
+
+                if (!wasPlaying)
+                    MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
 
                 MidiBard.Ui.Open();
 
