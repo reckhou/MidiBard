@@ -122,6 +122,7 @@ public class ConfigurationPrivate : IPluginConfiguration
                 else
                 {
                     config = new ConfigurationPrivate();
+                    config.EnabledTracks[0] = true; // always enable the 1st track for new user
                 }
                return;
             }
