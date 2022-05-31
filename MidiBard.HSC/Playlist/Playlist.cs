@@ -41,7 +41,7 @@ namespace MidiBard.HSC.Playlist
         {
             try
             {
-                var settings = await Task.Run(() => FileHelpers.Load<MidiSequence>(filePath));
+                var settings = await FileHelpers.Load<MidiSequence>(filePath);
 
                 if (settings == null)
                     return;
@@ -66,7 +66,7 @@ namespace MidiBard.HSC.Playlist
 
             Settings.AppSettings.PrevPlaylistFileName = playlistFilePath;
 
-            var playlist =  await Task.Run(() => FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath));
+            var playlist =  await FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath);
 
             if (playlist == null || playlist.IsEmpty)
                 return;
