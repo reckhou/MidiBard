@@ -10,6 +10,7 @@ using Lumina.Excel.GeneratedSheets;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
+using MidiBard.Control.MidiControl;
 
 namespace MidiBard.Control.CharacterControl
 {
@@ -26,7 +27,7 @@ namespace MidiBard.Control.CharacterControl
                 MidiBard.CurrentPlayback?.Stop();
                 await SwitchTo(instrumentId);
                 if (isPlaying)
-                    MidiBard.CurrentPlayback?.Start();
+                    MidiPlayerControl.DoPlay();
             });
         }
 

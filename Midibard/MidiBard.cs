@@ -143,6 +143,7 @@ public class MidiBard : IDalamudPlugin
         Ui = new PluginUI();
         PluginInterface.UiBuilder.Draw += Ui.Draw;
         Framework.Update += Tick;
+        Framework.Update += MidiPlayerControl.Tick;
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
@@ -308,6 +309,7 @@ public class MidiBard : IDalamudPlugin
             GuitarTonePatch.Dispose();
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             Framework.Update -= Tick;
+            Framework.Update -= MidiPlayerControl.Tick;
             PluginInterface.UiBuilder.Draw -= Ui.Draw;
 
             EnsembleManager.Instance.Dispose();

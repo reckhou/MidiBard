@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace MidiBard.Managers
         private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
 
         private Hook<sub_140C87B40> UpdateMetronomeHook;
-
+        Stopwatch stopWatch;
         private EnsembleManager()
         {
             UpdateMetronomeHook = new Hook<sub_140C87B40>(Offsets.UpdateMetronome, HandleUpdateMetronome);
@@ -42,6 +43,7 @@ namespace MidiBard.Managers
                     byte Ensemble;
                     byte beatsPerBar;
                     int barElapsed;
+                    
                     unsafe
                     {
                         var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
@@ -51,7 +53,7 @@ namespace MidiBard.Managers
                     }
 
                     if (barElapsed == 0 && currentBeat == 0)
-                    {
+                    { 
                         if (Ensemble != 0)
                         {
                             // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
@@ -76,12 +78,15 @@ namespace MidiBard.Managers
                                 midiClock.Restart();
                                 PluginLog.Warning($"setup midiclock compensation: {compensation}");
                                 midiClock.Ticked += OnMidiClockOnTicked;
-
+                                stopWatch.Stop();
+                                Lrc._lrc.Offset += stopWatch.ElapsedMilliseconds - compensation;
+                                PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
+                                
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
                                 {
                                     try
                                     {
-                                        MidiBard.CurrentPlayback.Start();
+                                        MidiPlayerControl.DoPlay();
                                         EnsembleStart?.Invoke();
                                         PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
                                     }
@@ -110,11 +115,11 @@ namespace MidiBard.Managers
 
                     if (barElapsed == -2 && currentBeat == 0)
                     {
-                        PluginLog.Warning($"Prepare: ensemble: {Ensemble}");
+                        PluginLog.Warning($"Prepare: ensemble: {Ensemble}");                     
                         if (Ensemble != 0)
                         {
                             EnsemblePrepare?.Invoke();
-
+                            stopWatch = Stopwatch.StartNew();
                             Task.Run(async () =>
                             {
                                 try
