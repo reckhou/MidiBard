@@ -155,7 +155,7 @@ public partial class MidiBard : IDalamudPlugin
         //if (PluginInterface.IsDev) Ui.Open();
 
         if (Configuration.config.useHscOverride)
-            InitHSCoverride();
+           InitHSCoverride();
 
     }
 

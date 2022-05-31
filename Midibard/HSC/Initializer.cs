@@ -11,30 +11,29 @@ namespace MidiBard
 {
     public partial class MidiBard
     {
-        private static void InitHSCoverride() {
+        private static async Task InitHSCoverride() {
 
             PluginLog.Information($"Using HSC override.");
 
             HSC.Settings.AppSettings.CurrentAppPath = DalamudApi.api.PluginInterface.AssemblyLocation.DirectoryName;
 
-            UpdateClientInfo();
+            await UpdateClientInfo();
+
             //InitIPC();
             CreateHSCPlaylistWatcher();
 
             //reload hsc playlist
             if (Configuration.config.useHscPlaylist)
-                Task.Run(() => {
+                await Task.Run(() => {
                     HSCPlaylistHelpers.Reload();
                     HSCPlaylistHelpers.ReloadSettings();
                 });
         }
 
-        private static void UpdateClientInfo()
+        private static async Task UpdateClientInfo()
         {
-            int procId = Process.GetCurrentProcess().Id;
-
             HSC.Settings.CharName = DalamudApi.api.ClientState.LocalPlayer?.Name.TextValue;
-            HSC.Settings.CharIndex = GameProcessFinder.GetIndex(procId);
+            HSC.Settings.CharIndex = await CharConfigHelpers.GetCharIndex(HSC.Settings.CharName);
 
             PluginLog.Information($"Updated HSC client info: index: {HSC.Settings.CharIndex}, char name: '{HSC.Settings.CharName}'.");
         }
