@@ -74,6 +74,7 @@ namespace MidiBard.HSC.Models.Playlist
 
         public void Clear()
         {
+            Files.Clear();
             Items.Clear();
         }
 

@@ -21,6 +21,7 @@ namespace MidiBard
 
             //InitIPC();
             CreateHSCPlaylistWatcher();
+            CreateCharConfigWatcher();
 
             //reload hsc playlist
             if (Configuration.config.useHscPlaylist)

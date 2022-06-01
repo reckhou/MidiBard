@@ -17,27 +17,25 @@ namespace MidiBard
     /// </summary>
     public class HSCPlaylistHelpers
     {
-
-        static int currentPlaying;
+        private static int currentPlaying;
 
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
         {
-            PluginLog.Information($"Updating tracks for '{title}'");
+  
+                PluginLog.Information($"Updating tracks for '{title}'");
 
-            int index = 0;
-            foreach (var track in tracks)
-            {
-                if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
+                int index = 0;
+                foreach (var track in tracks)
                 {
-                    PluginLog.Information($"Track {index} is assigned from HSC playlist");
-                    ConfigurationPrivate.config.EnabledTracks[index] = true;
+                    if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
+                    {
+                        PluginLog.Information($"Track {index} is assigned from HSC playlist");
+                        ConfigurationPrivate.config.EnabledTracks[index] = true;
+                    }
+                    else
+                        ConfigurationPrivate.config.EnabledTracks[index] = false;
+                        index++;
                 }
-                if (track.Value.Muted || track.Value.EnsembleMember != HSC.Settings.CharIndex)
-                {
-                    ConfigurationPrivate.config.EnabledTracks[index] = false;
-                }
-                index++;
-            }
         }
 
         private static async Task OpenPlaylist()
@@ -100,10 +98,12 @@ namespace MidiBard
                     return;
                 }
 
-                PluginLog.Information($"Updating tracks for {HSC.Settings.PlaylistSettings.Settings.Count} files");
+                if (string.IsNullOrEmpty(Configuration.config.loadedMidiFile))
+                    return;
 
-                foreach (var setting in HSC.Settings.PlaylistSettings.Settings)
-                    UpdateTracks(setting.Key, setting.Value.Tracks);
+                var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
+
+                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
 
                 PluginLog.Information($"Switching instrument for '{Configuration.config.loadedMidiFile}'...");
 
@@ -135,7 +135,12 @@ namespace MidiBard
                 await OpenPlaylist();
 
                 if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
+                {
+                    PluginLog.Information($"No songs in HSC playlist");
+                    PerformActions.DoPerformAction(0);
+                    PlaylistManager.CurrentPlaying = -1;
                     return;
+                }
 
                 PluginLog.Information($"Updating midibard playlist");
 
@@ -143,7 +148,12 @@ namespace MidiBard
 
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
 
-                PlaylistManager.CurrentPlaying = currentPlaying;
+                currentPlaying = PlaylistManager.CurrentPlaying;
+
+                var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
+
+                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
+
 
                 if (!wasPlaying)
                     MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
@@ -157,31 +167,6 @@ namespace MidiBard
             catch (Exception e)
             {
                 PluginLog.Error(e, $"Reloading HSC playlist failed. {e.Message}");
-            }
-        }
-
-        public static async Task LoadAndApplyHscPlaylistSettings(string fileName)
-        {
-            PluginLog.Information($"Loading HSC playlist settings for '{fileName}'");
-
-            try
-            {
-
-                await OpenPlaylistSettings();
-
-                var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
-
-                PluginLog.Information($"Load HSC playlist settings for '{fileName}' success.");
-
-                PluginLog.Information($"Total tracks: '{curItemSettings.Tracks.Count}'");
-
-                UpdateTracks(fileName, curItemSettings.Tracks);
-
-            }
-
-            catch (Exception e)
-            {
-                PluginLog.Error(e, $"Loading HSC playlist failed. {e.Message}");
             }
         }
     }
