@@ -12,7 +12,7 @@ namespace MidiBard.HSC.Helpers
         public static Instrument? GetInstrumentFromName(string insName)
         {
             if (string.IsNullOrEmpty(insName) || insName == "None")
-                return null;
+                return Instrument.None;
 
             if (insName.Equals("Guitar (Overdriven)"))
                 return Instrument.OverdrivenGuitar;

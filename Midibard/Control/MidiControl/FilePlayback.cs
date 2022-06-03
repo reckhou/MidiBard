@@ -337,9 +337,6 @@ public static class FilePlayback
 
             var songName = PlaylistManager.FilePathList[index].fileName;
 
-            if (Configuration.config.useHscOverride && Configuration.config.useHscPlaylist)
-               await HSCPlaylistHelpers.LoadAndApplyHscPlaylistSettings(songName);
-
             if (switchInstrument)
             {
                 try

@@ -266,14 +266,25 @@ internal class BardPlayDevice : IOutputDevice
 
     static string GetNoteName(NoteEvent note) => $"{note.GetNoteName().ToString().Replace("Sharp", "#")}{note.GetNoteOctave()}";
 
-    private static int TransposeFromHSCPlaylist(int? trackIndex)
+    private static int TransposeFromHSCPlaylist(int? trackIndex, bool plotting = false)
     {
+        if (plotting)
+            return 0;
+
         int noteNum = 0;
+
+        if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.loadedMidiFile))
+            return 0;
+
 
         var settings = HSC.Settings.PlaylistSettings.Settings[Configuration.config. loadedMidiFile];
 
         if (settings == null)
             return 0;
+
+        if (!settings.Tracks.ContainsKey(trackIndex.Value))
+            return 0;
+
 
         var track = settings.Tracks[trackIndex.Value];
 
@@ -286,7 +297,7 @@ internal class BardPlayDevice : IOutputDevice
         return (12 * settings.OctaveOffset) + settings.KeyOffset + noteNum;
     }
 
-    public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave)
+    public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
     {
 
         noteNumber = noteNumber - 48;
@@ -294,7 +305,7 @@ internal class BardPlayDevice : IOutputDevice
         octave = 0;
 
         if (Configuration.config.useHscOverride && Configuration.config.useHscTransposing)
-            noteNumber += TransposeFromHSCPlaylist(trackIndex);
+            noteNumber += TransposeFromHSCPlaylist(trackIndex, plotting);
         else 
             noteNumber += Configuration.config.TransposeGlobal +
                          (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
