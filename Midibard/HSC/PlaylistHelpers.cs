@@ -9,6 +9,7 @@ using MidiBard.Common;
 using MidiBard.HSC.Models;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
+using System.Threading;
 
 namespace MidiBard
 {
@@ -21,21 +22,20 @@ namespace MidiBard
 
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
         {
-  
-                PluginLog.Information($"Updating tracks for '{title}'");
 
-                int index = 0;
-                foreach (var track in tracks)
+            PluginLog.Information($"Updating tracks for '{title}'");
+            int index = 0;
+            foreach (var track in tracks)
+            {
+                if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
-                    if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
-                    {
-                        PluginLog.Information($"Track {index} is assigned from HSC playlist");
-                        ConfigurationPrivate.config.EnabledTracks[index] = true;
-                    }
-                    else
-                        ConfigurationPrivate.config.EnabledTracks[index] = false;
-                        index++;
+                    PluginLog.Information($"Track {index} is assigned from HSC playlist");
+                    ConfigurationPrivate.config.EnabledTracks[index] = true;
                 }
+                else
+                    ConfigurationPrivate.config.EnabledTracks[index] = false;
+                index++;
+            }
         }
 
         private static async Task OpenPlaylist()
@@ -82,7 +82,7 @@ namespace MidiBard
             PluginLog.Information($"Load HSC playlist '{settingsFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
 
-        public static async Task ReloadSettings()
+        public static async Task ReloadSettings(bool loggedIn = false)
         {
             PluginLog.Information($"Reloading HSC playlist settings'");
 
@@ -101,13 +101,19 @@ namespace MidiBard
                 if (string.IsNullOrEmpty(Configuration.config.loadedMidiFile))
                     return;
 
+                PluginLog.Information($"Switching instrument for '{Configuration.config.loadedMidiFile}'...");
+
+                if (!loggedIn && !HSC.Settings.Playlist.Loaded)
+                    await SwitchInstrument.WaitSwitchInstrumentForSong(Configuration.config.loadedMidiFile);
+
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
 
                 UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
 
-                PluginLog.Information($"Switching instrument for '{Configuration.config.loadedMidiFile}'...");
 
-                await SwitchInstrument.WaitSwitchInstrumentForSong(Configuration.config.loadedMidiFile);
+                HSC.Settings.Playlist.Loaded = true;
+                Thread.Sleep(5000);
+                HSC.Settings.Playlist.Loaded = false;
 
             }
 
@@ -117,22 +123,22 @@ namespace MidiBard
             }
         }
 
-        public static async Task Reload()
+        public static async Task Reload(bool loggedIn = false)
         {
             PluginLog.Information($"Reloading HSC playlist'");
 
             try
             {
-                HSC.Settings.Playlist.Clear();
-
                 bool wasPlaying = MidiBard.IsPlaying;
 
                 if (wasPlaying)
                     currentPlaying = PlaylistManager.CurrentPlaying;
 
+                HSC.Settings.Playlist.Clear();
                 PlaylistManager.Clear();
 
                 await OpenPlaylist();
+                await OpenPlaylistSettings();
 
                 if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
@@ -143,24 +149,26 @@ namespace MidiBard
                 }
 
                 PluginLog.Information($"Updating midibard playlist");
-
                 await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray());
-
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
 
-                currentPlaying = PlaylistManager.CurrentPlaying;
+                PluginLog.Information($"switching to {HSC.Settings.Playlist.SelectedIndex} from HSC playlist.");
+
+                PlaylistManager.CurrentPlaying = currentPlaying;
+
+                if (!wasPlaying && !loggedIn && !HSC.Settings.Playlist.Loaded)
+                    MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
 
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
 
                 UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
 
+                if (!loggedIn)
+                    MidiBard.Ui.Open();
 
-                if (!wasPlaying)
-                    MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
-
-                MidiBard.Ui.Open();
-
-                PluginLog.Information($"switching to {HSC.Settings.Playlist.SelectedIndex} from HSC playlist.");
+                HSC.Settings.Playlist.Loaded = true;
+                Thread.Sleep(5000);
+                HSC.Settings.Playlist.Loaded = false;
 
             }
 

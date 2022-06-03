@@ -136,10 +136,8 @@ namespace MidiBard.Control.CharacterControl
                     PluginLog.Information($"Instrument switching from hsc playlist for '{songName}'");
 
                     uint insId = HSC.PerformHelpers.GetInstrumentFromHscPlaylist(songName);
-                    if (insId == 0)
-                        PerformActions.DoPerformAction(0);
-                    else
-                        PluginLog.Information($"switching to '{insId}' as assigned from hsc playlist");
+
+                    PluginLog.Information($"switching to '{insId}' as assigned from hsc playlist");
 
                     await SwitchTo(insId);
                     return;

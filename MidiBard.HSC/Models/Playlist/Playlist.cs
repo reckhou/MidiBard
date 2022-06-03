@@ -20,6 +20,7 @@ namespace MidiBard.HSC.Models.Playlist
     [JsonObject(MemberSerialization.OptIn)]
     public class Playlist
     {
+        public bool Loaded { get; set; }
 
         [JsonProperty]
         public int SelectedIndex { get; set; }
