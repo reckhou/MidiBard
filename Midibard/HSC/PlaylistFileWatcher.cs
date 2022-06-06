@@ -16,6 +16,9 @@ namespace MidiBard
         {
             string filePath = Path.Join(HSC.Settings.AppSettings.CurrentAppPath, Configuration.config.hscPlayListPath);
 
+            if (!Directory.Exists(filePath))
+                Directory.CreateDirectory(filePath);
+
             hscPlaylistWatcher = new FileWatcherEx.FileWatcherEx(filePath);
 
             hscPlaylistWatcher.NotifyFilter = NotifyFilters.LastWrite;

@@ -30,12 +30,20 @@ namespace MidiBard
                 if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
                     PluginLog.Information($"Track {index} is assigned from HSC playlist");
-                    ConfigurationPrivate.config.EnabledTracks[index] = true;
+
+                    //percussion + duplication logic. if track has parent enable its parent
+                    if (track.Value.ParentIndex > -1)
+                        ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex] = true;
+                    else//no parent enable as normal
+                        ConfigurationPrivate.config.EnabledTracks[index] = true;
                 }
                 else
                     ConfigurationPrivate.config.EnabledTracks[index] = false;
                 index++;
             }
+
+   
+
         }
 
         private static async Task OpenPlaylist()

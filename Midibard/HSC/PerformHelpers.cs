@@ -22,9 +22,9 @@ namespace MidiBard.HSC
                 var songSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
                 if (songSettings.Tracks.IsNullOrEmpty())
-                    return 0;
+                    return 1;
 
-                var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => !t.Muted && t.EnsembleMember == HSC.Settings.CharIndex);
+                var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
                 if (firstTrack == null)
                     return 0;
 

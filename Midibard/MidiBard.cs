@@ -153,8 +153,8 @@ public partial class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
-
-        Task.Run(() => InitHSCoverride());
+        if (DalamudApi.api.ClientState.IsLoggedIn)
+            Task.Run(() => InitHSCoverride());
 
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout; 
