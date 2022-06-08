@@ -10,6 +10,7 @@ using MidiBard.HSC.Models;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using System.Threading;
+using MidiBard.HSC.Music;
 
 namespace MidiBard
 {
@@ -20,6 +21,8 @@ namespace MidiBard
     {
         private static int currentPlaying;
 
+
+        public static Track GetMappedTrack(int parentIndex) => HSC.Settings.MappedTracks[parentIndex];
 
         private static void UpdatePercussionNote(int trackIndex, int note)
         {
@@ -33,6 +36,12 @@ namespace MidiBard
         }
 
 
+        private static void UpdateMappedTracks(int parentIndex, Track child)
+        {
+            if (!HSC.Settings.MappedTracks.ContainsKey(parentIndex))
+                HSC.Settings.MappedTracks.Add(parentIndex, child);
+        }
+
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
         {
 
@@ -42,6 +51,7 @@ namespace MidiBard
 
             HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
             HSC.Settings.PercussionTracks = new Dictionary<int, bool>();
+            HSC.Settings.MappedTracks = new Dictionary<int, Track>();
 
             foreach (var track in tracks)
             {
@@ -58,7 +68,10 @@ namespace MidiBard
 
                     //percussion + duplication logic. if track has parent enable its parent
                     if (track.Value.ParentIndex.HasValue)
+                    {
                         ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex.Value] = true;
+                        UpdateMappedTracks(track.Value.ParentIndex.Value, track.Value);
+                    }
                     else//no parent enable as normal
                         ConfigurationPrivate.config.EnabledTracks[index] = true;
                 }

@@ -279,7 +279,6 @@ internal class BardPlayDevice : IOutputDevice
         if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.loadedMidiFile))
             return 0;
 
-
         var settings = HSC.Settings.PlaylistSettings.Settings[Configuration.config. loadedMidiFile];
 
         if (settings == null)
@@ -288,8 +287,7 @@ internal class BardPlayDevice : IOutputDevice
         if (!settings.Tracks.ContainsKey(trackIndex.Value))
             return 0;
 
-
-        var track = settings.Tracks[trackIndex.Value];
+        var track = HSC.Settings.MappedTracks.ContainsKey(trackIndex.Value) ? HSC.Settings.MappedTracks[trackIndex.Value] : settings.Tracks[trackIndex.Value];
 
         if (track.OctaveOffset != 0)
             noteNum += (12 * track.OctaveOffset);

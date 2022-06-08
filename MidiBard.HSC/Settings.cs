@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using MidiBard.Common;
+using MidiBard.HSC.Music;
 
 namespace MidiBard.HSC
 {
@@ -45,6 +46,7 @@ namespace MidiBard.HSC
                 AppSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
 
 
+
         }
 
         public static AppSettings AppSettings { get; private set; }
@@ -61,6 +63,8 @@ namespace MidiBard.HSC
 
         public static Dictionary<int, Dictionary<int, bool>> PercussionNotes { get; set; }
         public static Dictionary<int, bool> PercussionTracks { get; set; }
+
+        public static Dictionary<int, Track> MappedTracks { get; set; }
 
         public static async Task LoadAppSettings()
         {
