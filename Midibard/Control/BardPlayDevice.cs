@@ -85,6 +85,9 @@ internal class BardPlayDevice : IOutputDevice
                 {
                     return false;
                 }
+
+                if (Configuration.config.useHscOverride && Configuration.config.useHscPlaylist && !HSC.PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
+                    return false;
             }
 
             if (midiEvent is NoteOnEvent noteOnEvent)

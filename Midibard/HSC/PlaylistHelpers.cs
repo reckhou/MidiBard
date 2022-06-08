@@ -20,20 +20,45 @@ namespace MidiBard
     {
         private static int currentPlaying;
 
+
+        private static void UpdatePercussionNote(int trackIndex, int note)
+        {
+            if (!HSC.Settings.PercussionNotes.ContainsKey(trackIndex))
+                HSC.Settings.PercussionNotes[trackIndex] = new Dictionary<int, bool>() { { note, true } };
+            else
+                HSC.Settings.PercussionNotes[trackIndex].Add(note, true);
+
+            if (!HSC.Settings.PercussionTracks.ContainsKey(trackIndex))
+                HSC.Settings.PercussionTracks[trackIndex] = true;
+        }
+
+
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
         {
 
             PluginLog.Information($"Updating tracks for '{title}'");
+
             int index = 0;
+
+            HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
+            HSC.Settings.PercussionTracks = new Dictionary<int, bool>();
+
             foreach (var track in tracks)
             {
+
                 if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
+                    if (track.Value.PercussionNote.HasValue)
+                    {
+                        PluginLog.Information($"Percussion track {index} ({track.Value.PercussionNote.Value}) has parent {track.Value.ParentIndex} from HSC playlist");
+                        UpdatePercussionNote(track.Value.ParentIndex.Value, track.Value.PercussionNote.Value);
+                    }
+
                     PluginLog.Information($"Track {index} is assigned from HSC playlist");
 
                     //percussion + duplication logic. if track has parent enable its parent
-                    if (track.Value.ParentIndex > -1)
-                        ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex] = true;
+                    if (track.Value.ParentIndex.HasValue)
+                        ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex.Value] = true;
                     else//no parent enable as normal
                         ConfigurationPrivate.config.EnabledTracks[index] = true;
                 }
@@ -42,8 +67,13 @@ namespace MidiBard
                 index++;
             }
 
-   
-
+            //foreach (var pn in HSC.Settings.PercussionNotes)
+            //{
+            //    foreach (var n in pn.Value)
+            //    {
+            //        PluginLog.Information($"Percussion Note {pn.Key} {n.Key}");
+            //    }
+            //}
         }
 
         private static async Task OpenPlaylist()

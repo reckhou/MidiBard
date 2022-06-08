@@ -6,11 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
+using Melanchall.DryWetMidi.Core;
 
 namespace MidiBard.HSC
 {
     public class PerformHelpers
     {
+        public static bool ShouldPlayNote(MidiEvent ev, int trackIndex)
+        {
+            if (!(ev is NoteEvent))
+                return true;
+
+            var noteEv = ev as NoteEvent;
+
+            //not a percussion note so play anyway
+            if (!HSC.Settings.PercussionTracks.ContainsKey(trackIndex))
+                return true;
+
+            //percussion note - do percussion logic
+            return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
+        }
+
         public static uint GetInstrumentFromHscPlaylist(string fileName)
         {
             try

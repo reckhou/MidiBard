@@ -44,6 +44,7 @@ namespace MidiBard.HSC
             if (AppSettings.PrevMidiPath.IsNullOrEmpty())
                 AppSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
 
+
         }
 
         public static AppSettings AppSettings { get; private set; }
@@ -58,6 +59,8 @@ namespace MidiBard.HSC
 
         public static int CharIndex { get; set; }
 
+        public static Dictionary<int, Dictionary<int, bool>> PercussionNotes { get; set; }
+        public static Dictionary<int, bool> PercussionTracks { get; set; }
 
         public static async Task LoadAppSettings()
         {
