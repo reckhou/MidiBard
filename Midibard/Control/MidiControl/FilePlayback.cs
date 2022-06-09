@@ -84,7 +84,7 @@ public static class FilePlayback
         //int givenIndex = 0;
         //CurrentTracks.ForEach(tuple => tuple.trackInfo.Index = givenIndex++);
 
-        if (Configuration.config.useHscNoteProcessing)
+        if (Configuration.config.useHscChordProcessing)
             HSC.Music.MidiProcessor.ProcessChords(trackName, CurrentTracks.Select(t => t.trackChunk));
 
 
