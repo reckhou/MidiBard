@@ -10,7 +10,7 @@ namespace MidiBard.Util
     {
         public static int GetIndex(this List<string> pl, string title)
         {
-            var match = pl.Select((n, i) => new { Name = n, Index = i }).FirstOrDefault(x => x.Name.ToLower() == title);
+            var match = pl.Select((n, i) => new { Name = n, Index = i }).FirstOrDefault(x => x.Name == title);
             return match == null ? -1 : match.Index;
         }
     }
