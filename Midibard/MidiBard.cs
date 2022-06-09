@@ -38,7 +38,6 @@ using System.IO.Pipes;
 using System.Threading;
 using MidiBard.Common.IPC;
 using MidiBard.Common.Messaging.Messages;
-using MidiBard.HSC.Helpers;
 
 namespace MidiBard;
 
@@ -84,6 +83,7 @@ public partial class MidiBard : IDalamudPlugin
 
     public static XivCommonBase Cbase;
     public static bool SendReloadPlaylistCMD;
+
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
@@ -159,11 +159,9 @@ public partial class MidiBard : IDalamudPlugin
             PluginLog.Information($"Using HSC override.");
             HSC.Settings.AppSettings.CurrentAppPath = PluginInterface.AssemblyLocation.DirectoryName;
             UpdateClientInfo();
-            //InitIPC();
-            CreateHSCPlaylistWatcher();
+            InitIPC();
         }
     }
-
 
 
     private void UpdateClientInfo()

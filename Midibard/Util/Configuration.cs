@@ -47,8 +47,6 @@ public class Configuration : IPluginConfiguration
 
     public string hscPlayListPath = "playlists";
 
-    public string loadedMidiFile = "";
-
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
