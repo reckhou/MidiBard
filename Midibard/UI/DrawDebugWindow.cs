@@ -66,7 +66,7 @@ namespace MidiBard
 			//PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 2));
 			try
 			{
-				if (Configuration.config.DebugAgentInfo && Begin(nameof(MidiBard) + "AgentInfo"))
+				if (config.DebugAgentInfo && Begin(nameof(MidiBard) + "AgentInfo"))
 				{
 					try
 					{
@@ -168,7 +168,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (Configuration.config.DebugDeviceInfo && Begin(nameof(MidiBard) + "DeviceInfo"))
+				if (config.DebugDeviceInfo && Begin(nameof(MidiBard) + "DeviceInfo"))
 				{
 					try
 					{
@@ -447,7 +447,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (Configuration.config.DebugOffsets && Begin(nameof(MidiBard) + "Offsets"))
+				if (config.DebugOffsets && Begin(nameof(MidiBard) + "Offsets"))
 				{
 					try
 					{
@@ -491,7 +491,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (Configuration.config.DebugKeyStroke && Begin(nameof(MidiBard) + "KeyStroke"))
+				if (config.DebugKeyStroke && Begin(nameof(MidiBard) + "KeyStroke"))
 				{
 					TextUnformatted($"useRawHook: {Testhooks.Instance?.playnoteHook?.IsEnabled}");
 					if (Button("useRawhook"))

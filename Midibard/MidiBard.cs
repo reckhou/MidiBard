@@ -33,12 +33,10 @@ using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
 using XivCommon;
-using NamedPipeWrapper;
-using MidiBard.IPC.Messaging.Messages;
 
 namespace MidiBard;
 
-public partial class MidiBard : IDalamudPlugin
+public class MidiBard : IDalamudPlugin
 {
     internal static PluginUI Ui { get; set; }
 #if DEBUG
@@ -46,15 +44,6 @@ public partial class MidiBard : IDalamudPlugin
 #else
     public static bool Debug = false;
 #endif
-
-    #region IPC for external clients
-    const string ClientPipeName = "Midibard.pipe";
-
-    internal static Midibard.IPC.Messaging.Handlers.Client.Playback.MessageHandler playbackMessageHandler;
-
-    internal static NamedPipeClient<MidibardPipeMessage> clientPipe;
-    #endregion
-
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
     internal static Playback CurrentPlayback { get; set; }
@@ -157,26 +146,7 @@ public partial class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
-
-        InitIPC();
     }
-
-    private void InitIPC()
-    {
-        var pipes = System.IO.Directory.GetFiles(@"\\.\pipe\").Select(p => p.Replace(@"\\.\pipe\", ""));
-
-        if (!pipes.Contains(ClientPipeName))
-            return;
-
-        clientPipe = new NamedPipeClient<MidibardPipeMessage>(ClientPipeName);
-
-        clientPipe.Start();
-
-        playbackMessageHandler = new Midibard.IPC.Messaging.Handlers.Client.Playback.MessageHandler(clientPipe);
-
-        playbackMessageHandler.PlayMessageReceived += PlaybackMessageHandler_PlayMessageReceived;
-    }
-
 
     private void Tick(Dalamud.Game.Framework framework)
     {
