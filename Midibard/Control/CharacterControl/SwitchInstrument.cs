@@ -42,7 +42,7 @@ namespace MidiBard.Control.CharacterControl
                 var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => !t.Muted && t.EnsembleMember == HSC.Settings.CharIndex);
                 if (firstTrack == null)
                     return;
-
+                {
                     PluginLog.Information($"switching to '{firstTrack.EnsembleInstrument}' as assigned from hsc playlist");
 
                     uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(firstTrack.EnsembleInstrument).Value;
