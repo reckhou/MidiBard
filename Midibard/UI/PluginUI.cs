@@ -98,7 +98,7 @@ public partial class PluginUI
 				if (ImGui.Begin($"MidiBard - {api.ClientState.LocalPlayer?.Name.TextValue} PID{Process.GetCurrentProcess().Id}###MIDIBARD",
 					ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #else
-            if (ImGui.Begin($"♪ MidiBard ♪ {api.ClientState.LocalPlayer?.Name.TextValue}@{api.ClientState.LocalPlayer?.HomeWorld.GameData.Name.ToString()} ###MIDIBARD", ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
+            if (ImGui.Begin($"♪ MidiBard v{typeof(PluginUI).Assembly.GetName().Version} ♪ {api.ClientState.LocalPlayer?.Name.TextValue}@{api.ClientState.LocalPlayer?.HomeWorld.GameData.Name.ToString()} ###MIDIBARD", ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #endif
             {
                 if (ensembleModeRunning)
