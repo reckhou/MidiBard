@@ -49,7 +49,13 @@ public partial class MidiBard : IDalamudPlugin
 #else
     public static bool Debug = false;
 #endif
+    #region IPC for external clients
+    const string ClientPipeName = "Midibard.pipe";
 
+    internal static Midibard.IPC.Messaging.Handlers.Client.Playback.MessageHandler playbackMessageHandler;
+
+    internal static NamedPipeClient<MidibardPipeMessage> clientPipe;
+    #endregion
 
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
@@ -158,10 +164,35 @@ public partial class MidiBard : IDalamudPlugin
         {
             PluginLog.Information($"Using HSC override.");
             HSC.Settings.AppSettings.CurrentAppPath = PluginInterface.AssemblyLocation.DirectoryName;
+            InitIPC();
             UpdateClientInfo();
         }
     }
 
+    private void InitIPC()
+    {
+        PluginLog.Information($"Connecting to IPC server.");
+
+        var pipes = System.IO.Directory.GetFiles(@"\\.\pipe\").Select(p => p.Replace(@"\\.\pipe\", ""));
+
+        if (!pipes.Contains(ClientPipeName))
+        {
+            PluginLog.Information($"IPC server pipe not found.");
+            return;
+        }
+
+        PluginLog.Information($"IPC server pipe found.");
+
+        clientPipe = new NamedPipeClient<MidibardPipeMessage>(ClientPipeName);
+
+        clientPipe.Start();
+
+        PluginLog.Information("Connected to IPC server.");
+
+        playbackMessageHandler = new Midibard.IPC.Messaging.Handlers.Client.Playback.MessageHandler(clientPipe);
+
+        playbackMessageHandler.PlayMessageReceived += PlaybackMessageHandler_PlayMessageReceived;
+    }
 
     private void UpdateClientInfo()
     {
