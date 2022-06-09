@@ -27,12 +27,9 @@ namespace MidiBard.HSC.Models.Playlist
         [JsonProperty]
         public string Title { get; set; }
 
-        [JsonProperty]
-        public List<string> Files { get; set; }
-
         public List<PlaylistItem> Items { get; private set; }
 
-        public int Total => this.Files.Count;
+        public int Total => this.Items.Count;
 
         public string FilePath { get; set; }
 
@@ -40,13 +37,14 @@ namespace MidiBard.HSC.Models.Playlist
 
         public bool IsEmpty => this.Total == 0;
 
+        public IEnumerable<string> Files => Items.IsNullOrEmpty() ? null : Items.Select(i => i.Sequence.Info.FilePath);
+
 
         public Playlist() 
         {
             this.Title = "playlist";
             this.FilePath = GetDefaultFilePath();
             this.Items = new List<PlaylistItem>();
-            this.Files = new List<string>();
         }
         
         public Playlist(string title) : this()

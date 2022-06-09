@@ -31,8 +31,18 @@ namespace MidiBard.HSC.Models.Settings
         [JsonProperty]
         public string PrevMidiPath { get; set; }
 
-        public string CurrentAppPath { get; set; }
+        public static AppSettings Create()
+        {
+            var appSettings = new AppSettings();;
 
 
+            if (appSettings.PrevPlaylistPath.IsNullOrEmpty())
+                appSettings.PrevPlaylistPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.PlaylistPath);
+
+            if (appSettings.PrevMidiPath.IsNullOrEmpty())
+                appSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
+
+            return appSettings;
+        }
     }
 }

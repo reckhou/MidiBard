@@ -17,32 +17,13 @@ namespace MidiBard.HSC
 
         private const string AppSettingsFileName = "settings.config";
 
-        public static Dictionary<int, bool> EnabledTracks { get; set; }
-
         static Settings()
         {
-            EnabledTracks = new Dictionary<int, bool>();
-
             SongSettings = new SongSettings();
 
             PlaylistSettings = new SongSettings();
 
             Playlist = new MidiBard.HSC.Models.Playlist.Playlist();
-
-            AppSettings = new AppSettings();
-
-            AppSettings.CurrentAppPath = System.IO.Directory.GetCurrentDirectory();
-
-            Paths.MidiFilePath = Path.Combine(AppSettings.CurrentAppPath, "Midis");
-
-            Paths.PlaylistPath = Path.Combine(AppSettings.CurrentAppPath, "Playlists");
-
-            if (AppSettings.PrevPlaylistPath.IsNullOrEmpty())
-                AppSettings.PrevPlaylistPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.PlaylistPath);
-
-            if (AppSettings.PrevMidiPath.IsNullOrEmpty())
-                AppSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
-
         }
 
         public static AppSettings AppSettings { get; private set; }
@@ -61,7 +42,7 @@ namespace MidiBard.HSC
         public static async Task LoadAppSettings()
         {
 
-            var filePath = Path.Combine(HSC.Settings.AppSettings.CurrentAppPath, AppSettingsFileName);
+            var filePath = Path.Combine(MidiBard.HSC.Helpers.AppHelpers.GetAppAbsolutePath(), AppSettingsFileName);
 
             var appSettings = await Task.Run(() => FileHelpers.Load<AppSettings>(filePath));
 
@@ -80,7 +61,7 @@ namespace MidiBard.HSC
 
         public static async Task LoadPlaylistSettings()
         {
-            var filePath = $"{AppSettings.CurrentAppPath}\\{Playlist.SettingsFile}";
+            var filePath = $"{AppHelpers.GetAppAbsolutePath()}\\{Playlist.SettingsFile}";
             var songSettings = await Task.Run(() => FileHelpers.Load<SongSettings>(filePath));
 
             if (songSettings != null)
@@ -91,7 +72,7 @@ namespace MidiBard.HSC
         {
             try
             {
-                var filePath = $"{AppSettings.CurrentAppPath}\\{AppSettingsFileName}";
+                var filePath = $"{AppHelpers.GetAppAbsolutePath()}\\{AppSettingsFileName}";
                  FileHelpers.Save(AppSettings, filePath);
             }
             catch (Exception ex) { }
@@ -101,7 +82,7 @@ namespace MidiBard.HSC
         {
             try
             {
-                FileHelpers.Save(PlaylistSettings, filePath ?? $"{AppSettings.CurrentAppPath}\\{Playlist.SettingsFile}");
+                FileHelpers.Save(PlaylistSettings, filePath ?? $"{AppHelpers.GetAppAbsolutePath()}\\{Playlist.SettingsFile}");
             }
             catch (Exception ex) { }
         }

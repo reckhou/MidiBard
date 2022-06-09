@@ -18,7 +18,6 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
 using System.IO;
-using MidiBard.HSC;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -311,44 +310,30 @@ public static class FilePlayback
     /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
     /// </summary>
 
-    private static  void LoadAndApplyHscPlaylistSettingsToTracks(string fileName)
+    private static async void LoadAndApplyHscPlaylistSettingsToTracks(string fileName)
     {
         PluginLog.Information($"Loading hsc playlist settings for '{fileName}'");
 
         try
         {
+            string path = Path.Combine(HSC.Helpers.AppHelpers.GetAppAbsolutePath(), Configuration.config.hscPlayListPath);
 
-            string path = Path.Join(HSC.Settings.AppSettings.CurrentAppPath, Configuration.config.hscPlayListPath);
+            PluginLog.Information($"hsc playlist path: '{path}'");
 
-            var files = Directory.GetFiles(path, "*.pl");
+            await HSC.Playlist.Playlist.OpenPlaylist(path, true);
 
-            if (files.IsNullOrEmpty()) {
-
-                PluginLog.Information($"no hsc playlists found.'");
-                return;
-            }
-
-            var playlistFile = files.First();
-
-            PluginLog.Information($"hsc playlist path: '{playlistFile}'");
-
-            HSC.Playlist.Playlist.OpenPlaylist(playlistFile, true);
+            //exclude files from hsc playlist not in midibard one
+            var filesMissing = HSC.Settings.Playlist.Files.Where(f => !Configuration.config.Playlist.Contains(f));
+            HSC.Settings.Playlist.Remove(filesMissing);
+            HSC.Settings.PlaylistSettings.Remove(filesMissing);
 
             var curItemSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
-            PluginLog.Information($"loaded playlist settings for '{curItemSettings.Info.Title}'");
-
-            PluginLog.Information($"total tracks: '{curItemSettings.Tracks.Count}'");
-
-            int index = 0;
-            foreach (var track in curItemSettings.Tracks)
+            foreach (var track in curItemSettings.Tracks.Values)
             {
-                if (track.Value.EnsembleMember == HSC.Settings.CharIndex)
-                {
-                    PluginLog.Information($"track {index} is assigned from hsc playlist");
-                    ConfigurationPrivate.config.EnabledTracks[index] = true;
-                }
-                index++;
+                if (track.EnsembleMember == HSC.Settings.CharIndex &&
+                    !ConfigurationPrivate.config.EnabledTracks[track.Index])
+                    ConfigurationPrivate.config.EnabledTracks[track.Index] = true;
             }
         }
 

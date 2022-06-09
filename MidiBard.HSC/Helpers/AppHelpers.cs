@@ -9,12 +9,16 @@ namespace MidiBard.HSC.Helpers
 {
     public static class AppHelpers
     {
+        public static string GetAppAbsolutePath()
+        {
+            return System.IO.Directory.GetCurrentDirectory();
+        }
 
         public static string GetAppRelativePath(string path)
         {
             try
             {
-                path = path.Substring(Settings.AppSettings.CurrentAppPath.Length + 1);
+                path = path.Substring(AppHelpers.GetAppAbsolutePath().Length + 1);
                 return path;
             }
             catch

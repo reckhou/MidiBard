@@ -35,7 +35,6 @@ using Dalamud.Game.Gui;
 using XivCommon;
 using NamedPipeWrapper;
 using MidiBard.Common.Messaging.Messages;
-using MidiBard.HSC;
 
 namespace MidiBard;
 
@@ -157,11 +156,9 @@ public partial class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
-        PluginLog.Information($"Using HSC override.");
+
         if (Configuration.config.useHscOverride)
         {
-            PluginLog.Information($"Using HSC override.");
-            HSC.Settings.AppSettings.CurrentAppPath = PluginInterface.AssemblyLocation.DirectoryName;
             InitIPC();
             UpdateClientInfo();
         }
@@ -196,12 +193,10 @@ public partial class MidiBard : IDalamudPlugin
 
     private void UpdateClientInfo()
     {
-        int procId = Process.GetCurrentProcess().Id;
-
         HSC.Settings.CharName = api.ClientState.LocalPlayer?.Name.TextValue;
-        HSC.Settings.CharIndex = GameProcessFinder.GetIndex(procId);
-
-        PluginLog.Information($"Updated HSC client info: index: {HSC.Settings.CharIndex}, char name: '{HSC.Settings.CharName}'.");
+        var clientInfo = SharedClientInfo.Add(HSC.Settings.CharName);
+        HSC.Settings.CharIndex = clientInfo.Index;
+        PluginLog.Information($"Updated HSC client info in shared memory - index: {clientInfo.Index}, char name: '{clientInfo.CharName}'.");
     }
 
     private void Tick(Dalamud.Game.Framework framework)
