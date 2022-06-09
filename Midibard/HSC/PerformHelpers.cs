@@ -5,24 +5,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MidiBard.Common;
+using Melanchall.DryWetMidi.Core;
+using static MidiBard.HSC.Settings;
+using static MidiBard.HSC.Enums;
+using MidiBard.HSC.Music;
 
 namespace MidiBard.HSC
 {
     public class PerformHelpers
     {
+        public static bool ShouldPlayNote(MidiEvent ev, int trackIndex)
+        {
+            if (!(ev is NoteEvent))
+                return true;
+
+            var noteEv = ev as NoteEvent;
+
+            //not a percussion note so play anyway
+            if (!HSC.Settings.PercussionNotes.ContainsKey(trackIndex))
+                return true;
+
+            //percussion note - do percussion logic
+            return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
+        }
+
+        public static int GetGuitarTone(Track track)
+        {
+            var ins = (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument);
+            return ins switch
+            {
+                24 => 0,
+                25 => 1,
+                26 => 2,
+                27 => 3,
+                28 => 4,
+            };
+
+        }
+
+
+        public static bool HasGuitar(Track track)
+        {
+            var ins = (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument).Value;
+            return ins >= (int)Instrument.ElectricGuitarClean && ins <= (int)Instrument.ElectricGuitarSpecial;
+        }
+
+
         public static uint GetInstrumentFromHscPlaylist(string fileName)
         {
             try
             {
-                PluginLog.Information($"Instrument switching from hsc playlist for '{fileName}'");
+
+                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(fileName))
+                    return 0;
 
                 var songSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
 
-                var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => !t.Muted && t.EnsembleMember == HSC.Settings.CharIndex);
+                if (songSettings.Tracks.IsNullOrEmpty())
+                    return 1;
+
+                var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
                 if (firstTrack == null)
                     return 0;
-
-                PluginLog.Information($"switching to '{firstTrack.EnsembleInstrument}' as assigned from hsc playlist");
 
                 uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(firstTrack.EnsembleInstrument).Value;
 
@@ -32,8 +77,8 @@ namespace MidiBard.HSC
             catch (Exception e)
             {
                 PluginLog.Error(e, $"Instrument switching from hsc playlist failed. {e.Message}");
+                return 0;
             }
-            return 0;
         }
     }
 }

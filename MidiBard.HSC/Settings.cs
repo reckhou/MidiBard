@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using MidiBard.Common;
+using MidiBard.HSC.Music;
 
 namespace MidiBard.HSC
 {
@@ -19,6 +20,12 @@ namespace MidiBard.HSC
         private const string AppSettingsFileName = "settings.config";
 
         public static Dictionary<int, bool> EnabledTracks { get; set; }
+
+        public class TrackTransposeInfo
+        {
+            public int KeyOffset { get; set; }
+            public int OctaveOffset { get; set; }
+        }
 
         static Settings()
         {
@@ -44,6 +51,8 @@ namespace MidiBard.HSC
             if (AppSettings.PrevMidiPath.IsNullOrEmpty())
                 AppSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
 
+
+
         }
 
         public static AppSettings AppSettings { get; private set; }
@@ -58,6 +67,16 @@ namespace MidiBard.HSC
 
         public static int CharIndex { get; set; }
 
+        public static Dictionary<int, Dictionary<int, bool>> PercussionNotes { get; set; }
+        public static Dictionary<int, bool> PercussionTracks { get; set; }
+
+        public static Dictionary<int, TrackTransposeInfo> MappedTracks { get; set; }
+
+        public static Dictionary<int, Dictionary<int, TrackTransposeInfo>> MappedDrumTracks { get; set; }
+
+       public static Dictionary<int, TrackTransposeInfo> TrackInfo { get; set; }
+        public static int OctaveOffset { get; set; }
+        public static int KeyOffset { get; set; }
 
         public static async Task LoadAppSettings()
         {

@@ -129,6 +129,8 @@ public class Configuration : IPluginConfiguration
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
     [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
+    public int HscOverrideDelay { get; internal set; } = 5000;
+
     //public void Save()
     //{
     //    var startNew = Stopwatch.StartNew();

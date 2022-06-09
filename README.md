@@ -1,5 +1,3 @@
-
-
 # **MidiBard**
 
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
@@ -10,6 +8,7 @@
 
 MidiBard is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It was originally authored by [akira0245](https://github.com/akira0245/MidiBard), now developed by [Ori](https://github.com/reckhou/MidiBard) and other developers after he quit for real-life reasons.
 
+**This branch adds HSC support into MidiBard.** 
 
 # Why MidiBard?
 

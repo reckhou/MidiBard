@@ -39,10 +39,11 @@ namespace MidiBard.HSC
 			Viola = 21,
 			Cello = 22,
 			DoubleBass = 23,
-			OverdrivenGuitar = 24,
-			CleanGuitar = 25,
-			MutedGuitar = 26,
-			DistortedGuitar = 27,
+			ElectricGuitarOverdriven = 24,
+			ElectricGuitarClean = 25,
+			ElectricGuitarMuted = 26,
+			ElectricGuitarPowerChords = 27,
+			ElectricGuitarSpecial = 28,
 		}
 	}
 }

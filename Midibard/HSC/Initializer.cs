@@ -5,38 +5,67 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MidiBard
 {
     public partial class MidiBard
     {
-        private static void InitHSCoverride() {
+
+        private async void HSCCleanup()
+        {
+            //free watchers
+            if (charConfigWatcher != null)
+            {
+                charConfigWatcher.Stop();
+                charConfigWatcher.Dispose();
+                charConfigWatcher = null;
+            }
+
+            if (hscPlaylistWatcher != null)
+            {
+                hscPlaylistWatcher.Stop();
+                hscPlaylistWatcher.Dispose();
+                hscPlaylistWatcher = null;
+            }
+
+            HSC.Settings.CharName = null;
+            HSC.Settings.CharIndex = -1;
+
+            HSC.Settings.Playlist.Clear();
+            HSC.Settings.PlaylistSettings.Clear();
+        }
+
+        private static async Task InitHSCoverride(bool loggedIn = false) {
 
             PluginLog.Information($"Using HSC override.");
 
             HSC.Settings.AppSettings.CurrentAppPath = DalamudApi.api.PluginInterface.AssemblyLocation.DirectoryName;
 
-            UpdateClientInfo();
+            if (loggedIn)//wait until fully logged in
+                Thread.Sleep(Configuration.config.HscOverrideDelay);
+
+            await UpdateClientInfo();
+
             //InitIPC();
             CreateHSCPlaylistWatcher();
+            CreateCharConfigWatcher();
 
             //reload hsc playlist
             if (Configuration.config.useHscPlaylist)
-                Task.Run(() => {
-                    HSCPlaylistHelpers.Reload();
-                    HSCPlaylistHelpers.ReloadSettings();
-                });
+            {
+                await HSCPlaylistHelpers.Reload(loggedIn);
+                await HSCPlaylistHelpers.ReloadSettings(loggedIn);
+            }
         }
 
-        private static void UpdateClientInfo()
+        private static async Task UpdateClientInfo()
         {
-            int procId = Process.GetCurrentProcess().Id;
-
             HSC.Settings.CharName = DalamudApi.api.ClientState.LocalPlayer?.Name.TextValue;
-            HSC.Settings.CharIndex = GameProcessFinder.GetIndex(procId);
+            HSC.Settings.CharIndex = await CharConfigHelpers.GetCharIndex(HSC.Settings.CharName);
 
-            PluginLog.Information($"Updated HSC client info: index: {HSC.Settings.CharIndex}, char name: '{HSC.Settings.CharName}'.");
+            PluginLog.Information($"Client logged in. HSC client info - index: {HSC.Settings.CharIndex}, character name: '{HSC.Settings.CharName}'.");
         }
 
     }

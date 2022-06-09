@@ -131,9 +131,22 @@ namespace MidiBard.Control.CharacterControl
 
             if (config.useHscOverride && config.switchInstrumentFromHscPlaylist)
             {
-                uint insId = HSC.PerformHelpers.GetInstrumentFromHscPlaylist(songName);
-                await SwitchTo(insId);
-                return;
+                try
+                {
+                    PluginLog.Information($"Instrument switching from hsc playlist for '{songName}'");
+
+                    uint insId = HSC.PerformHelpers.GetInstrumentFromHscPlaylist(songName);
+
+                    PluginLog.Information($"switching to '{insId}' as assigned from hsc playlist");
+
+                    await SwitchTo(insId);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Information($"Error when equipping instrument from HSC playlist. Message: {ex.Message}");
+                    return;
+                }
             }
 
             if (config.bmpTrackNames)

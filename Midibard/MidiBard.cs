@@ -153,10 +153,24 @@ public partial class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
+        if (DalamudApi.api.ClientState.IsLoggedIn)
+            Task.Run(() => InitHSCoverride());
+
+        DalamudApi.api.ClientState.Login += ClientState_Login;
+        DalamudApi.api.ClientState.Logout += ClientState_Logout; 
+    }
+
+    private void ClientState_Logout(object sender, EventArgs e)
+    {
+        if (Configuration.config.useHscOverride)
+            HSCCleanup();
+    }
+
+    private void ClientState_Login(object sender, EventArgs e)
+    {
 
         if (Configuration.config.useHscOverride)
-            InitHSCoverride();
-
+            Task.Run(() => InitHSCoverride(true));
     }
 
     private void Tick(Dalamud.Game.Framework framework)
@@ -338,9 +352,8 @@ public partial class MidiBard : IDalamudPlugin
             }
             DalamudApi.api.Dispose();
 
-            midiBardPlaylistWatcher.Stop();
-            midiBardPlaylistWatcher.Dispose();
-            midiBardPlaylistWatcher = null;
+            if (Configuration.config.useHscOverride)
+                HSCCleanup();
         }
         catch (Exception e2)
         {
