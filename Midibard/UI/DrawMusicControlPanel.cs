@@ -14,6 +14,10 @@ namespace MidiBard
         private void DrawPanelMusicControl()
         {
             ManualDelay();
+            if (MidiPlayerControl.LrcLoaded())
+            {
+                LRCDeltaTime();
+            }
 
             ComboBoxSwitchInstrument();
 
@@ -201,6 +205,27 @@ namespace MidiBard
                 MidiPlayerControl.ChangeDeltaTime(-MidiPlayerControl.playDeltaTime);
             }
             ToolTip("Delay time(ms) add on top of current progress to help sync between bards.");
+        }
+
+        private static void LRCDeltaTime()
+        {
+
+            if (ImGui.Button("-100ms"))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(-100);
+            }
+            ImGui.SameLine();           
+            if (ImGui.Button("+100ms"))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(100);
+            }
+            ImGui.SameLine();
+            ImGui.TextUnformatted("LRC Sync: " + $"{MidiPlayerControl.LRCDeltaTime} ms");
+            if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(-MidiPlayerControl.LRCDeltaTime);
+            }
+            ToolTip("Delay time(ms) add on top of lyrics.");
         }
     }
 }

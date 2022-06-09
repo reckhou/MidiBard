@@ -5,6 +5,7 @@ using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using static MidiBard.MidiBard;
+using MidiBard.Managers;
 using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 
@@ -15,6 +16,7 @@ namespace MidiBard.Control.MidiControl
     {
 
         internal static int playDeltaTime = 0;
+        internal static int LRCDeltaTime = 0;
     
         public enum e_stat
         {
@@ -25,43 +27,64 @@ namespace MidiBard.Control.MidiControl
 
         public static e_stat _stat = e_stat.Stopped;
         public static int LrcIdx = -1;
+        public static bool IsLeader;
 
         public static List<double> LrcTimeStamps = new List<double>();
+
+        public static bool LrcLoaded()
+        {
+            return IsLeader && LrcTimeStamps.Count > 0;
+        }
+
         public static void Tick(Dalamud.Game.Framework framework)
         {
-            if (_stat != e_stat.Playing)
+            try
             {
-                return;
-            }
-
-            if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
-            {
-                int idx = FindLrcIdx(LrcTimeStamps);
-                if (idx < 0 || idx == LrcIdx)
+                if (_stat != e_stat.Playing)
                 {
                     return;
                 }
-                else
-                {
-                    var partymember = DalamudApi.api.PartyList.CreatePartyMemberReference(DalamudApi.api.PartyList.GetPartyMemberAddress((int)DalamudApi.api.PartyList.PartyLeaderIndex));
-                    bool isLeader = String.Compare(partymember.Name.TextValue, DalamudApi.api.ClientState.LocalPlayer.Name.TextValue) == 0;
-                    if (isLeader)
-                    {
-                        string msg = "";
-                        if (idx == 0)
-                        {
-                            msg = $"/y ♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ Lyric By: {Lrc._lrc.LrcBy} ♪";
-                        }
-                        else
-                        {
-                            PluginLog.LogVerbose($"{Lrc._lrc.LrcWord[LrcTimeStamps[idx]]}");
-                            msg = $"♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                        }
 
-                        MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
+                {
+                    int idx = FindLrcIdx(LrcTimeStamps);
+                    if (idx < 0 || idx == LrcIdx)
+                    {
+                        return;
                     }
-                    LrcIdx = idx;
+                    else
+                    {                      
+                        if (IsLeader)
+                        {
+                            string msg = "";
+                            if (idx == 0)
+                            {
+                                msg = $"♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ Lyric By: {Lrc._lrc.LrcBy} ♪";
+                                if (!AgentMetronome.EnsembleModeRunning)
+                                {
+                                    msg = "/p " + msg;
+                                }
+                            }
+                            else
+                            {
+                                PluginLog.LogVerbose($"{Lrc._lrc.LrcWord[LrcTimeStamps[idx]]}");
+                                if (AgentMetronome.EnsembleModeRunning)
+                                {
+                                    msg = $"/s ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                } else
+                                {
+                                    msg = $"/p ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                }
+                            }
+
+                            MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                        }
+                        LrcIdx = idx;
+                    }
                 }
+            } catch (Exception ex)
+            {
+                PluginLog.LogError($"exception: {ex}");
             }
         }
 
@@ -71,7 +94,7 @@ namespace MidiBard.Control.MidiControl
                 return -1;
 
             int idx = -1;
-            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset/1000.0f;
+            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset/1000.0f + LRCDeltaTime/1000.0f;
 
             foreach (double TimeStamp in TimeStamps)
             {
@@ -90,6 +113,7 @@ namespace MidiBard.Control.MidiControl
         internal static void Play()
         {
 	        playDeltaTime = 0;
+            LRCDeltaTime = 0;
             if (CurrentPlayback != null)
             {
                 try
@@ -132,6 +156,26 @@ namespace MidiBard.Control.MidiControl
                 return;
             }
 
+            IsLeader = false;
+
+            if (Lrc.HasLyric())
+            {
+                if (DalamudApi.api.PartyList.Length > 1)
+                {
+                    // it seems the PartyLeaderIndex always == 0 after joined and leave a party, 
+                    var partyMemberAddr = DalamudApi.api.PartyList.GetPartyMemberAddress((int)DalamudApi.api.PartyList.PartyLeaderIndex);
+                    if (partyMemberAddr != IntPtr.Zero)
+                    {
+                        var partymember = DalamudApi.api.PartyList.CreatePartyMemberReference(partyMemberAddr);
+                        IsLeader = String.Compare(partymember.Name.TextValue, DalamudApi.api.ClientState.LocalPlayer.Name.TextValue) == 0;
+                    }
+                }
+                else
+                {
+                    DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Not in a party, Lyrics will not be posted."));
+                }
+            }
+
             CurrentPlayback.Start();
             try
             {
@@ -156,6 +200,11 @@ namespace MidiBard.Control.MidiControl
 
         internal static void PlayPause()
         {
+            if (CurrentPlayback == null)
+            {
+                return;
+            }
+
             var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
             PluginLog.LogVerbose($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
 
@@ -200,6 +249,7 @@ namespace MidiBard.Control.MidiControl
                 _stat = e_stat.Stopped;
                 CurrentPlayback?.Dispose();
                 CurrentPlayback = null;
+                IsLeader = false;
             }
         }
 
@@ -330,6 +380,7 @@ namespace MidiBard.Control.MidiControl
             LrcIdx = -1;
             _stat = e_stat.Stopped;
             playDeltaTime = 0;
+            LRCDeltaTime = 0;
             if (index < 0 || index >= PlaylistManager.FilePathList.Count)
             {
                 PluginLog.Error($"SwitchSong: invalid playlist index {index}");
@@ -348,6 +399,7 @@ namespace MidiBard.Control.MidiControl
 			if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
 			{
 				playDeltaTime = 0;
+                LRCDeltaTime = 0;
 				return;
 			}
 
@@ -364,5 +416,17 @@ namespace MidiBard.Control.MidiControl
 			CurrentPlayback.MoveToTime(newTime);
 			playDeltaTime += delta;
 		}
-	}
+
+        internal static void ChangeLRCDeltaTime(int delta)
+        {
+            if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+            {
+                playDeltaTime = 0;
+                LRCDeltaTime = 0;
+                return;
+            }
+
+            LRCDeltaTime += delta;
+        }
+    }
 }

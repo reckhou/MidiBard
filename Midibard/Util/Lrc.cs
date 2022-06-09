@@ -118,5 +118,10 @@ namespace MidiBard
         {
             return line.Substring(line.IndexOf(":") + 1).TrimEnd(']');
         }
+
+        public static bool HasLyric()
+        {
+            return _lrc == null ? false : (_lrc.LrcWord.Count > 0);
+        }
     }
 }
