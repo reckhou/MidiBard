@@ -1,6 +1,6 @@
 ﻿
-using MidiBard.Common.IPC;
 using MidiBard.Common.Messaging.Messages;
+using NamedPipeWrapper;
 using System;
 using System.Collections.Generic;
 using System.Text;

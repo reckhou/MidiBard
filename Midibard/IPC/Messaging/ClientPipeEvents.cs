@@ -1,5 +1,6 @@
 ﻿using MidiBard.Common.Messaging.Messages;
 using MidiBard.Control.MidiControl;
+using NamedPipeWrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace MidiBard;
 
 public partial class MidiBard
 {
-    //private void ClientPipe_Disconnected(NamedPipeConnection<MidibardPipeMessage, MidibardPipeMessage> e)
-    //{
-    //    Dalamud.Logging.PluginLog.Debug($"Disconnected from the IPC server.");
-    //}
+    private void ClientPipe_Disconnected(NamedPipeConnection<MidibardPipeMessage, MidibardPipeMessage> e)
+    {
+        Dalamud.Logging.PluginLog.Debug($"Disconnected from the IPC server.");
+    }
 }

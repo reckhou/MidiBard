@@ -18,7 +18,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
 using System.IO;
-using MidiBard.Common;
+using MidiBard.HSC;
 
 namespace MidiBard.Control.MidiControl;
 

@@ -41,11 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinarySerializer.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="IPC\NamedPipe.cs" />
-    <Compile Include="IPC\NamedPipeClient.cs" />
-    <Compile Include="IPC\NamedPipeServer.cs" />
     <Compile Include="Messaging\Messages\MidibardPipeMessage.cs" />
     <Compile Include="Messaging\Messages\PlaybackMessage.cs" />
     <Compile Include="Messaging\Messages\PlaylistMessage.cs" />
