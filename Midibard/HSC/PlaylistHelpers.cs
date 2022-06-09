@@ -28,9 +28,6 @@ namespace MidiBard
                 HSC.Settings.PercussionNotes[trackIndex] = new Dictionary<int, bool>() { { note, true } };
             else
                 HSC.Settings.PercussionNotes[trackIndex].Add(note, true);
-
-            if (!HSC.Settings.PercussionTracks.ContainsKey(trackIndex))
-                HSC.Settings.PercussionTracks[trackIndex] = true;
         }
 
 
@@ -59,7 +56,6 @@ namespace MidiBard
             HSC.Settings.KeyOffset = seq.KeyOffset;
 
             HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
-            HSC.Settings.PercussionTracks = new Dictionary<int, bool>();
             HSC.Settings.MappedTracks = new Dictionary<int, TrackTransposeInfo>();
             HSC.Settings.MappedDrumTracks = new Dictionary<int, Dictionary<int, TrackTransposeInfo>>();
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
