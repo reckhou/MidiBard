@@ -19,15 +19,8 @@ public partial class MidiBard
     /// <param name="index"></param>
     private static async void PlaylistMessageHandler_ReloadMessageReceived(object sender, EventArgs e)
     {
-        Dalamud.Logging.PluginLog.Information($"Reload playlist message received from IPC server.");
-
         await HSCPlaylistHelpers.Reload();
-    }
 
-    private static async void PlaylistMessageHandler_ReloadSongMessageReceived(object sender, string title)
-    {
-        Dalamud.Logging.PluginLog.Information($"Reload song '{title}' message received from IPC server.");
-
-        await HSCPlaylistHelpers.LoadAndApplyHscPlaylistSettings(title);
+        Dalamud.Logging.PluginLog.Information($"Reload playlist message received from IPC server.");
     }
 }

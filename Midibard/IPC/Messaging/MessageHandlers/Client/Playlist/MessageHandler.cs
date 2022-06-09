@@ -20,7 +20,6 @@ namespace Midibard.IPC.Messaging.Handlers.Client.Playlist
 
         public event EventHandler ReloadMessageReceived;
 
-        public event EventHandler<string> ReloadSongMessageReceived;
 
         protected override void HandleMessage(PlaylistMessage msg)
         {
@@ -32,10 +31,6 @@ namespace Midibard.IPC.Messaging.Handlers.Client.Playlist
 
                 case PlaylistMessageType.Reload:
                     ReloadMessageReceived.Invoke(this, EventArgs.Empty);
-                    break;
-
-                case PlaylistMessageType.ReloadSong:
-                    ReloadSongMessageReceived.Invoke(this, (string)msg.Data[0]);
                     break;
 
             }

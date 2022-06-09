@@ -159,7 +159,6 @@ public partial class MidiBard : IDalamudPlugin
             PluginLog.Information($"Using HSC override.");
             HSC.Settings.AppSettings.CurrentAppPath = PluginInterface.AssemblyLocation.DirectoryName;
             UpdateClientInfo();
-            InitIPC();
         }
     }
 

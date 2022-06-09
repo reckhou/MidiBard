@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace MidiBard.Common.Messaging.Messages
 {
-    public enum PlaylistMessageType { Reload, ReloadSong }
+    public enum PlaylistMessageType { Reload }
 
-    [Serializable]
     public class PlaylistMessage
     {
         public PlaylistMessageType Type { get; set; }

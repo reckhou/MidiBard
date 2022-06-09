@@ -49,8 +49,6 @@ namespace MidiBard
             playlistMessageHandler = new Midibard.IPC.Messaging.Handlers.Client.Playlist.MessageHandler(clientPipe);
 
             playlistMessageHandler.ReloadMessageReceived += PlaylistMessageHandler_ReloadMessageReceived;
-
-            playlistMessageHandler.ReloadSongMessageReceived += PlaylistMessageHandler_ReloadSongMessageReceived;
         }
     }
 }
