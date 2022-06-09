@@ -30,7 +30,20 @@ namespace MidiBard.HSC
             return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
         }
 
-        public static int GetGuitarTone(Track track) => (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument) - 24;
+        public static int GetGuitarTone(Track track)
+        {
+            var ins = (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument);
+            return ins switch
+            {
+                24 => 0,
+                25 => 1,
+                26 => 2,
+                27 => 3,
+                28 => 4,
+            };
+
+        }
+
 
         public static bool HasGuitar(Track track)
         {
