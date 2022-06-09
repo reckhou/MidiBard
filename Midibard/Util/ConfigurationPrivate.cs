@@ -13,7 +13,6 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using Newtonsoft.Json;
-using MidiBard.Common;
 
 namespace MidiBard;
 
@@ -80,7 +79,7 @@ public class ConfigurationPrivate : IPluginConfiguration
 
                     var serializedContents = JsonConvert.SerializeObject(this, Formatting.Indented);
 
-                    FileHelpers.WriteAllText(configFileInfo.FullName, serializedContents);
+                    File.WriteAllText(configFileInfo.FullName, serializedContents);
                     PluginLog.LogWarning($"Saving {DateTime.Now} - {playerName}_{playerWorld}_{contentId}.json Saved");
                 }
             }
@@ -110,7 +109,9 @@ public class ConfigurationPrivate : IPluginConfiguration
                 var configFileInfo = GetConfigFileInfo(playerName, playerWorld, contentId);
                 if (configFileInfo.Exists)
                 {
-                    var loadedCharacterConfiguration = FileHelpers.Load<ConfigurationPrivate>(configFileInfo.FullName);
+                    var fileText = File.ReadAllText(configFileInfo.FullName);
+
+                    var loadedCharacterConfiguration = JsonConvert.DeserializeObject<ConfigurationPrivate>(fileText);
                     if (loadedCharacterConfiguration == null)
                     {
                         config = new ConfigurationPrivate();

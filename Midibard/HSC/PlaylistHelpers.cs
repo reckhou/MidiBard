@@ -122,7 +122,7 @@ namespace MidiBard
 
                 PluginLog.Information($"Updating midibard playlist");
 
-               PlaylistManager.Add(HSC.Settings.Playlist.Files.ToArray());
+                await PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray());
 
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
 
