@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidibardIPCTester", "Midiba
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBard.Common", "MidiBard.Common\MidiBard.Common.csproj", "{4451702D-2BA2-4899-A82E-307263A8C29E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBard.HSC", "MidiBard.HSC\MidiBard.HSC.csproj", "{38732045-14FD-49CC-96A5-92A8AB23A6F9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{4451702D-2BA2-4899-A82E-307263A8C29E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4451702D-2BA2-4899-A82E-307263A8C29E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4451702D-2BA2-4899-A82E-307263A8C29E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38732045-14FD-49CC-96A5-92A8AB23A6F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38732045-14FD-49CC-96A5-92A8AB23A6F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38732045-14FD-49CC-96A5-92A8AB23A6F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38732045-14FD-49CC-96A5-92A8AB23A6F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

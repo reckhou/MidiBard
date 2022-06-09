@@ -46,6 +46,7 @@ public partial class MidiBard : IDalamudPlugin
 #else
     public static bool Debug = false;
 #endif
+
     #region IPC for external clients
     const string ClientPipeName = "Midibard.pipe";
 
@@ -139,8 +140,8 @@ public partial class MidiBard : IDalamudPlugin
         _ = EnsembleManager.Instance;
 
 #if DEBUG
-        _ = NetworkManager.Instance;
-        _ = Testhooks.Instance;
+			_ = NetworkManager.Instance;
+			_ = Testhooks.Instance;
 #endif
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
@@ -157,26 +158,20 @@ public partial class MidiBard : IDalamudPlugin
 
         //if (PluginInterface.IsDev) Ui.Open();
 
-        if (Configuration.config.useHscOverride)
-        {
-            InitIPC();
-            UpdateClientInfo();
-        }
+        InitIPC();
     }
 
     private void InitIPC()
     {
-        PluginLog.Information($"Connecting to IPC server.");
-
         var pipes = System.IO.Directory.GetFiles(@"\\.\pipe\").Select(p => p.Replace(@"\\.\pipe\", ""));
 
         if (!pipes.Contains(ClientPipeName))
         {
-            PluginLog.Information($"IPC server pipe not found.");
+            PluginLog.Debug($"IPC server pipe not found.");
             return;
         }
 
-        PluginLog.Information($"IPC server pipe found.");
+        PluginLog.Debug($"IPC server pipe found.");
 
         clientPipe = new NamedPipeClient<MidibardPipeMessage>(ClientPipeName);
 
@@ -184,20 +179,13 @@ public partial class MidiBard : IDalamudPlugin
 
         clientPipe.Start();
 
-        PluginLog.Information("Connected to IPC server.");
+        PluginLog.Debug("Connected to IPC server.");
 
         playbackMessageHandler = new Midibard.IPC.Messaging.Handlers.Client.Playback.MessageHandler(clientPipe);
 
         playbackMessageHandler.PlayMessageReceived += PlaybackMessageHandler_PlayMessageReceived;
     }
 
-    private void UpdateClientInfo()
-    {
-        HSC.Settings.CharName = api.ClientState.LocalPlayer?.Name.TextValue;
-        var clientInfo = SharedClientInfo.Add(HSC.Settings.CharName);
-        HSC.Settings.CharIndex = clientInfo.Index;
-        PluginLog.Information($"Updated HSC client info in shared memory - index: {clientInfo.Index}, char name: '{clientInfo.CharName}'.");
-    }
 
     private void Tick(Dalamud.Game.Framework framework)
     {

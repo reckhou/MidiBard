@@ -30,19 +30,6 @@ namespace MidiBard.Control.CharacterControl
             });
         }
 
-        public static async Task SwitchToFromHscPlaylist(string fileName)
-        {
-            var songSettings = HSC.Settings.PlaylistSettings.Settings[fileName];
-
-            var firstTrack = songSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
-            if (firstTrack == null)
-                return;
-
-            uint insId = TrackInfo.GetInstrumentIDByName(firstTrack.EnsembleInstrument).Value;
-
-            await SwitchTo(insId);
-        }
-
         public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
         {
             if (Configuration.config.bmpTrackNames)
@@ -141,12 +128,6 @@ namespace MidiBard.Control.CharacterControl
         {
             var config = Configuration.config;
 
-            if (config.useHscOverride && config.switchInstrumentFromHscPlaylist)
-            {
-                await SwitchToFromHscPlaylist(songName);
-                return;
-            }
-
             if (config.bmpTrackNames)
             {
                 var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);
@@ -202,8 +183,6 @@ namespace MidiBard.Control.CharacterControl
                     await SwitchTo((uint)idFromSongName);
                 }
             }
-
-
         }
 
         internal static void UpdateGuitarToneByConfig()

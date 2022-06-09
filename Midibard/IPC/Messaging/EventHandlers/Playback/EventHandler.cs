@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace MidiBard;
 
 public partial class MidiBard
@@ -17,8 +16,8 @@ public partial class MidiBard
     /// <param name="index"></param>
     private static void PlaybackMessageHandler_PlayMessageReceived(object sender, int index)
     {
-        Dalamud.Logging.PluginLog.Information($"Play '{index}' message received from IPC server.");
-
         MidiPlayerControl.SwitchSong(index);
+
+        Dalamud.Logging.PluginLog.Debug($"Play '{index}' message received from IPC server.");
     }
 }

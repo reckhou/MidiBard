@@ -39,14 +39,6 @@ public class Configuration : IPluginConfiguration
 {
     public static Configuration config;
 
-    public bool useHscOverride { get; set; } = true;
-
-    public bool useHscPlaylist { get; set; } = true;
-
-    public bool switchInstrumentFromHscPlaylist { get; set; } = true;
-
-    public string HscPlayListPath { get; set; }
-
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
