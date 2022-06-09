@@ -1,5 +1,4 @@
-﻿using MidiBard.Common.Messaging.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
@@ -14,75 +13,25 @@ namespace MidiBard.Common.IPC
 
         protected PipeStream stream;
 
+        private bool stopped = false;
+
         public event DataReceivedEventHandler<T> DataReceived;
 
         protected NamedPipe(string name)
         {
-
+            
         }
 
         protected void Stop()
         {
-            stream.Close();
+            stopped = true;
         }
 
-        public void Send(T msg)
+        protected void Send(T msg)
         {
             var data = BinarySerializer.Serialize(msg);
-
-            if (data == null)
-                return;
-
-            writeLen(data.Length);
-            stream.Flush();
-            writeObj(msg);
-            stream.Flush();
-            //stream.WaitForPipeDrain(); ;
-            //stream.WaitForPipeDrain();
-        }
-
-
-        private void writeObj(T obj)
-        {
-            var data = BinarySerializer.Serialize(obj);
-
-            if (data == null)
-                return;
-
-            stream.Write(data, 0, data.Length);
-        }
-
-        private void writeLen(int len)
-        {
-            var lenbuf = BitConverter.GetBytes(len);
-            stream.Write(lenbuf, 0, lenbuf.Length);
-        }
-
-        private T readObj(int len)
-        {
-            var buffer = new byte[len];
-
-            int bytesRead = stream.Read(buffer, 0, len);
-
-            if (bytesRead == 0)
-                return null;
-
-            var obj = BinarySerializer.Deserialize<T>(buffer);
-            return obj as T;
-        }
-        private int readLen()
-        {
-            const int lensize = sizeof(int);
-            var lenbuf = new byte[lensize];
-            var bytesRead = stream.Read(lenbuf, 0, lensize);
-
-            if (bytesRead == 0)
-                return 0;
-
-            if (bytesRead != lensize)
-                return 0;
-
-            return BitConverter.ToInt32(lenbuf, 0);
+            if (data != null)
+                stream.Write(data, 0, data.Length);
         }
 
         protected void StartPipeThread()
@@ -90,25 +39,16 @@ namespace MidiBard.Common.IPC
 
             Task.Run(() =>
             {
-                while (stream.IsConnected)
+                while (!stopped)
                 {
-                    int len = readLen();
-
-                    if (len == 0)
-                        stream.Close();
-
-                    var obj = readObj(len);
-
-                    if (obj == null)
-                        stream.Close();
-
-                    if (DataReceived != null)
-                        DataReceived.Invoke(this, obj);
-
-                    //var okMsg = new MidibardPipeMessage() { Type = MidibardPipeMessageType.OK };
-
-                    //Send(okMsg as T);
-
+                    var buffer = new byte[4096];
+                    int total = stream.Read(buffer, 0, 4096);
+                    if (total > 0)
+                    {
+                        var msg = BinarySerializer.Deserialize<T>(buffer);
+                        if (msg != null)
+                            DataReceived(this, msg);
+                    }
                 }
             });
         }

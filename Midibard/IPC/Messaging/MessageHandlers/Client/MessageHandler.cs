@@ -1,5 +1,4 @@
-﻿
-using MidiBard.Common.IPC;
+﻿using MidiBard.Common.IPC;
 using MidiBard.Common.Messaging.Messages;
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ namespace Midibard.IPC.Messaging.Handlers.Client
     {
         private readonly NamedPipeClient<MidibardPipeMessage> client;
 
-        public MessageHandler(NamedPipeClient<MidibardPipeMessage> client)
+        protected MessageHandler(NamedPipeClient<MidibardPipeMessage> client)
         {
             this.client = client;
             this.client.DataReceived += OnMessageReceived;

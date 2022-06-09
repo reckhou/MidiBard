@@ -33,11 +33,11 @@ using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
 using XivCommon;
+using MidiBard.Common.Messaging.Messages;
 using MidiBard.HSC;
 using System.IO.Pipes;
 using System.Threading;
 using MidiBard.Common.IPC;
-using MidiBard.Common.Messaging.Messages;
 
 namespace MidiBard;
 
