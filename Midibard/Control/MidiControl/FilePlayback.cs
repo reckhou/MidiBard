@@ -348,7 +348,7 @@ public static class FilePlayback
                     PluginLog.Information($"track {index} is assigned from hsc playlist");
                     ConfigurationPrivate.config.EnabledTracks[index] = true;
                 }
-                if (track.Value.Muted || track.Value.EnsembleMember != HSC.Settings.CharIndex)
+                if (track.Value.Muted)
                 {
                     ConfigurationPrivate.config.EnabledTracks[index] = false;
                 }
