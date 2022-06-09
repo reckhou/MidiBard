@@ -153,10 +153,27 @@ public partial class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
-
+        PluginLog.Information($"Using HSC override.");
         if (Configuration.config.useHscOverride)
-            InitHSCoverride();
+        {
+            PluginLog.Information($"Using HSC override.");
+            HSC.Settings.AppSettings.CurrentAppPath = PluginInterface.AssemblyLocation.DirectoryName;
+            UpdateClientInfo();
+            //InitIPC();
+            CreateHSCPlaylistWatcher();
+        }
+    }
 
+
+
+    private void UpdateClientInfo()
+    {
+        int procId = Process.GetCurrentProcess().Id;
+
+        HSC.Settings.CharName = api.ClientState.LocalPlayer?.Name.TextValue;
+        HSC.Settings.CharIndex = GameProcessFinder.GetIndex(procId);
+
+        PluginLog.Information($"Updated HSC client info: index: {HSC.Settings.CharIndex}, char name: '{HSC.Settings.CharName}'.");
     }
 
     private void Tick(Dalamud.Game.Framework framework)
