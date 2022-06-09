@@ -26,15 +26,7 @@ namespace MidiBard.HSC.Music
 
             Parallel.ForEach(trackChunks, trackChunk =>
             {
-                ChordsManagingUtilities.ProcessChords(trackChunk, chord => ProcessChord(settings, chord, trackIndex), 
-                    new ChordDetectionSettings() {  
-                        NoteDetectionSettings = new NoteDetectionSettings() { 
-                            NoteStartDetectionPolicy = NoteStartDetectionPolicy.FirstNoteOn, 
-                            NoteSearchContext = NoteSearchContext.AllEventsCollections},
-                       NotesMinCount = 2,
-                       NotesTolerance = 0,
-                      ChordSearchContext = ChordSearchContext.AllEventsCollections
-                    });
+                ChordsManagingUtilities.ProcessChords(trackChunk, chord => ProcessChord(settings, chord, trackIndex));
                 trackIndex++;
             });
         }
@@ -76,7 +68,7 @@ namespace MidiBard.HSC.Music
             else
                 notesToKeep = ProcessChordNotesReduce(chord, track.ReduceMaxNotes);
 
-            chord.Notes.RemoveAll(no => notesToKeep.All(n => n.NoteNumber != no.NoteNumber));
+            chord.Notes.RemoveAll(n => !notesToKeep.Contains(n));
         }
 
         private static IEnumerable<Note> ProcessChordNotesHighestOnly(Chord chord)
