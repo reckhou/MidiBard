@@ -337,10 +337,6 @@ public partial class MidiBard : IDalamudPlugin
                 PluginLog.Error($"{e}");
             }
             DalamudApi.api.Dispose();
-
-            midiBardPlaylistWatcher.Stop();
-            midiBardPlaylistWatcher.Dispose();
-            midiBardPlaylistWatcher = null;
         }
         catch (Exception e2)
         {
