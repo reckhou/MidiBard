@@ -338,7 +338,3 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/latest
-/ConsoleApp2
-/MidibardIPCTester
-/ConsoleApp1

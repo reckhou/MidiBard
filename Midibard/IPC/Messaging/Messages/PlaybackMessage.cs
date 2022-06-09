@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MidiBard.Common.Messaging.Messages
+namespace MidiBard.IPC.Messaging.Messages
 {
     public enum PlaybackMessageType { Play, Stop, Pause }
 
-    [Serializable]
     public class PlaybackMessage
     {
         public PlaybackMessageType Type { get; set; }
