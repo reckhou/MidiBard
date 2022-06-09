@@ -50,7 +50,7 @@ namespace MidiBard.Control.MidiControl
                         string msg = "";
                         if (idx == 0)
                         {
-                            msg = $"/y ♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ LyricBy: {Lrc._lrc.LrcBy} ♪";
+                            msg = $"/y ♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ Lyric By: {Lrc._lrc.LrcBy} ♪";
                         }
                         else
                         {
@@ -156,7 +156,9 @@ namespace MidiBard.Control.MidiControl
 
         internal static void PlayPause()
         {
-            PluginLog.LogVerbose($"Timespan: {CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds()}");
+            var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+            PluginLog.LogVerbose($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
+
             if (FilePlayback.isWaiting)
             {
                 FilePlayback.StopWaiting();
