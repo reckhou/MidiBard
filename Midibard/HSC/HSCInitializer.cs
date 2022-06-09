@@ -21,7 +21,6 @@ namespace MidiBard
             //InitIPC();
             CreateHSCPlaylistWatcher();
 
-            //reload hsc playlist
             if (Configuration.config.useHscPlaylist)
                 Task.Run(() => {
                     HSCPlaylistHelpers.Reload();
@@ -40,4 +39,5 @@ namespace MidiBard
         }
 
     }
+}
 }
