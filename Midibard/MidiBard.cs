@@ -142,7 +142,7 @@ public partial class MidiBard : IDalamudPlugin
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
-        Task.Run(() => PlaylistManager.Add(Configuration.config.Playlist.ToArray(), true));
+        Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
         CurrentOutputDevice = new BardPlayDevice();
         InputDeviceManager.ScanMidiDeviceThread.Start();
