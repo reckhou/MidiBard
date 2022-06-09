@@ -37,16 +37,16 @@ namespace MidiBard
             HSC.Settings.PlaylistSettings.Clear();
         }
 
-        private static void InitHSCoverride(bool wait = false) {
+        private static async Task InitHSCoverride(bool loggedIn = false) {
 
             PluginLog.Information($"Using HSC override.");
 
             HSC.Settings.AppSettings.CurrentAppPath = DalamudApi.api.PluginInterface.AssemblyLocation.DirectoryName;
 
-            if (wait)//wait until fully logged in
+            if (loggedIn)//wait until fully logged in
                 Thread.Sleep(Configuration.config.HscOverrideDelay);
 
-            UpdateClientInfo();
+            await UpdateClientInfo();
 
             //InitIPC();
             CreateHSCPlaylistWatcher();
@@ -55,8 +55,8 @@ namespace MidiBard
             //reload hsc playlist
             if (Configuration.config.useHscPlaylist)
             {
-                HSCPlaylistHelpers.Reload(true);
-                HSCPlaylistHelpers.ReloadSettings(true);
+                await HSCPlaylistHelpers.Reload(loggedIn);
+                await HSCPlaylistHelpers.ReloadSettings(loggedIn);
             }
         }
 

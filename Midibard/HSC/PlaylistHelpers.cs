@@ -21,6 +21,7 @@ namespace MidiBard
     public class HSCPlaylistHelpers
     {
         private static int currentPlaying;
+        private static bool wasPlaying;
 
         private static void UpdatePercussionNote(int trackIndex, int note)
         {
@@ -37,14 +38,6 @@ namespace MidiBard
                 HSC.Settings.MappedTracks.Add(parentIndex, info);
         }
 
-        private static void UpdateMappedDrumTracks(int parentIndex, int note, TrackTransposeInfo info)
-        {
-            if (!HSC.Settings.MappedDrumTracks.ContainsKey(parentIndex))
-                HSC.Settings.MappedDrumTracks.Add(parentIndex, new Dictionary<int, TrackTransposeInfo>() { { note, info } });
-
-            HSC.Settings.MappedDrumTracks[parentIndex].Add(note, info);
-        }
-
         private static void UpdateTracks(string title, MidiSequence seq)
         {
 
@@ -56,8 +49,7 @@ namespace MidiBard
             HSC.Settings.KeyOffset = seq.KeyOffset;
 
             HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
-            HSC.Settings.MappedTracks = new Dictionary<int, TrackTransposeInfo>();
-            HSC.Settings.MappedDrumTracks = new Dictionary<int, Dictionary<int, TrackTransposeInfo>>();
+            HSC.Settings.MappedTracks = new Dictionary<int, TrackTransposeInfo>(); 
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
             foreach (var track in seq.Tracks)
@@ -81,9 +73,6 @@ namespace MidiBard
                     {
                         ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex.Value] = true;
 
-                        if (track.Value.PercussionNote.HasValue)
-                            UpdateMappedDrumTracks(track.Value.ParentIndex.Value, track.Value.PercussionNote.Value, info);
-                        else
                             UpdateMappedTracks(track.Value.ParentIndex.Value, info);
                     }
                     else//no parent enable as normal
@@ -168,16 +157,16 @@ namespace MidiBard
 
                 PluginLog.Information($"Switching instrument for '{Configuration.config.loadedMidiFile}'...");
 
-                if (!loggedIn && !HSC.Settings.Playlist.Loaded)
+                if (!loggedIn && !wasPlaying && !HSC.Settings.Playlist.Loaded)
                     await SwitchInstrument.WaitSwitchInstrumentForSong(Configuration.config.loadedMidiFile);
 
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
 
-                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
+                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings);
 
 
                 HSC.Settings.Playlist.Loaded = true;
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
                 HSC.Settings.Playlist.Loaded = false;
 
             }
@@ -194,10 +183,8 @@ namespace MidiBard
 
             try
             {
-                bool wasPlaying = MidiBard.IsPlaying;
+                wasPlaying = MidiBard.IsPlaying;
 
-                if (wasPlaying)
-                    currentPlaying = PlaylistManager.CurrentPlaying;
 
                 HSC.Settings.Playlist.Clear();
                 PlaylistManager.Clear();
@@ -208,7 +195,8 @@ namespace MidiBard
                 if (HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
                     PluginLog.Information($"No songs in HSC playlist");
-                    PerformActions.DoPerformAction(0);
+                    if (!wasPlaying)
+                        PerformActions.DoPerformAction(0);
                     PlaylistManager.CurrentPlaying = -1;
                     return;
                 }
@@ -219,10 +207,11 @@ namespace MidiBard
 
                 PluginLog.Information($"switching to {HSC.Settings.Playlist.SelectedIndex} from HSC playlist.");
 
-                PlaylistManager.CurrentPlaying = currentPlaying;
+                if (wasPlaying)
+                    PlaylistManager.CurrentPlaying = HSC.Settings.Playlist.SelectedIndex;
 
                 if (!wasPlaying && !loggedIn && !HSC.Settings.Playlist.Loaded)
-                    MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex, false);
+                    MidiPlayerControl.SwitchSong(HSC.Settings.Playlist.SelectedIndex);
 
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
 
@@ -232,7 +221,7 @@ namespace MidiBard
                     MidiBard.Ui.Open();
 
                 HSC.Settings.Playlist.Loaded = true;
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
                 HSC.Settings.Playlist.Loaded = false;
 
             }

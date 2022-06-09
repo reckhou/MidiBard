@@ -276,9 +276,6 @@ internal class BardPlayDevice : IOutputDevice
         if (HSC.Settings.MappedTracks.ContainsKey(trackIndex))
             return HSC.Settings.MappedTracks[trackIndex];
 
-        else if (HSC.Settings.MappedDrumTracks.ContainsKey(trackIndex))
-            return PerformHelpers.GetMappedDrumTrackInfo(trackIndex, noteNumber);
-
         if (!HSC.Settings.TrackInfo.ContainsKey(trackIndex))
             return null;
 

@@ -37,6 +37,8 @@ namespace MidiBard
                     
                     PluginLog.Information($"Playlist file changed '{args.FullPath}'.");
 
+                    HSC.Settings.Playlist.Loaded = false;
+
                     if (Path.GetExtension(args.FullPath) == ".pl")
                         await HSCPlaylistHelpers.Reload();
                         /*await HSCPlaylistHelpers.ReloadSettings();*/ //needed to update the tracks when selecting a song
