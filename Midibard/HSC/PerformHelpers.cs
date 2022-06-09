@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using MidiBard.Common;
 using Melanchall.DryWetMidi.Core;
 using static MidiBard.HSC.Settings;
+using static MidiBard.HSC.Enums;
+using MidiBard.HSC.Music;
 
 namespace MidiBard.HSC
 {
@@ -27,6 +29,15 @@ namespace MidiBard.HSC
             //percussion note - do percussion logic
             return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
         }
+
+        public static int GetGuitarTone(Track track) => (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument) - 24;
+
+        public static bool HasGuitar(Track track)
+        {
+            var ins = (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument).Value;
+            return ins >= (int)Instrument.ElectricGuitarClean && ins <= (int)Instrument.ElectricGuitarSpecial;
+        }
+
 
         public static uint GetInstrumentFromHscPlaylist(string fileName)
         {

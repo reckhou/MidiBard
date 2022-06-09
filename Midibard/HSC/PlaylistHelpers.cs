@@ -12,6 +12,7 @@ using MidiBard.Control.CharacterControl;
 using System.Threading;
 using MidiBard.HSC.Music;
 using static MidiBard.HSC.Settings;
+using MidiBard.HSC;
 
 namespace MidiBard
 {
@@ -41,7 +42,7 @@ namespace MidiBard
         private static void UpdateTracks(string title, MidiSequence seq)
         {
 
-            PluginLog.Information($"Updating tracks for '{title}'");
+            PluginLog.Information($"Hey Updating tracks for '{title}'");
 
             int index = 0;
 
@@ -57,6 +58,9 @@ namespace MidiBard
                 var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.KeyOffset };
 
                 HSC.Settings.TrackInfo.Add(index, info);
+
+                if (Configuration.config.OverrideGuitarTones && PerformHelpers.HasGuitar(track.Value))
+                    Configuration.config.TonesPerTrack[index] = PerformHelpers.GetGuitarTone(track.Value);
 
                 if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
@@ -142,6 +146,8 @@ namespace MidiBard
 
             try
             {
+                wasPlaying = MidiBard.IsPlaying;
+
                 HSC.Settings.PlaylistSettings.Settings.Clear();
 
                 await OpenPlaylistSettings();
