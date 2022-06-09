@@ -70,7 +70,7 @@ namespace MidiBard.HSC.Playlist
 
             var playlist = await Task.Run(() => FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath));
 
-            if (playlist == null || playlist.IsEmpty)
+            if (playlist == null || !playlist.HasFiles)
                 return;
 
             MidiBard.HSC.Settings.Playlist = playlist;
