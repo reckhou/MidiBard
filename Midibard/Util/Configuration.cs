@@ -43,8 +43,6 @@ public class Configuration : IPluginConfiguration
 
     public bool useHscPlaylist = true;
 
-    public bool useHscChordProcessing = true;
-
     public bool switchInstrumentFromHscPlaylist  = true;
 
     public string hscPlayListPath = "playlists";
