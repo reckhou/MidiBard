@@ -26,14 +26,14 @@ namespace MidiBard.HSC.Playlist
         }
 
 
-        public static async Task LoadPlaylistSettings(Models.Playlist.Playlist playlist)
+        public static void LoadPlaylistSettings(Models.Playlist.Playlist playlist)
         {
             if (string.IsNullOrEmpty(playlist.SettingsFile))
                 return;
 
             string settingsFile = Path.Join(Settings.AppSettings.CurrentAppPath, playlist.SettingsFile);
 
-            var playlistSettings = await Task.Run(() => FileHelpers.Load<SongSettings>(settingsFile));
+            var playlistSettings =  FileHelpers.Load<SongSettings>(settingsFile);
 
             if (playlistSettings != null)
                 MidiBard.HSC.Settings.PlaylistSettings = playlistSettings;
@@ -59,7 +59,7 @@ namespace MidiBard.HSC.Playlist
             }
         }
 
-        public static async Task OpenPlaylist(string playlistFilePath, bool loadSettings = true)
+        public static void OpenPlaylist(string playlistFilePath, bool loadSettings = true)
         {
             MidiBard.HSC.Settings.Playlist.Title = Path.GetFileNameWithoutExtension(playlistFilePath);
 
@@ -68,7 +68,7 @@ namespace MidiBard.HSC.Playlist
 
             Settings.AppSettings.PrevPlaylistFileName = playlistFilePath;
 
-            var playlist =  await Task.Run(() => FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath));
+            var playlist =  FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath);
 
             if (playlist == null || playlist.IsEmpty)
                 return;
@@ -76,7 +76,7 @@ namespace MidiBard.HSC.Playlist
             MidiBard.HSC.Settings.Playlist = playlist;
 
             if (loadSettings)
-                 await LoadPlaylistSettings (playlist);
+                 LoadPlaylistSettings (playlist);
         }
 
     }
