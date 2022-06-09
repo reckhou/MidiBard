@@ -73,7 +73,7 @@ namespace MidiBard
                 }
 
 				Configuration.Load();
-				Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
+				Task.Run(() => PlaylistManager.Add(Configuration.config.Playlist.ToArray(), true));
 			}
 			else if (cmd == "close") // switch off the instrument
 			{

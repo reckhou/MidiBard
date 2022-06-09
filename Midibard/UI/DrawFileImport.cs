@@ -68,7 +68,7 @@ public partial class PluginUI
                     Task.Run(async () =>
                     {
                         await Coroutine.WaitUntil(() => array != null, 5000);
-                        await PlaylistManager.AddAsync(array);
+                        PlaylistManager.Add(array);
                         Configuration.config.Save(true);
                     });
                 }
@@ -146,7 +146,7 @@ public partial class PluginUI
                 {
                     Task.Run(async () =>
                     {
-                        await PlaylistManager.AddAsync(filePath);
+                        PlaylistManager.Add(filePath);
                         Configuration.config.Save(true);
                     });
                 }
@@ -170,7 +170,7 @@ public partial class PluginUI
                 PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", strings)}");
                 if (b) Task.Run(async () =>
                 {
-                    await PlaylistManager.AddAsync(strings);
+                    PlaylistManager.Add(strings);
                     Configuration.config.Save(true);
                 });
 

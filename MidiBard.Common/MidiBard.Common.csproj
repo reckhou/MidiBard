@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,6 +46,7 @@
   <ItemGroup>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="FileHelpers.cs" />
     <Compile Include="IPC\NamedPipe.cs" />
     <Compile Include="IPC\NamedPipeClient.cs" />
     <Compile Include="IPC\NamedPipeServer.cs" />
@@ -50,6 +54,9 @@
     <Compile Include="Messaging\Messages\PlaybackMessage.cs" />
     <Compile Include="Messaging\Messages\PlaylistMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -19,6 +19,7 @@ using MidiBard.Control.CharacterControl;
 using MidiBard.DalamudApi;
 using MidiBard.Managers.Ipc;
 using Newtonsoft.Json;
+using MidiBard.Common;
 
 namespace MidiBard
 {
@@ -114,8 +115,14 @@ namespace MidiBard
         //	Task.Run(async () => await Reload(Configuration.config.Playlist.ToArray()));
         //}
 
-        internal static async Task AddAsync(string[] filePaths, bool reload = false)
+        internal static void Add(string[] filePaths, bool reload = false)
         {
+            if (filePaths.IsNullOrEmpty())
+            {
+                PluginLog.Information($"Error: no files to import.");
+                return;
+            }
+
             if (reload)
             {
                 FilePathList.Clear();
@@ -125,32 +132,20 @@ namespace MidiBard
             var count = filePaths.Length;
             var success = 0;
 
-            await foreach (var path in GetPathsAvailable(filePaths))
+            foreach (var filePath in filePaths.Where(f => IsValidForPlaylist(f)))
             {
-                Configuration.config.Playlist.Add(path);
-                string fileName = Path.GetFileNameWithoutExtension(path);
-                FilePathList.Add((path, fileName, SwitchInstrument.ParseSongName(fileName, out _, out _)));
+                Configuration.config.Playlist.Add(filePath);
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
+                FilePathList.Add((filePath, fileName, SwitchInstrument.ParseSongName(fileName, out _, out _)));
                 success++;
+                PluginLog.Information($"importing {fileName}");
             }
 
             PluginLog.Information($"File import all complete! success: {success} total: {count}");
         }
 
-        internal static async IAsyncEnumerable<string> GetPathsAvailable(string[] filePaths)
-        {
-            foreach (var path in filePaths)
-            {
-                MidiFile file = null;
+        internal static bool IsValidForPlaylist(string filePath) => Path.GetExtension(filePath).ToLower().Equals(".mmsong") || Path.GetExtension(filePath).ToLower().Equals(".mid");
 
-                if (Path.GetExtension(path).Equals(".mmsong"))
-                    file =  await LoadMMSongFile(path);
-                else if (Path.GetExtension(path).Equals(".mid"))
-                    file = await LoadMidiFile(path);
-
-                if (file is not null)
-                    yield return path;
-            }
-        }
 
         //internal static async Task<MidiFile> LoadMidiFile(int index, out string trackName)
         //{
