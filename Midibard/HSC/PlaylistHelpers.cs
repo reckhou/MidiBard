@@ -11,6 +11,7 @@ using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using System.Threading;
 using MidiBard.HSC.Music;
+using static MidiBard.HSC.Settings;
 
 namespace MidiBard
 {
@@ -20,9 +21,6 @@ namespace MidiBard
     public class HSCPlaylistHelpers
     {
         private static int currentPlaying;
-
-
-        public static Track GetMappedTrack(int parentIndex) => HSC.Settings.MappedTracks[parentIndex];
 
         private static void UpdatePercussionNote(int trackIndex, int note)
         {
@@ -36,10 +34,18 @@ namespace MidiBard
         }
 
 
-        private static void UpdateMappedTracks(int parentIndex, Track child)
+        private static void UpdateMappedTracks(int parentIndex, TrackTransposeInfo info)
         {
             if (!HSC.Settings.MappedTracks.ContainsKey(parentIndex))
-                HSC.Settings.MappedTracks.Add(parentIndex, child);
+                HSC.Settings.MappedTracks.Add(parentIndex, info);
+        }
+
+        private static void UpdateMappedDrumTracks(int parentIndex, int note, TrackTransposeInfo info)
+        {
+            if (!HSC.Settings.MappedDrumTracks.ContainsKey(parentIndex))
+                HSC.Settings.MappedDrumTracks.Add(parentIndex, new Dictionary<int, TrackTransposeInfo>() { { note, info } });
+
+            HSC.Settings.MappedDrumTracks[parentIndex].Add(note, info);
         }
 
         private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
@@ -51,10 +57,15 @@ namespace MidiBard
 
             HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
             HSC.Settings.PercussionTracks = new Dictionary<int, bool>();
-            HSC.Settings.MappedTracks = new Dictionary<int, Track>();
+            HSC.Settings.MappedTracks = new Dictionary<int, TrackTransposeInfo>();
+            HSC.Settings.MappedDrumTracks = new Dictionary<int, Dictionary<int, TrackTransposeInfo>>();
+            HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
             foreach (var track in tracks)
             {
+                var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.KeyOffset };
+
+                HSC.Settings.TrackInfo.Add(index, info);
 
                 if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
                 {
@@ -70,7 +81,11 @@ namespace MidiBard
                     if (track.Value.ParentIndex.HasValue)
                     {
                         ConfigurationPrivate.config.EnabledTracks[track.Value.ParentIndex.Value] = true;
-                        UpdateMappedTracks(track.Value.ParentIndex.Value, track.Value);
+
+                        if (track.Value.PercussionNote.HasValue)
+                            UpdateMappedDrumTracks(track.Value.ParentIndex.Value, track.Value.PercussionNote.Value, info);
+                        else
+                            UpdateMappedTracks(track.Value.ParentIndex.Value, info);
                     }
                     else//no parent enable as normal
                         ConfigurationPrivate.config.EnabledTracks[index] = true;

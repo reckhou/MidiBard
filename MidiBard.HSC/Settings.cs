@@ -21,6 +21,12 @@ namespace MidiBard.HSC
 
         public static Dictionary<int, bool> EnabledTracks { get; set; }
 
+        public class TrackTransposeInfo
+        {
+            public int KeyOffset { get; set; }
+            public int OctaveOffset { get; set; }
+        }
+
         static Settings()
         {
             EnabledTracks = new Dictionary<int, bool>();
@@ -64,7 +70,13 @@ namespace MidiBard.HSC
         public static Dictionary<int, Dictionary<int, bool>> PercussionNotes { get; set; }
         public static Dictionary<int, bool> PercussionTracks { get; set; }
 
-        public static Dictionary<int, Track> MappedTracks { get; set; }
+        public static Dictionary<int, TrackTransposeInfo> MappedTracks { get; set; }
+
+        public static Dictionary<int, Dictionary<int, TrackTransposeInfo>> MappedDrumTracks { get; set; }
+
+       public static Dictionary<int, TrackTransposeInfo> TrackInfo { get; set; }
+        public static int OctaveOffset { get; set; }
+        public static int KeyOffset { get; set; }
 
         public static async Task LoadAppSettings()
         {

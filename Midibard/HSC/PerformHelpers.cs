@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
 using Melanchall.DryWetMidi.Core;
+using static MidiBard.HSC.Settings;
 
 namespace MidiBard.HSC
 {
@@ -26,6 +27,14 @@ namespace MidiBard.HSC
             //percussion note - do percussion logic
             return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
         }
+
+
+        public static bool IsTrackNoteMapped(int trackIndex, int note) => HSC.Settings.MappedDrumTracks.ContainsKey(trackIndex) && HSC.Settings.MappedDrumTracks[trackIndex].ContainsKey(note);
+
+        public static TrackTransposeInfo GetMappedTrackInfo(int trackIndex) => HSC.Settings.MappedTracks[trackIndex];
+
+        public static TrackTransposeInfo GetMappedDrumTrackInfo(int trackIndex, int note) => HSC.Settings.MappedDrumTracks[trackIndex][note];
+
 
         public static uint GetInstrumentFromHscPlaylist(string fileName)
         {
