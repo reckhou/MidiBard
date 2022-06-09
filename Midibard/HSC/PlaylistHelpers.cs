@@ -48,12 +48,15 @@ namespace MidiBard
             HSC.Settings.MappedDrumTracks[parentIndex].Add(note, info);
         }
 
-        private static void UpdateTracks(string title, Dictionary<int, HSC.Music.Track> tracks)
+        private static void UpdateTracks(string title, MidiSequence seq)
         {
 
             PluginLog.Information($"Updating tracks for '{title}'");
 
             int index = 0;
+
+            HSC.Settings.OctaveOffset = seq.OctaveOffset;
+            HSC.Settings.KeyOffset = seq.KeyOffset;
 
             HSC.Settings.PercussionNotes = new Dictionary<int, Dictionary<int, bool>>();
             HSC.Settings.PercussionTracks = new Dictionary<int, bool>();
@@ -61,7 +64,7 @@ namespace MidiBard
             HSC.Settings.MappedDrumTracks = new Dictionary<int, Dictionary<int, TrackTransposeInfo>>();
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
-            foreach (var track in tracks)
+            foreach (var track in seq.Tracks)
             {
                 var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.KeyOffset };
 
@@ -227,7 +230,7 @@ namespace MidiBard
 
                 var curItemSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.loadedMidiFile];
 
-                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings.Tracks);
+                UpdateTracks(Configuration.config.loadedMidiFile, curItemSettings);
 
                 if (!loggedIn)
                     MidiBard.Ui.Open();
