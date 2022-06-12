@@ -206,7 +206,7 @@ namespace MidiBard.Control.MidiControl
             }
 
             var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-            PluginLog.LogVerbose($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
+            PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
 
             if (FilePlayback.isWaiting)
             {
