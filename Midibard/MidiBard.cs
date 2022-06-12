@@ -303,9 +303,6 @@ public class MidiBard : IDalamudPlugin
     {
         try
         {
-
-			Testhooks.Instance?.Dispose();
-
             GuitarTonePatch.Dispose();
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             Framework.Update -= Tick;
@@ -314,7 +311,8 @@ public class MidiBard : IDalamudPlugin
 
             EnsembleManager.Instance.Dispose();
 #if DEBUG
-				NetworkManager.Instance.Dispose();
+            Testhooks.Instance?.Dispose();
+			NetworkManager.Instance.Dispose();
 #endif
             InputDeviceManager.DisposeCurrentInputDevice();
             try
