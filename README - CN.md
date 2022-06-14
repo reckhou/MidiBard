@@ -1,4 +1,4 @@
-# **MidiBard**
+# **MidiBard 2**
 
 **如果需要支持，请加入我们的 ✅[Discord 服务器](https://discord.gg/sMUACqqKzF)!**
 **如果不方便使用Discord，请加入QQ群：260985966（由原作者akira0245创建）**
@@ -23,13 +23,13 @@ MidiBard是基于[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB
 
 
 # 安装方法
-> MidiBard需要[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)，如未安装请参考[原帖](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)安装后继续。
+> MidiBard 2需要[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)，如未安装请参考[原帖](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)安装后继续。
 
 正确安装卫月框架并注入后在游戏聊天框中输入`/xlsettings`打开Dalamud 设置窗口，复制该源  
 `https://raw.githubusercontent.com/reckhou/DalamudPlugins-Ori/api6/pluginmaster.json` 并将其添加到插件仓库  
 
 
-成功添加后在`/xlplugins`中搜索MidiBard并安装即可。
+成功添加后在`/xlplugins`中搜索MidiBard 2并安装即可。
 
  ![DD5JTJH.png](https://i.imgur.com/DD5JTJH.png)](https://i.imgur.com/DD5JTJH.png)
 ![enter image description here](https://i.imgur.com/4BH682e.png)
