@@ -19,6 +19,7 @@ using MidiBard.Util;
 using static MidiBard.MidiBard;
 using System.IO;
 using MidiBard.Common;
+using MidiBard.HSC;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -83,9 +84,6 @@ public static class FilePlayback
         PluginLog.Information($"[LoadPlayback] -> {trackName} 2 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         //int givenIndex = 0;
         //CurrentTracks.ForEach(tuple => tuple.trackInfo.Index = givenIndex++);
-
-        if (Configuration.config.useHscNoteProcessing)
-            HSC.Music.MidiProcessor.ProcessChords(trackName, CurrentTracks.Select(t => t.trackChunk));
 
 
         var timedEvents = CurrentTracks.Select(i => i.trackChunk).AsParallel()
@@ -220,14 +218,29 @@ public static class FilePlayback
 
     private static void Playback_Finished(object sender, EventArgs e)
     {
+
+
         Task.Run(async () =>
         {
             try
             {
-                if (MidiBard.AgentMetronome.EnsembleModeRunning)
-                    return;
                 if (!PlaylistManager.FilePathList.Any())
                     return;
+
+                if (MidiBard.AgentMetronome.EnsembleModeRunning)
+                {
+                    if (Configuration.config.useHscmOverride && Configuration.config.useHscmCloseOnFinish)
+                    {
+                        PerformHelpers.WaitUntilChanged(() => !MidiBard.AgentMetronome.EnsembleModeRunning, 100, 5000);
+                        HSC.PerformHelpers.ClosePerformance();
+                    }
+                }
+                else
+                {
+                    if (Configuration.config.useHscmOverride && Configuration.config.useHscmCloseOnFinish)
+                        HSC.PerformHelpers.ClosePerformance();
+                }
+      
 
                 PerformWaiting(Configuration.config.secondsBetweenTracks);
                 if (needToCancel)
@@ -235,6 +248,7 @@ public static class FilePlayback
                     needToCancel = false;
                     return;
                 }
+
 
                 switch ((PlayMode)Configuration.config.PlayMode)
                 {
@@ -315,12 +329,12 @@ public static class FilePlayback
     /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
     /// </summary>
 
-        internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
+        internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true, bool hscmProcess = false)
     {
         var wasPlaying = IsPlaying;
         CurrentPlayback?.Dispose();
         CurrentPlayback = null;
-        MidiFile midiFile = await PlaylistManager.LoadMidiFile(index);
+        MidiFile midiFile = await PlaylistManager.LoadMidiFile(index, hscmProcess);
         if (midiFile == null)
         {
             // delete file if can't be loaded(likely to be deleted locally)
@@ -335,7 +349,10 @@ public static class FilePlayback
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
 
-            var songName = PlaylistManager.FilePathList[index].fileName;
+            if (Configuration.config.useHscmOverride)
+                HSCMPlaylistManager.ReloadSettings(true);//this should allow the HSCM playlist to be looped 
+
+                var songName = PlaylistManager.FilePathList[index].fileName;
 
             if (switchInstrument)
             {
@@ -348,6 +365,9 @@ public static class FilePlayback
                     PluginLog.Warning(e.ToString());
                 }
             }
+
+            if (Configuration.config.useHscmOverride && DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)
+                return true;
 
             if (switchInstrument && (wasPlaying || startPlaying))
                 CurrentPlayback?.Start();

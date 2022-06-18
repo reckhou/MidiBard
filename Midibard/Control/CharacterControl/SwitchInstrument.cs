@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
+using MidiBard.HSC;
 using MidiBard.HSC.Helpers;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
@@ -54,7 +55,6 @@ namespace MidiBard.Control.CharacterControl
             if (MidiBard.CurrentInstrument == instrumentId)
                 return;
 
-            SwitchingInstrument = true;
             var sw = Stopwatch.StartNew();
             try
             {
@@ -129,26 +129,12 @@ namespace MidiBard.Control.CharacterControl
         {
             var config = Configuration.config;
 
-            if (config.useHscOverride && config.switchInstrumentFromHscPlaylist)
+            if (Configuration.config.useHscmOverride && Configuration.config.switchInstrumentFromHscmPlaylist)
             {
-                try
-                {
-                    PluginLog.Information($"Instrument switching from hsc playlist for '{songName}'");
-
-                    uint insId = HSC.PerformHelpers.GetInstrumentFromHscPlaylist(songName);
-
-                    PluginLog.Information($"switching to '{insId}' as assigned from hsc playlist");
-
-                    await SwitchTo(insId);
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    PluginLog.Information($"Error when equipping instrument from HSC playlist. Message: {ex.Message}");
-                    return;
-                }
+                PerformHelpers.SwitchInstrumentFromSong();
+                return;
             }
-
+            
             if (config.bmpTrackNames)
             {
                 var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);

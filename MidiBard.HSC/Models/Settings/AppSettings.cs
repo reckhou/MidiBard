@@ -15,26 +15,15 @@ namespace MidiBard.HSC.Models.Settings
 
         public AppSettings()
         {
-
+            this.GeneralSettings = new GeneralSettings();
         }
 
 
         [JsonProperty]
-        public string PrevPlaylistFileName { get; set; }
+        public GeneralSettings GeneralSettings { get; set; }
 
-        [JsonProperty]
-        public string PrevPlaylistPath { get; set; }
 
-        [JsonProperty]
-        public string PrevSequenceTitle { get; set; }
 
-        [JsonProperty]
-        public string PrevMidiPath { get; set; }
 
-        public string CurrentAppPath { get; set; }
-
-        public bool MidibardPlaylistChanged { get; set; }
-
-        public bool MidibardPlaylistSettingsChanged { get; set; }
     }
 }

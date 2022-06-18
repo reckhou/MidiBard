@@ -11,15 +11,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using MidiBard.Common;
 using MidiBard.HSC.Music;
+using Melanchall.DryWetMidi.Common;
 
 namespace MidiBard.HSC
 {
     public static class Settings
     {
+        public const string HscmSettingsFileName = "settings.config";
 
-        private const string AppSettingsFileName = "settings.config";
 
-        public static Dictionary<int, bool> EnabledTracks { get; set; }
 
         public class TrackTransposeInfo
         {
@@ -29,35 +29,29 @@ namespace MidiBard.HSC
 
         static Settings()
         {
-            EnabledTracks = new Dictionary<int, bool>();
-
-            SongSettings = new SongSettings();
 
             PlaylistSettings = new SongSettings();
 
             Playlist = new MidiBard.HSC.Models.Playlist.Playlist();
 
             AppSettings = new AppSettings();
+        }
 
-            AppSettings.CurrentAppPath = System.IO.Directory.GetCurrentDirectory();
+        public static void Cleanup()
+        {
+            CharName = null;
+            CharIndex = -1;
 
-            Paths.MidiFilePath = Path.Combine(AppSettings.CurrentAppPath, "Midis");
+            HSC.Settings.Playlist?.Clear();
+            HSC.Settings.PlaylistSettings?.Clear();
 
-            Paths.PlaylistPath = Path.Combine(AppSettings.CurrentAppPath, "Playlists");
-
-            if (AppSettings.PrevPlaylistPath.IsNullOrEmpty())
-                AppSettings.PrevPlaylistPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.PlaylistPath);
-
-            if (AppSettings.PrevMidiPath.IsNullOrEmpty())
-                AppSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
-
-
-
+            PercussionNotes?.Clear();
+            PercussionTracks?.Clear();
+            MappedTracks?.Clear();
+            TrackInfo?.Clear();
         }
 
         public static AppSettings AppSettings { get; private set; }
-
-        public static SongSettings SongSettings { get; private set; }
 
         public static MidiBard.HSC.Models.Playlist.Playlist Playlist { get; set; }
 
@@ -72,58 +66,32 @@ namespace MidiBard.HSC
 
         public static Dictionary<int, TrackTransposeInfo> MappedTracks { get; set; }
 
-        public static Dictionary<int, Dictionary<int, TrackTransposeInfo>> MappedDrumTracks { get; set; }
-
        public static Dictionary<int, TrackTransposeInfo> TrackInfo { get; set; }
+
+        public static Dictionary<long, Dictionary<SevenBitNumber, bool>> TrimmedNotes { get; set; }
+
+        public static int CurrentSongIndex { get; set; }
+
+        public static string CurrentSong { get; set; }
+
+        public static MidiSequence CurrentSongSettings { get; set; }
         public static int OctaveOffset { get; set; }
         public static int KeyOffset { get; set; }
+        public static bool SwitchingInstrument { get; set; }
 
-        public static async Task LoadAppSettings()
+        public static string CurrentAppPath { get; set; }
+        public static bool SwitchInstrumentFailed { get; set; }
+    
+        public static void LoadHSCMSettings()
         {
 
-            var filePath = Path.Combine(HSC.Settings.AppSettings.CurrentAppPath, AppSettingsFileName);
+            var filePath = Path.Combine(HSC.Settings.CurrentAppPath, HscmSettingsFileName);
 
-            var appSettings = await Task.Run(() => FileHelpers.Load<AppSettings>(filePath));
+            var appSettings = FileHelpers.Load<AppSettings>(filePath);
 
             if (appSettings != null)
-            {
-                if (appSettings.PrevPlaylistPath.IsNullOrEmpty())
-                    appSettings.PrevPlaylistPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.PlaylistPath);
-
-                if (appSettings.PrevMidiPath.IsNullOrEmpty())
-                    appSettings.PrevMidiPath = MidiBard.HSC.Helpers.AppHelpers.GetAppRelativePath(Paths.MidiFilePath);
-
                 AppSettings = appSettings;
-
-            }
         }
 
-        public static async Task LoadPlaylistSettings()
-        {
-            var filePath = $"{AppSettings.CurrentAppPath}\\{Playlist.SettingsFile}";
-            var songSettings = await Task.Run(() => FileHelpers.Load<SongSettings>(filePath));
-
-            if (songSettings != null)
-                PlaylistSettings = songSettings;
-        }
-
-        public static void SaveAppSettings()
-        {
-            try
-            {
-                var filePath = $"{AppSettings.CurrentAppPath}\\{AppSettingsFileName}";
-                 FileHelpers.Save(AppSettings, filePath);
-            }
-            catch (Exception ex) { }
-        }
-
-        public static void SavePlaylistSettings(string filePath = null)
-        {
-            try
-            {
-                FileHelpers.Save(PlaylistSettings, filePath ?? $"{AppSettings.CurrentAppPath}\\{Playlist.SettingsFile}");
-            }
-            catch (Exception ex) { }
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace MidiBard.HSC.Helpers
         {
             try
             {
-                path = path.Substring(Settings.AppSettings.CurrentAppPath.Length + 1);
+                path = path.Substring(Settings.CurrentAppPath.Length + 1);
                 return path;
             }
             catch

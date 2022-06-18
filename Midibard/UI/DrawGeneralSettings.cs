@@ -126,34 +126,11 @@ namespace MidiBard
             }
             ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
-            if (ImGui.Checkbox("Auto switch instrument from HSC Playlist".Localize(), ref Configuration.config.switchInstrumentFromHscPlaylist))
+
+            if (ImGui.Checkbox("Use HSC override".Localize(), ref Configuration.config.useHscmOverride))
             {
                 Configuration.config.Save();
             }
-
-            if (ImGui.Checkbox("Use HSC override".Localize(), ref Configuration.config.useHscOverride))
-            {
-                Configuration.config.Save();
-            }
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
-            if (ImGui.Checkbox("Load HSC playlist".Localize(), ref Configuration.config.useHscPlaylist))
-            {
-                Configuration.config.Save();
-            }
-            ImGuiUtil.ToolTip("This will load hsc playlist settings".Localize());
-
-            if (ImGui.Checkbox("Use HSC note processing".Localize(), ref Configuration.config.useHscNoteProcessing))
-            {
-                Configuration.config.Save();
-            }
-
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
-
-            if (ImGui.Checkbox("Use HSC transposing".Localize(), ref Configuration.config.useHscTransposing))
-            {
-                Configuration.config.Save();
-            }
-
             if (ImGui.InputText("", ref Configuration.config.hscPlayListPath, 1024))
             {
                 Configuration.config.Save();

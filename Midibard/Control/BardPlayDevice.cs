@@ -87,7 +87,7 @@ internal class BardPlayDevice : IOutputDevice
                     return false;
                 }
 
-                if (Configuration.config.useHscOverride && Configuration.config.useHscPlaylist && !HSC.PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
+                if (Configuration.config.useHscmOverride && !HSC.PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
                     return false;
             }
 
@@ -310,7 +310,7 @@ internal class BardPlayDevice : IOutputDevice
 
         octave = 0;
 
-        if (Configuration.config.useHscOverride && Configuration.config.useHscTransposing)
+        if (Configuration.config.useHscmOverride && Configuration.config.useHscmTransposing)
             noteNumber += TransposeFromHSCPlaylist(noteNumber, trackIndex, plotting);
         else 
             noteNumber += Configuration.config.TransposeGlobal +

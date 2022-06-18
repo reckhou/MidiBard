@@ -39,19 +39,18 @@ public class Configuration : IPluginConfiguration
 {
     public static Configuration config;
 
-    public bool useHscOverride = true;
-
-    public bool useHscPlaylist = true;
-
-    public bool switchInstrumentFromHscPlaylist  = true;
-
-    public bool useHscNoteProcessing = true;
-
-    public bool useHscTransposing = true;
-
+    public bool useHscmOverride = true;
+    public bool switchInstrumentFromHscmPlaylist  = true;
+    public bool useHscmChordTrimming = true;
+    public bool useHscmTransposing = true;
+    public bool useHscmTrimByTrack = false;
+    public bool useHscmCloseOnFinish = false;
+    public bool useHscmSendReadyCheck = false;
     public string hscPlayListPath = "playlists";
 
-    public string loadedMidiFile = "";
+    public int prevSelected;
+
+    public string hscmMidiFile;
 
     public int Version { get; set; }
     public bool Debug;
@@ -88,6 +87,7 @@ public class Configuration : IPluginConfiguration
 
     public bool bmpTrackNames = false;
     public bool autoPostPartyChatCommand = false;
+    internal bool hscSendReadyCheck = true;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
@@ -127,9 +127,11 @@ public class Configuration : IPluginConfiguration
     //public bool SyncSongSelection = false;
     //public bool SyncMuteUnMute = false;
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
+
     [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
-    public int HscOverrideDelay { get; internal set; } = 5000;
+    public int hscmOverrideDelay { get; internal set; } = 5000;
+    public bool hscmOfflineTesting { get; internal set; } = false;
 
     //public void Save()
     //{
