@@ -31,5 +31,7 @@ namespace MidiBard.HSC.Models.Settings
 
         public bool SendReadyCheckOnEquip { get; set; }
 
+        public bool AutoPlayOnSelect { get; set; }
+
     }
 }

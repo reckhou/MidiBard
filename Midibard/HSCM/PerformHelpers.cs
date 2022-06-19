@@ -29,13 +29,14 @@ namespace MidiBard.HSC
         {
             if (HSC.Settings.SwitchInstrumentFailed)
             {
-                ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 2 seconds.");
+                ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
                 return;
             }
 
             ImGuiUtil.AddNotification(NotificationType.Info, "Closing performance mode and stopping playback.");
 
-            MidiPlayerControl.Stop();
+            if (MidiBard.IsPlaying)
+                MidiPlayerControl.Stop();
             //ImGuiUtil.AddNotification(NotificationType.Error, "Cannot close instrument while playing.");
 
             PerformActions.DoPerformAction(0);
@@ -51,14 +52,14 @@ namespace MidiBard.HSC
             ImGuiUtil.AddNotification(NotificationType.Success, $"Performance mode closed");
         }
 
-        public static void SwitchInstrumentFromSong()
+        public static bool SwitchInstrumentFromSong()
         {
             try
             {
                 if (HSC.Settings.SwitchInstrumentFailed)
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 2 seconds.");
-                    return;
+                    ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
+                    return false;
                 }
 
                 PluginLog.Information($"Instrument switching from HSCM playlist for '{HSC.Settings.CurrentSong}'");
@@ -70,16 +71,18 @@ namespace MidiBard.HSC
                 if (!instrumentEquipped)
                 {
                     PluginLog.Error($"Failed to equip instrument for '{HSC.Settings.CurrentSong}'.");
-                    return;
+                    return false;
                 }
 
                 if (instrumentEquipped && Configuration.config.useHscmSendReadyCheck)
                     SendReadyCheckForPartyLeader();
+
+                return true;
             }
             catch (Exception ex)
             {
                 PluginLog.Error($"Error when switching instrument from HSC playlist. Message: {ex.Message}");
-                return;
+                return false;
             }
         }
 
@@ -115,7 +118,7 @@ namespace MidiBard.HSC
 
         private static void SendReadyCheckForPartyLeader()
         {
-            if (!api.PartyList.IsInParty() || !api.PartyList.IsPartyLeader())
+            if (!api.PartyList.IsInParty() || !api.PartyList.IsPartyLeader() || api.PartyList.Length < 2)
                 return;
 
             //wait for everyone to equip instruments first then send
@@ -176,7 +179,7 @@ namespace MidiBard.HSC
             HSC.Settings.SwitchInstrumentFailed = true;
             Task.Run(() =>
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(Configuration.config.switchInstrumentDelay);
                 Settings.SwitchInstrumentFailed = false;
             });
         }
@@ -197,7 +200,7 @@ namespace MidiBard.HSC
                     if (!success)
                     {
                         SwitchInstrumentFailed();
-                        PluginLog.Error($"Failed to equip instrument '{instrumentId}'.");
+                        ImGuiUtil.AddNotification(NotificationType.Error, $"Failed to equip instrument '{instrumentId}'.");
                         return false;
                     }
 
@@ -227,7 +230,7 @@ namespace MidiBard.HSC
                 if (!success)//dont try to equip if failed to unequip previous instrument (should prevent crashes)
                 {
                     SwitchInstrumentFailed();
-                    PluginLog.Error($"Failed to unequip current instrument.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Failed to unequip current instrument..");
                     return false;
                 }
 
@@ -237,7 +240,7 @@ namespace MidiBard.HSC
                 if (!success)
                 {
                     SwitchInstrumentFailed();
-                    PluginLog.Error($"Failed to equip instrument '{instrumentId}'.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Failed to equip instrument '{instrumentId}'.");
                     return false;
                 }
 

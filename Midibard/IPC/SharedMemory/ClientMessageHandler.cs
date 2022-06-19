@@ -54,9 +54,15 @@ namespace MidiBard
                 while (Configuration.config.useHscmOverride && hscmClientHandlerRunning && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
                     if (!hscmClientHandlerRunning)
+                    {
+                        PluginLog.Information($"Stopping client message event handler.");
+                        // Clean up here, then...
+                        //cancelToken.ThrowIfCancellationRequested();
                         break;
+                    }
 
                     PluginLog.Information($"Client waiting for message.");
+
                     bool success = hscmWaitHandle.WaitOne();
                     PluginLog.Information($"Client message sent.");
 

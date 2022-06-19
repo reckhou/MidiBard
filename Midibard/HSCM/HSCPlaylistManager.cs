@@ -24,7 +24,6 @@ namespace MidiBard
     public class HSCMPlaylistManager
     {
         private static bool wasPlaying;
-        private static int prevSelected;
 
         private static void UpdatePercussionNote(int trackIndex, int note)
         {
@@ -143,7 +142,7 @@ namespace MidiBard
             PluginLog.Information($"Load HSCM playlist '{settingsFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
 
-        public static void ReloadSettings(bool fromCurrent = false)
+        public static void ApplySettings(bool fromCurrent = false)
         {
             if (fromCurrent)
                 Configuration.config.hscmMidiFile = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[PlaylistManager.CurrentPlaying]);
@@ -187,10 +186,13 @@ namespace MidiBard
                     return;
                 }
 
-                ReloadSettings();
+                ApplySettings();
 
-                if (!loggedIn && !wasPlaying && Configuration.config.switchInstrumentFromHscmPlaylist)
-                    PerformHelpers.SwitchInstrumentFromSong();
+                HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
+
+                bool switchInstruments = !loggedIn && !wasPlaying && Configuration.config.switchInstrumentFromHscmPlaylist;
+
+                HSCM.HSCMFilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, Configuration.config.hscmAutoPlaySong, switchInstruments, true, true, true);
 
                 if (!loggedIn)
                     MidiBard.Ui.Open();
@@ -234,6 +236,10 @@ namespace MidiBard
 
                 if (PlaylistManager.CurrentSelected != Configuration.config.prevSelected)
                     PlaylistManager.CurrentSelected = Configuration.config.prevSelected;
+
+                if (PlaylistManager.CurrentPlaying != Configuration.config.prevSelected)
+                    PlaylistManager.CurrentPlaying = Configuration.config.prevSelected;
+
             }
 
             catch (Exception e)
@@ -283,7 +289,7 @@ namespace MidiBard
 
                 MidiBard.Ui.Open();
 
-                MidiPlayerControl.SwitchSongByName(Configuration.config.hscmMidiFile);
+                HSCM.MidiPlayerControl.SwitchSongByName(Configuration.config.hscmMidiFile);
             }
 
             catch (Exception e)

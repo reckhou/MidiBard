@@ -71,7 +71,7 @@ public partial class MidiBard : IDalamudPlugin
     internal static string[] InstrumentStrings;
 
     internal static IDictionary<SevenBitNumber, uint> ProgramInstruments;
-		
+
     internal static byte CurrentInstrument => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset);
     internal static byte CurrentTone => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset + 1);
     internal static readonly byte[] guitarGroup = { 24, 25, 26, 27, 28 };
@@ -150,20 +150,21 @@ public partial class MidiBard : IDalamudPlugin
         Ui = new PluginUI();
         PluginInterface.UiBuilder.Draw += Ui.Draw;
         Framework.Update += Tick;
+        Framework.Update += MidiPlayerControl.Tick;
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
 
+        DalamudApi.api.ClientState.Login += ClientState_Login;
+        DalamudApi.api.ClientState.Logout += ClientState_Logout;
+
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());
-  
-        DalamudApi.api.ClientState.Login += ClientState_Login;
-        DalamudApi.api.ClientState.Logout += ClientState_Logout; 
     }
 
     private static void ClientState_Logout(object sender, EventArgs e)
     {
-         HSCMCleanup();
+        HSCMCleanup();
     }
 
     private static void ClientState_Login(object sender, EventArgs e)
@@ -190,10 +191,10 @@ public partial class MidiBard : IDalamudPlugin
 
             if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
             {
-                if (Configuration.config.StopPlayingWhenEnsembleEnds)
-                {
-                    MidiPlayerControl.Stop();
-                }
+                //if (Configuration.config.StopPlayingWhenEnsembleEnds)
+                //{
+                MidiPlayerControl.Stop();
+                //}
             }
 
             wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning;
@@ -285,32 +286,32 @@ public partial class MidiBard : IDalamudPlugin
                     }
                     break;
                 case "rewind":
-                {
-                    double timeInSeconds = -5;
-                    try
                     {
-                        timeInSeconds = -double.Parse(argStrings[1]);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                        double timeInSeconds = -5;
+                        try
+                        {
+                            timeInSeconds = -double.Parse(argStrings[1]);
+                        }
+                        catch (Exception e)
+                        {
+                        }
 
-                    MidiPlayerControl.MoveTime(timeInSeconds);
-                }
+                        MidiPlayerControl.MoveTime(timeInSeconds);
+                    }
                     break;
                 case "fastforward":
-                {
-                    double timeInSeconds = 5;
-                    try
                     {
-                        timeInSeconds = double.Parse(argStrings[1]);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                        double timeInSeconds = 5;
+                        try
+                        {
+                            timeInSeconds = double.Parse(argStrings[1]);
+                        }
+                        catch (Exception e)
+                        {
+                        }
 
-                    MidiPlayerControl.MoveTime(timeInSeconds);
-                }
+                        MidiPlayerControl.MoveTime(timeInSeconds);
+                    }
                     break;
             }
         }
@@ -326,17 +327,16 @@ public partial class MidiBard : IDalamudPlugin
     {
         try
         {
-
-            Testhooks.Instance?.Dispose();
-
             GuitarTonePatch.Dispose();
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             Framework.Update -= Tick;
+            Framework.Update -= MidiPlayerControl.Tick;
             PluginInterface.UiBuilder.Draw -= Ui.Draw;
 
             EnsembleManager.Instance.Dispose();
 #if DEBUG
-				NetworkManager.Instance.Dispose();
+            Testhooks.Instance?.Dispose();
+			NetworkManager.Instance.Dispose();
 #endif
             InputDeviceManager.DisposeCurrentInputDevice();
             try

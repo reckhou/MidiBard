@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
-using MidiBard.HSC;
 using MidiBard.HSC.Helpers;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
+using MidiBard.Control.MidiControl;
 
 namespace MidiBard.Control.CharacterControl
 {
@@ -28,7 +28,7 @@ namespace MidiBard.Control.CharacterControl
                 MidiBard.CurrentPlayback?.Stop();
                 await SwitchTo(instrumentId);
                 if (isPlaying)
-                    MidiBard.CurrentPlayback?.Start();
+                    MidiPlayerControl.DoPlay();
             });
         }
 
@@ -55,6 +55,7 @@ namespace MidiBard.Control.CharacterControl
             if (MidiBard.CurrentInstrument == instrumentId)
                 return;
 
+            SwitchingInstrument = true;
             var sw = Stopwatch.StartNew();
             try
             {
@@ -129,12 +130,6 @@ namespace MidiBard.Control.CharacterControl
         {
             var config = Configuration.config;
 
-            if (Configuration.config.useHscmOverride && Configuration.config.switchInstrumentFromHscmPlaylist)
-            {
-                PerformHelpers.SwitchInstrumentFromSong();
-                return;
-            }
-            
             if (config.bmpTrackNames)
             {
                 var firstEnabledTrack = MidiBard.CurrentTracks.Select(i => i.trackInfo).FirstOrDefault(i => i.IsEnabled);
@@ -159,7 +154,7 @@ namespace MidiBard.Control.CharacterControl
                     config.TransposeGlobal = transpose;
                 }
 
-                
+
                 var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
                 if (idFromTrackName != null)
                 {

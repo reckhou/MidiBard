@@ -14,6 +14,10 @@ namespace MidiBard
         private void DrawPanelMusicControl()
         {
             ManualDelay();
+            if (MidiPlayerControl.LrcLoaded())
+            {
+                LRCDeltaTime();
+            }
 
             ComboBoxSwitchInstrument();
 
@@ -29,7 +33,8 @@ namespace MidiBard
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
-                MidiPlayerControl.SetSpeed(1);
+                Configuration.config.playSpeed = 1;
+                SetSpeed();
             }
 
 
@@ -86,7 +91,13 @@ namespace MidiBard
 
         private static void SetSpeed()
         {
-            MidiPlayerControl.SetSpeed();
+            Configuration.config.playSpeed = Math.Max(0.1f, Configuration.config.playSpeed);
+            var currenttime = MidiBard.CurrentPlayback?.GetCurrentTime(TimeSpanType.Midi);
+            if (currenttime is not null)
+            {
+                MidiBard.CurrentPlayback.Speed = Configuration.config.playSpeed;
+                MidiBard.CurrentPlayback?.MoveToTime(currenttime);
+            }
         }
 
         private static string GetBpmString()
@@ -131,7 +142,6 @@ namespace MidiBard
                 if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
                 {
                     MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(0));
-                    MidiBard.InternalPlaybackMessageSender.ChangeTime(duration.Milliseconds);
                 }
             }
             else
@@ -195,6 +205,27 @@ namespace MidiBard
                 MidiPlayerControl.ChangeDeltaTime(-MidiPlayerControl.playDeltaTime);
             }
             ToolTip("Delay time(ms) add on top of current progress to help sync between bards.");
+        }
+
+        private static void LRCDeltaTime()
+        {
+
+            if (ImGui.Button("-100ms"))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(-100);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("+100ms"))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(100);
+            }
+            ImGui.SameLine();
+            ImGui.TextUnformatted("LRC Sync: " + $"{MidiPlayerControl.LRCDeltaTime} ms");
+            if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                MidiPlayerControl.ChangeLRCDeltaTime(-MidiPlayerControl.LRCDeltaTime);
+            }
+            ToolTip("Delay time(ms) add on top of lyrics.");
         }
     }
 }

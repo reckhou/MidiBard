@@ -12,6 +12,7 @@ using System.Windows;
 using MidiBard.Common;
 using MidiBard.HSC.Music;
 using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Interaction;
 
 namespace MidiBard.HSC
 {
@@ -81,7 +82,8 @@ namespace MidiBard.HSC
 
         public static string CurrentAppPath { get; set; }
         public static bool SwitchInstrumentFailed { get; set; }
-    
+        public static ITimeSpan PrevTime { get; set; }
+
         public static void LoadHSCMSettings()
         {
 

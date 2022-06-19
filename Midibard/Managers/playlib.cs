@@ -1,7 +1,6 @@
 ﻿using Dalamud.Game;
 using Dalamud.Game.Gui;
 using Dalamud.Logging;
-using MidiBard.Managers;
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -39,8 +38,10 @@ namespace playlibnamespace
                 ptr = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B 44 24 20 C1 E8 05");
             }
 
-            // SendActionNative: v6.11 +0x50CE50 void Component::GUI::AtkUnitBase.FireCallback(longlong* param_1, undefined4 param_2, undefined8 param_3, char param_4)
+            //PluginLog.LogWarning("SendActionNative ADDR: " + MainModuleRva(ptr));
             SendActionNative = Marshal.GetDelegateForFunctionPointer<SendActionDelegate>(ptr);
+            //PluginLog.LogWarning("SetToneUI ADDR: " + MainModuleRva(sigScanner.ScanText("83 FA 04 77 4E")));
+            //PluginLog.LogWarning("SetToneUI ADDR2: " + sigScanner.ScanText("83 FA 04 77 4E").ToString("X8"));
             SetToneUI = Marshal.GetDelegateForFunctionPointer<SetToneUIDelegate>(sigScanner.ScanText("83 FA 04 77 4E"));
         }
 
@@ -81,64 +82,54 @@ namespace playlibnamespace
 
         public static bool PressKey(int keynumber, ref int offset, ref int octave)
         {
-            //PluginLog.LogVerbose("Presskey: " + keynumber + " " + offset + " " + octave);
+            if (TargetWindowPtr(out bool miniMode, out IntPtr targetWindowPtr))
+            {
+                offset = 0;
+                octave = 0;
+                if (miniMode)
+                {
+                    keynumber = ConvertMiniKeyNumber(keynumber, ref offset, ref octave);
+                }
 
-            Testhooks.Instance.noteOn(keynumber+39);
+                IntPtr ptr = targetWindowPtr;
+                ulong[] obj = new ulong[4]
+                {
+                    3uL,
+                    1uL,
+                    4uL,
+                    0uL
+                };
+                obj[3] = (ulong)keynumber;
+                SendAction(ptr, obj);
+                return true;
+            }
 
-            return true;
-            //if (TargetWindowPtr(out bool miniMode, out IntPtr targetWindowPtr))
-            //{
-            //    offset = 0;
-            //    octave = 0;
-            //    if (miniMode)
-            //    {
-            //        keynumber = ConvertMiniKeyNumber(keynumber, ref offset, ref octave);
-            //    }
-
-            //    IntPtr ptr = targetWindowPtr;
-            //    ulong[] obj = new ulong[4]
-            //    {
-            //        3uL,
-            //        1uL,
-            //        4uL,
-            //        0uL
-            //    };
-            //    obj[3] = (ulong)keynumber;
-            //    SendAction(ptr, obj);
-            //    return true;
-            //}
-
-            //return false;
+            return false;
         }
 
-        public static bool ReleaseKey(int ReleaseKey)
+        public static bool ReleaseKey(int keynumber)
         {
-            //PluginLog.LogVerbose("ReleaseKey: " + ReleaseKey);
+            if (TargetWindowPtr(out bool miniMode, out IntPtr targetWindowPtr))
+            {
+                if (miniMode)
+                {
+                    keynumber = ConvertMiniKeyNumber(keynumber);
+                }
 
-            Testhooks.Instance.noteOff();
+                IntPtr ptr = targetWindowPtr;
+                ulong[] obj = new ulong[4]
+                {
+                    3uL,
+                    2uL,
+                    4uL,
+                    0uL
+                };
+                obj[3] = (ulong)keynumber;
+                SendAction(ptr, obj);
+                return true;
+            }
 
-            return true;
-            //if (TargetWindowPtr(out bool miniMode, out IntPtr targetWindowPtr))
-            //{
-            //    if (miniMode)
-            //    {
-            //        keynumber = ConvertMiniKeyNumber(keynumber);
-            //    }
-
-            //    IntPtr ptr = targetWindowPtr;
-            //    ulong[] obj = new ulong[4]
-            //    {
-            //        3uL,
-            //        2uL,
-            //        4uL,
-            //        0uL
-            //    };
-            //    obj[3] = (ulong)keynumber;
-            //    SendAction(ptr, obj);
-            //    return true;
-            //}
-
-            //return false;
+            return false;
         }
 
         private static int ConvertMiniKeyNumber(int keynumber)

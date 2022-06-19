@@ -17,7 +17,6 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Tools;
 using MidiBard.Control.CharacterControl;
 using MidiBard.DalamudApi;
-using MidiBard.HSC;
 using MidiBard.Managers.Ipc;
 using Newtonsoft.Json;
 
@@ -84,8 +83,6 @@ namespace MidiBard
         }
         private static int currentPlaying = -1;
         private static int currentSelected = -1;
-        private static string currentSongPlaying = "";
-
         internal static readonly ReadingSettings readingSettings = new ReadingSettings
         {
             NoHeaderChunkPolicy = NoHeaderChunkPolicy.Ignore,
@@ -117,41 +114,6 @@ namespace MidiBard
         //	Task.Run(async () => await Reload(Configuration.config.Playlist.ToArray()));
         //}
 
-        public struct SongEntry
-        {
-            public int index { get; set; }
-            public string name { get; set; }
-        }
-
-        public static SongEntry? GetSongByName(string name)
-        {
-            var song = PlaylistManager.FilePathList
-                .Select((fp, i) => new SongEntry { index = i, name = fp.fileName })
-                .FirstOrDefault(fp => fp.name.ToLower().Equals(name.ToLower()));
-
-            if (song.Equals(default(SongEntry)))
-                return null;
-
-            return song;
-        }
-
-        //add from HSC playlist - not async
-        internal static void Add(string[] filePaths)
-        {
- 
-            var count = filePaths.Length;
-            var success = 0;
-
-            foreach (var path in filePaths.Select(f => f.ToLower()).Where(f => Path.GetExtension(f).Equals(".mid")))
-            {
-                Configuration.config.Playlist.Add(path);
-                string fileName = Path.GetFileNameWithoutExtension(path);
-                FilePathList.Add((path, fileName, SwitchInstrument.ParseSongName(fileName, out _, out _)));
-                success++;
-            }
-
-            PluginLog.Information($"File import all complete! success: {success} total: {count}");
-        }
 
         internal static async Task AddAsync(string[] filePaths, bool reload = false)
         {
@@ -182,7 +144,7 @@ namespace MidiBard
                 MidiFile file = null;
 
                 if (Path.GetExtension(path).Equals(".mmsong"))
-                    file =  await LoadMMSongFile(path);
+                    file = await LoadMMSongFile(path);
                 else if (Path.GetExtension(path).Equals(".mid"))
                     file = await LoadMidiFile(path);
 
@@ -202,7 +164,7 @@ namespace MidiBard
         //	return await LoadMidiFile(Filelist[index].path);
         //}
 
-        internal static async Task<MidiFile> LoadMidiFile(int index, bool process = false)
+        internal static async Task<MidiFile> LoadMidiFile(int index)
         {
             if (index < 0 || index >= FilePathList.Count)
             {
@@ -214,12 +176,12 @@ namespace MidiBard
             if (Path.GetExtension(FilePathList[index].path).Equals(".mmsong"))
                 return await LoadMMSongFile(FilePathList[index].path);
             else if (Path.GetExtension(FilePathList[index].path).Equals(".mid"))
-                return await LoadMidiFile(FilePathList[index].path, process);
+                return await LoadMidiFile(FilePathList[index].path);
             else
                 return null;
         }
 
-        internal static async Task<MidiFile> LoadMidiFile(string filePath, bool process = false)
+        internal static async Task<MidiFile> LoadMidiFile(string filePath)
         {
             PluginLog.Debug($"[LoadMidiFile] -> {filePath} START");
             MidiFile loaded = null;
@@ -234,31 +196,63 @@ namespace MidiBard
                         return;
                     }
 
-
                     using (var f = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         loaded = MidiFile.Read(f, readingSettings);
+                        //PluginLog.Log(f.Name);
+                        //PluginLog.LogDebug($"{loaded.OriginalFormat}, {loaded.TimeDivision}, Duration: {loaded.GetDuration<MetricTimeSpan>().Hours:00}:{loaded.GetDuration<MetricTimeSpan>().Minutes:00}:{loaded.GetDuration<MetricTimeSpan>().Seconds:00}:{loaded.GetDuration<MetricTimeSpan>().Milliseconds:000}");
+                        //foreach (var chunk in loaded.Chunks) PluginLog.LogDebug($"{chunk}");
 
-                        string fileName = Path.GetFileNameWithoutExtension(filePath);
+                        //try
+                        //{
+                        //	loaded.ProcessChords(chord =>
+                        //	{
+                        //		try
+                        //		{
+                        //			//PluginLog.Warning($"{chord} Time:{chord.Time} Length:{chord.Length} NotesCount:{chord.Notes.Count()}");
+                        //			var i = 0;
+                        //			foreach (var chordNote in chord.Notes.OrderBy(j => j.NoteNumber))
+                        //			{
+                        //				var starttime = chordNote.GetTimedNoteOnEvent().Time;
+                        //				var offtime = chordNote.GetTimedNoteOffEvent().Time;
 
-                        try
-                        {
-                            if (process && Configuration.config.useHscmOverride && Configuration.config.useHscmChordTrimming)
-                            {
+                        //				chordNote.Time += i;
+                        //				if (chordNote.Length - i < 0)
+                        //				{
+                        //					chordNote.Length = 0;
+                        //				}
+                        //				else
+                        //				{
+                        //					chordNote.Length -= i;
+                        //				}
 
-                                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(fileName))
-                                    return;
 
-                                var settings = HSC.Settings.PlaylistSettings.Settings[fileName];
-                                ChordTrimmer.Trim(loaded, settings, 2, false, Configuration.config.useHscmTrimByTrack);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            //reload file normally in case we failed
-                            loaded = MidiFile.Read(f, readingSettings);
-                            PluginLog.Error(e, $"Error when trimming chords on '{fileName}'. Message: {e.Message}");
-                        }
+                        //				i++;
+
+                        //				//PluginLog.Verbose($"[{i}]Note:{chordNote} start/processed:[{starttime}/{chordNote.GetTimedNoteOnEvent().Time}] off/processed:[{offtime}/{chordNote.GetTimedNoteOffEvent().Time}]");
+                        //			}
+                        //		}
+                        //		catch (Exception e)
+                        //		{
+                        //			try
+                        //			{
+                        //				PluginLog.Verbose($"{chord.Channel} {chord} {chord.Time} {e}");
+                        //			}
+                        //			catch (Exception exception)
+                        //			{
+                        //				PluginLog.Verbose($"error when processing a chord: {exception}");
+                        //			}
+                        //		}
+                        //	}, chord => chord.Notes.Count() > 1);
+
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //}
+                        //catch (Exception e)
+                        //{
+                        //	PluginLog.Error(e, $"error when processing chords on {filePath}");
+                        //}
                     }
 
                     PluginLog.Debug($"[LoadMidiFile] -> {filePath} OK! in {stopwatch.Elapsed.TotalMilliseconds} ms");

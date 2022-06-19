@@ -14,11 +14,6 @@ namespace MidiBard
 {
     public partial class MidiBard
     {
-
-        public static Mutex ConfigMutex;
-
-        public static ManualResetEvent WaitEvent;
-
         public static void SaveConfig()
         {
             //MidiBard.ConfigMutex.WaitOne();
@@ -30,7 +25,11 @@ namespace MidiBard
         {
             try
             {
+                PluginLog.Information($"Stopping HSCM override and cleaning up.");
+
                 StopClientMessageHandler();
+
+                hscmWaitHandle?.Set();
 
                 Common.IPC.SharedMemory.Clear();
                 Common.IPC.SharedMemory.Close();
@@ -83,9 +82,6 @@ namespace MidiBard
                 if (loggedIn)//wait until fully logged in
                     Thread.Sleep(Configuration.config.hscmOverrideDelay);
 
-                ConfigMutex = new Mutex(true, "MidiBard.Mutex");
-                WaitEvent = new ManualResetEvent(false);
-
                 CreateHSCMConfigFileWatcher();
 
                 Settings.LoadHSCMSettings();
@@ -130,6 +126,7 @@ namespace MidiBard
             Configuration.config.switchInstrumentFromHscmPlaylist = Settings.AppSettings.GeneralSettings.EnableMidiBardInstrumentSwitching;
             Configuration.config.useHscmCloseOnFinish = Settings.AppSettings.GeneralSettings.CloseOnFinish;
             Configuration.config.useHscmSendReadyCheck = Settings.AppSettings.GeneralSettings.SendReadyCheckOnEquip;
+            Configuration.config.hscmAutoPlaySong = Settings.AppSettings.GeneralSettings.AutoPlayOnSelect;
 
             PluginLog.Information($"useHscmChordTrimming: {Configuration.config.useHscmChordTrimming}");
             PluginLog.Information($"useHscmTrimByTrack: {Configuration.config.useHscmTrimByTrack}");
@@ -137,6 +134,7 @@ namespace MidiBard
             PluginLog.Information($"switchInstrumentFromHscmPlaylist: {Configuration.config.switchInstrumentFromHscmPlaylist}");
             PluginLog.Information($"useHscmCloseOnFinish: {Configuration.config.useHscmCloseOnFinish}");
             PluginLog.Information($"useHscmSendReadyCheck: {Configuration.config.useHscmSendReadyCheck}");
+            PluginLog.Information($"hscmAutoPlaySong: {Configuration.config.hscmAutoPlaySong}");
         }
 
         private static void UpdateClientInfo()

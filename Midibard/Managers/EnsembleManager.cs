@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace MidiBard.Managers
         private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
 
         private Hook<sub_140C87B40> UpdateMetronomeHook;
-
+        Stopwatch stopWatch;
         private EnsembleManager()
         {
             UpdateMetronomeHook = new Hook<sub_140C87B40>(Offsets.UpdateMetronome, HandleUpdateMetronome);
@@ -42,6 +43,7 @@ namespace MidiBard.Managers
                     byte Ensemble;
                     byte beatsPerBar;
                     int barElapsed;
+
                     unsafe
                     {
                         var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
@@ -76,12 +78,15 @@ namespace MidiBard.Managers
                                 midiClock.Restart();
                                 PluginLog.Warning($"setup midiclock compensation: {compensation}");
                                 midiClock.Ticked += OnMidiClockOnTicked;
+                                stopWatch.Stop();
+                                Lrc._lrc.Offset += stopWatch.ElapsedMilliseconds - compensation;
+                                PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
 
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
                                 {
                                     try
                                     {
-                                        MidiBard.CurrentPlayback.Start();
+                                        MidiPlayerControl.DoPlay();
                                         EnsembleStart?.Invoke();
                                         PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
                                     }
@@ -114,7 +119,7 @@ namespace MidiBard.Managers
                         if (Ensemble != 0)
                         {
                             EnsemblePrepare?.Invoke();
-
+                            stopWatch = Stopwatch.StartNew();
                             Task.Run(async () =>
                             {
                                 try
@@ -122,9 +127,9 @@ namespace MidiBard.Managers
                                     var playing = PlaylistManager.CurrentPlaying;
                                     if (playing == -1)
                                     {
-                                    // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
-                                    // the instrument should have been switched already when loading the song in this occasion.
-                                    await FilePlayback.LoadPlayback(0, false, !Configuration.config.bmpTrackNames);
+                                        // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
+                                        // the instrument should have been switched already when loading the song in this occasion.
+                                        await FilePlayback.LoadPlayback(0, false, !Configuration.config.bmpTrackNames);
                                     }
                                     else
                                     {
