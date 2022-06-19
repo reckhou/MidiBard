@@ -220,6 +220,25 @@ namespace MidiBard.Control.MidiControl
             }
         }
 
+  
+        //loads song by name (selected from HSC) to prevent errors when HSC + MidiBard playlist not the same
+        public static void SwitchSongByName(string name)
+        {
+            playDeltaTime = 0;
+
+            var song = PlaylistManager.GetSongByName(name);
+
+            if (song == null)
+            {
+                PluginLog.Error($"Error: song does not exist on playlist '{name}'.");
+                return;
+            }
+
+            PlaylistManager.CurrentPlaying = song.Value.index;
+
+            FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, false, true, true);
+        }
+
         public static void SwitchSong(int index, bool startPlaying = false)
         {
             playDeltaTime = 0;
@@ -230,9 +249,6 @@ namespace MidiBard.Control.MidiControl
             }
 
             PlaylistManager.CurrentPlaying = index;
-
-            Configuration.config.loadedMidiFile = PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].fileName;
-            PluginLog.Information($"current song '{Configuration.config.loadedMidiFile}'.");
 
 
             Task.Run(async () =>

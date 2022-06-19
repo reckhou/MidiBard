@@ -8,26 +8,16 @@ using MidiBard.Common;
 
 namespace MidiBard.HSC
 {
-    public class GameProcessFinder
+    public class ProcessFinder
     {
-        public static Process[] Find()
+        public static Process[] Find(string name)
         {
-            Process[] processes = Process.GetProcessesByName("ffxiv_dx11");
+            Process[] processes = Process.GetProcessesByName(name);
 
             if (processes.IsNullOrEmpty())
                 return null;
 
             return processes.Where(p => p.MainWindowHandle.ToInt32() > 0 && !p.HasExited && !p.MainWindowTitle.IsNullOrEmpty()).ToArray();
-        }
-
-        public static int GetIndex(int processId)
-        {
-            var processes = Find();
-
-            var process = processes.Select((p, i) => new { Index = i, Process = p })
-                .FirstOrDefault(p => p.Process.Id == processId);
-
-            return process == null ? -1 : process.Index;
         }
 
     }

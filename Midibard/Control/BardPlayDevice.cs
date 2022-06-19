@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Standards;
 using MidiBard.Control.CharacterControl;
+using MidiBard.HSC;
 using MidiBard.Util;
 using playlibnamespace;
 
@@ -85,6 +86,9 @@ internal class BardPlayDevice : IOutputDevice
                 {
                     return false;
                 }
+
+                if (Configuration.config.useHscmOverride && !HSC.PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
+                    return false;
             }
 
             if (midiEvent is NoteOnEvent noteOnEvent)
@@ -266,35 +270,37 @@ internal class BardPlayDevice : IOutputDevice
 
     static string GetNoteName(NoteEvent note) => $"{note.GetNoteName().ToString().Replace("Sharp", "#")}{note.GetNoteOctave()}";
 
-    private static int TransposeFromHSCPlaylist(int? trackIndex, bool plotting = false)
+
+    private static HSC.Settings.TrackTransposeInfo GetHSCTrackInfo(int trackIndex, int noteNumber)
+    {
+        if (HSC.Settings.MappedTracks.ContainsKey(trackIndex))
+            return HSC.Settings.MappedTracks[trackIndex];
+
+        if (!HSC.Settings.TrackInfo.ContainsKey(trackIndex))
+            return null;
+
+        return HSC.Settings.TrackInfo[trackIndex];
+    }
+
+    private static int TransposeFromHSCPlaylist(int noteNumber, int? trackIndex, bool plotting = false)
     {
         if (plotting)
             return 0;
 
         int noteNum = 0;
 
-        if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.loadedMidiFile))
-            return 0;
+        var trackInfo = GetHSCTrackInfo(trackIndex.Value, noteNumber);
 
+        if (trackInfo == null)
+           return 0;
 
-        var settings = HSC.Settings.PlaylistSettings.Settings[Configuration.config. loadedMidiFile];
+        if (trackInfo.OctaveOffset != 0)
+            noteNum += (12 * trackInfo.OctaveOffset);
 
-        if (settings == null)
-            return 0;
+        if (trackInfo.KeyOffset != 0)
+            noteNum += trackInfo.KeyOffset;
 
-        if (!settings.Tracks.ContainsKey(trackIndex.Value))
-            return 0;
-
-
-        var track = settings.Tracks[trackIndex.Value];
-
-        if (track.OctaveOffset != 0)
-            noteNum += (12 * track.OctaveOffset);
-
-        if (track.KeyOffset != 0)
-            noteNum += track.KeyOffset;
-
-        return (12 * settings.OctaveOffset) + settings.KeyOffset + noteNum;
+        return (12 * HSC.Settings.OctaveOffset) + HSC.Settings.KeyOffset + noteNum;
     }
 
     public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
@@ -304,8 +310,8 @@ internal class BardPlayDevice : IOutputDevice
 
         octave = 0;
 
-        if (Configuration.config.useHscOverride && Configuration.config.useHscTransposing)
-            noteNumber += TransposeFromHSCPlaylist(trackIndex, plotting);
+        if (Configuration.config.useHscmOverride && Configuration.config.useHscmTransposing)
+            noteNumber += TransposeFromHSCPlaylist(noteNumber, trackIndex, plotting);
         else 
             noteNumber += Configuration.config.TransposeGlobal +
                          (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);

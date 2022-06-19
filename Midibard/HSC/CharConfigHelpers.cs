@@ -6,17 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
+using MidiBard.HSC;
+using Dalamud.Logging;
 
-namespace MidiBard.HSC
+namespace MidiBard
 {
     public class CharConfigHelpers
     {
         public const string CharConfigFileName = "characters.config";
 
-        public static async Task<int> GetCharIndex(string charName)
+        public static int GetCharIndex(string charName)
         {
-            string filePath = Path.Join(HSC.Settings.AppSettings.CurrentAppPath, CharConfigFileName);
-            var charConfig = await FileHelpers.Load<CharacterConfig>(filePath);
+            string filePath = Path.Join(HSC.Settings.CurrentAppPath, CharConfigFileName);
+            var charConfig =  FileHelpers.Load<CharacterConfig>(filePath);
 
             if (charConfig == null || string.IsNullOrEmpty(charName))
                 return -1;

@@ -154,23 +154,22 @@ public partial class MidiBard : IDalamudPlugin
 
         //if (PluginInterface.IsDev) Ui.Open();
 
-        Task.Run(() => InitHSCoverride());
-
+        if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+            Task.Run(() => InitHSCMOverride());
+  
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout; 
     }
 
-    private void ClientState_Logout(object sender, EventArgs e)
+    private static void ClientState_Logout(object sender, EventArgs e)
     {
-        if (Configuration.config.useHscOverride)
-            HSCCleanup();
+         HSCMCleanup();
     }
 
-    private void ClientState_Login(object sender, EventArgs e)
+    private static void ClientState_Login(object sender, EventArgs e)
     {
-
-        if (Configuration.config.useHscOverride)
-            Task.Run(() => InitHSCoverride(true));
+        if (Configuration.config.useHscmOverride)
+            Task.Run(() => InitHSCMOverride(true));
     }
 
     private void Tick(Dalamud.Game.Framework framework)
@@ -328,7 +327,7 @@ public partial class MidiBard : IDalamudPlugin
         try
         {
 
-			Testhooks.Instance?.Dispose();
+            Testhooks.Instance?.Dispose();
 
             GuitarTonePatch.Dispose();
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
@@ -352,8 +351,7 @@ public partial class MidiBard : IDalamudPlugin
             }
             DalamudApi.api.Dispose();
 
-            if (Configuration.config.useHscOverride)
-                HSCCleanup();
+            HSCMCleanup();
         }
         catch (Exception e2)
         {

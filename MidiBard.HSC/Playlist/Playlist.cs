@@ -26,22 +26,22 @@ namespace MidiBard.HSC.Playlist
         }
 
 
-        public static async Task LoadPlaylistSettings(string settingsFile)
+        public static void LoadPlaylistSettings(string settingsFile)
         {
             if (string.IsNullOrEmpty(settingsFile))
                 return;
 
-            var playlistSettings = await Task.Run(() => FileHelpers.Load<SongSettings>(settingsFile));
+            var playlistSettings = FileHelpers.Load<SongSettings>(settingsFile);
 
             if (playlistSettings != null)
                 MidiBard.HSC.Settings.PlaylistSettings = playlistSettings;
         }
 
-        public static async Task LoadSongSettings(string filePath)
+        public static void LoadSongSettings(string filePath)
         {
             try
             {
-                var settings = await FileHelpers.Load<MidiSequence>(filePath);
+                var settings = FileHelpers.Load<MidiSequence>(filePath);
 
                 if (settings == null)
                     return;
@@ -57,16 +57,14 @@ namespace MidiBard.HSC.Playlist
             }
         }
 
-        public static async Task OpenPlaylist(string playlistFilePath, bool loadSettings = true)
+        public static void OpenPlaylist(string playlistFilePath, bool loadSettings = true)
         {
             MidiBard.HSC.Settings.Playlist.Title = Path.GetFileNameWithoutExtension(playlistFilePath);
 
             if (!File.Exists(playlistFilePath))
                 return;
 
-            Settings.AppSettings.PrevPlaylistFileName = playlistFilePath;
-
-            var playlist =  await FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath);
+            var playlist =   FileHelpers.Load<Models.Playlist.Playlist>(playlistFilePath);
 
             if (playlist == null || playlist.IsEmpty)
                 return;
@@ -74,7 +72,7 @@ namespace MidiBard.HSC.Playlist
             MidiBard.HSC.Settings.Playlist = playlist;
 
             if (loadSettings)
-                 await LoadPlaylistSettings (playlist.SettingsFile);
+                LoadPlaylistSettings (playlist.SettingsFile);
         }
 
     }

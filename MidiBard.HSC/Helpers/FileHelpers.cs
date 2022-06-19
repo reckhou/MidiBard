@@ -30,7 +30,7 @@ namespace MidiBard.HSC
             File.WriteAllText(fileName, json);
         }
 
-        public static async Task<T> Load<T>(string filePath)
+        public static T Load<T>(string filePath)
         {
             if (!File.Exists(filePath))
                 return default(T);
@@ -38,7 +38,7 @@ namespace MidiBard.HSC
             string json = "";
             try
             {
-                json = await ReadAllText(filePath);
+                json = ReadAllText(filePath);
                 return JsonConvert.DeserializeObject<T>(json);
 
             }
@@ -50,11 +50,11 @@ namespace MidiBard.HSC
 
         }
 
-        private static async Task<string> ReadAllText(string path)
+        private static string ReadAllText(string path)
         {
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(fs, Encoding.UTF8);
-            return await sr.ReadToEndAsync();
+            return sr.ReadToEnd();
         }
 
         public static bool IsDirectory(string path)

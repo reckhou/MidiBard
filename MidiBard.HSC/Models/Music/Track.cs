@@ -71,6 +71,12 @@ namespace MidiBard.HSC.Music
 
         }
 
+        [JsonProperty]
+        public int? PercussionNote { get; set; }
+
+        [JsonProperty]
+        public int? ParentIndex { get; set; }
+
         public int HighestNote { get; set; }
 
         public int Index { get; set;  }
