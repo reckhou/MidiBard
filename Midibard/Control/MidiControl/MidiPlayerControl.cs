@@ -367,7 +367,7 @@ namespace MidiBard.Control.MidiControl
                 if (totalMicroseconds > dura.TotalMicroseconds) totalMicroseconds = dura.TotalMicroseconds;
                 CurrentPlayback.MoveToTime(new MetricTimeSpan(totalMicroseconds));
             }
-            else
+            catch (Exception e)
             {
                 PluginLog.Warning(e.ToString(), "error when try setting current playback time");
             }
