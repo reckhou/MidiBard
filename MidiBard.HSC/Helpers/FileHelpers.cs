@@ -26,35 +26,40 @@ namespace MidiBard.HSC
             if (!Directory.Exists(dirName))
                 Directory.CreateDirectory(dirName);
 
-            var json = JsonConvert.SerializeObject(obj);
-            File.WriteAllText(fileName, json);
+            var json = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            WriteAllText(fileName, json);
         }
+
+        private static void WriteAllText(string path, string text)
+        {
+            //File.WriteAllText(path, text);
+            //text += "\0";
+
+            FileStream fs;
+            if (File.Exists(path))
+
+                fs = File.Open(path, FileMode.Truncate,
+                               FileAccess.Write, FileShare.ReadWrite);
+            else
+                fs = File.Open(path, FileMode.CreateNew,
+               FileAccess.Write, FileShare.ReadWrite);
+            using (var sw = new StreamWriter(fs, Encoding.UTF8))
+            {
+                sw.Write(text);
+                sw.Flush();
+            }
+            fs.Close();
+        }
+
 
         public static T Load<T>(string filePath)
         {
             if (!File.Exists(filePath))
                 return default(T);
 
-            string json = "";
-            try
-            {
-                json = ReadAllText(filePath);
-                return JsonConvert.DeserializeObject<T>(json);
+            var json = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<T>(json);
 
-            }
-            catch (Exception ex)
-            {
-                return default(T); 
-            }
-      
-
-        }
-
-        private static string ReadAllText(string path)
-        {
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var sr = new StreamReader(fs, Encoding.UTF8);
-            return sr.ReadToEnd();
         }
 
         public static bool IsDirectory(string path)
@@ -62,7 +67,6 @@ namespace MidiBard.HSC
             var attrs = File.GetAttributes(path);
             return (attrs & FileAttributes.Directory) == FileAttributes.Directory;
         }
-
 
     }
 }

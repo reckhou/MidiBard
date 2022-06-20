@@ -51,7 +51,7 @@ public partial class MidiBard : IDalamudPlugin
     public static bool Debug = false;
 #endif
 
-
+            public static Mutex ConfigMutex;
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
     internal static Playback CurrentPlayback { get; set; }
@@ -144,7 +144,7 @@ public partial class MidiBard : IDalamudPlugin
 
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
-        CurrentOutputDevice = new BardPlayDevice();
+        CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.BardPlayDevice() : new BardPlayDevice());
         InputDeviceManager.ScanMidiDeviceThread.Start();
 
         Ui = new PluginUI();
@@ -157,6 +157,8 @@ public partial class MidiBard : IDalamudPlugin
 
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout;
+
+        ConfigMutex = new Mutex(false, "MidiBard.Mutex");
 
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());

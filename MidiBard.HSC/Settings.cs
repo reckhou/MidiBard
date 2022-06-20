@@ -13,9 +13,12 @@ using MidiBard.Common;
 using MidiBard.HSC.Music;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Interaction;
+using Newtonsoft.Json;
 
 namespace MidiBard.HSC
 {
+
+    [JsonObject(MemberSerialization.OptIn)]
     public static class Settings
     {
         public const string HscmSettingsFileName = "settings.config";
@@ -52,7 +55,8 @@ namespace MidiBard.HSC
             TrackInfo?.Clear();
         }
 
-        public static AppSettings AppSettings { get; private set; }
+        [JsonProperty]
+        public static AppSettings AppSettings { get; set; }
 
         public static MidiBard.HSC.Models.Playlist.Playlist Playlist { get; set; }
 
@@ -71,10 +75,6 @@ namespace MidiBard.HSC
 
         public static Dictionary<long, Dictionary<SevenBitNumber, bool>> TrimmedNotes { get; set; }
 
-        public static int CurrentSongIndex { get; set; }
-
-        public static string CurrentSong { get; set; }
-
         public static MidiSequence CurrentSongSettings { get; set; }
         public static int OctaveOffset { get; set; }
         public static int KeyOffset { get; set; }
@@ -83,8 +83,9 @@ namespace MidiBard.HSC
         public static string CurrentAppPath { get; set; }
         public static bool SwitchInstrumentFailed { get; set; }
         public static ITimeSpan PrevTime { get; set; }
+        public static bool SavedConfig { get; set; }
 
-        public static void LoadHSCMSettings()
+        public static void Load()
         {
 
             var filePath = Path.Combine(HSC.Settings.CurrentAppPath, HscmSettingsFileName);
@@ -93,6 +94,16 @@ namespace MidiBard.HSC
 
             if (appSettings != null)
                 AppSettings = appSettings;
+        }
+
+        public static void Save()
+        {
+            SavedConfig = true;
+
+            var filePath = Path.Combine(HSC.Settings.CurrentAppPath, HscmSettingsFileName);
+
+            FileHelpers.Save(AppSettings, filePath);
+
         }
 
     }

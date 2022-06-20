@@ -13,6 +13,8 @@ namespace MidiBard
 
         internal static FileWatcherEx.FileWatcherEx hscmFileWatcher;
 
+        static bool savedConfig = false;
+
         internal static void CreateHSCMConfigFileWatcher()
         {
             string filePath = HSC.Settings.CurrentAppPath;
@@ -27,6 +29,13 @@ namespace MidiBard
         }
         private static void HandleFileChangedOrCreated(string path)
         {
+
+            if (Settings.SavedConfig)
+            {
+                Settings.SavedConfig = false;
+                return;
+            }
+
             PluginLog.Information($"File '{path}' changed.");
 
             if (Path.GetFileName(path).Equals(CharConfigHelpers.CharConfigFileName))
@@ -38,7 +47,7 @@ namespace MidiBard
             else if (Path.GetFileName(path).Equals(Settings.HscmSettingsFileName))
             {
                 ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM settings file.");
-                Settings.LoadHSCMSettings();
+                Settings.Load();
                 PopulateConfigFromMidiBardSettings();
                 PluginLog.Information($"HSCM settings file loaded.");
             }

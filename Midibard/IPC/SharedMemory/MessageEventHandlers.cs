@@ -10,6 +10,8 @@ namespace MidiBard
 {
     public partial class MidiBard
     {
+
+
         private static void MsgHandler_ChangeSongMessageReceived(object sender, int index)
         {
             PluginLog.Information($"Received change song '{index}' message.");

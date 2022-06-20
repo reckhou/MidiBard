@@ -23,7 +23,7 @@ namespace MidiBard.HSCM
 
             PlaylistManager.CurrentPlaying = song.Value.index;
 
-            HSCMFilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, true, true, true);
+            HSCMFilePlayback.LoadPlaybackFromSong(name, startPlaying, true, true, true);
         }
     }
 }

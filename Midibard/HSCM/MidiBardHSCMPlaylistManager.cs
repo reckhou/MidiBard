@@ -48,9 +48,38 @@ namespace MidiBard.HSCM
             public string name { get; set; }
         }
 
+
+        public static void Add(string[] filePaths)
+        {
+
+            var count = filePaths.Length;
+            var success = 0;
+
+            foreach (var path in filePaths.Where(p => !PlaylistManager.FilePathList.Select(f => f.path).Contains(p)))
+            {
+                try
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(path);
+                    Configuration.config.Playlist.Add(path);
+                    PlaylistManager.FilePathList.Add((path, fileName, fileName));
+
+                    success++;
+                }
+                catch { }
+            }
+            try
+            {
+                //MidiBard.ConfigMutex.WaitOne();
+                Configuration.config.Save();
+                //MidiBard.ConfigMutex.ReleaseMutex();
+            }
+            catch { }
+            PluginLog.Information($"File import all complete! success: {success} total: {count}");
+        }
+
         public static SongEntry? GetSongByName(string name)
         {
-            var song = PlaylistManager.FilePathList
+            var song = PlaylistManager.FilePathList.ToArray()
                 .Select((fp, i) => new SongEntry { index = i, name = fp.fileName })
                 .FirstOrDefault(fp => fp.name.ToLower().Equals(name.ToLower()));
 

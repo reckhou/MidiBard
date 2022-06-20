@@ -42,7 +42,8 @@ namespace MidiBard
 
         private static void ClearTracks()
         {
-            for(int i = 0; i < ConfigurationPrivate.config.EnabledTracks.Length; i++)
+            int total = ConfigurationPrivate.config.EnabledTracks.Length;
+            for (int i = 0; i < total; i++)
             {
                 ConfigurationPrivate.config.EnabledTracks[i] = false;
             }
@@ -62,7 +63,7 @@ namespace MidiBard
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
 
-            foreach (var track in seq.Tracks)
+            foreach (var track in seq.Tracks.ToArray())
             {
                 var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.OctaveOffset };
 
@@ -144,25 +145,32 @@ namespace MidiBard
 
         public static void ApplySettings(bool fromCurrent = false)
         {
-            if (fromCurrent)
-                Configuration.config.hscmMidiFile = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[PlaylistManager.CurrentPlaying]);
+            try
+            {
+                if (fromCurrent)
+                    Settings.AppSettings.CurrentSong = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[PlaylistManager.CurrentPlaying]);
 
-            HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.hscmMidiFile];
+                HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Settings.AppSettings.CurrentSong];
 
-            HSC.Settings.OctaveOffset = HSC.Settings.CurrentSongSettings.OctaveOffset;
-            HSC.Settings.KeyOffset = HSC.Settings.CurrentSongSettings.KeyOffset;
+                HSC.Settings.OctaveOffset = HSC.Settings.CurrentSongSettings.OctaveOffset;
+                HSC.Settings.KeyOffset = HSC.Settings.CurrentSongSettings.KeyOffset;
 
-            if (!HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
-                UpdateTracks(HSC.Settings.CurrentSongSettings);
+                if (!HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
+                    UpdateTracks(HSC.Settings.CurrentSongSettings);
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error($"Applying HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' failed. Message: {ex.Message}");
+            }
         }
 
         public static void ReloadSettingsAndSwitch(bool loggedIn = false)
         {
-            ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Configuration.config.hscmMidiFile}'.");
+            ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
 
             try
             {
-                if (string.IsNullOrEmpty(Configuration.config.hscmMidiFile))
+                if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
                     return;
@@ -180,30 +188,31 @@ namespace MidiBard
                     return;
                 }
 
-                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.hscmMidiFile))
+                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Configuration.config.hscmMidiFile}'.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
                     return;
                 }
 
                 ApplySettings();
 
-                HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
+                if (wasPlaying)
+                    HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
 
                 bool switchInstruments = !loggedIn && !wasPlaying && Configuration.config.switchInstrumentFromHscmPlaylist;
 
-                HSCM.HSCMFilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, Configuration.config.hscmAutoPlaySong, switchInstruments, true, true, true);
+                HSCM.HSCMFilePlayback.LoadPlaybackFromSong(Settings.AppSettings.CurrentSong, false, switchInstruments, true, true, true);
 
                 if (!loggedIn)
                     MidiBard.Ui.Open();
 
-                ImGuiUtil.AddNotification(NotificationType.Success, $"Reload HSCM playlist settings for '{Configuration.config.hscmMidiFile}' complete.");
+                ImGuiUtil.AddNotification(NotificationType.Success, $"Reload HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' complete.");
             }
 
             catch (Exception e)
             {
-                ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Configuration.config.hscmMidiFile}' failed.");
-                PluginLog.Error(e, $"Reloading HSCM playlist settings for '{Configuration.config.hscmMidiFile}' failed. Message: {e.Message}");
+                ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' failed.");
+                PluginLog.Error(e, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' failed. Message: {e.Message}");
             }
         }
 
@@ -214,6 +223,14 @@ namespace MidiBard
             try
             {
                 HSC.Settings.Playlist.Clear();
+                try
+                {
+                    MidiBard.ConfigMutex.WaitOne();
+                    PlaylistManager.Clear();
+                    MidiBard.ConfigMutex.ReleaseMutex();
+                }
+                catch { }
+
 
                 OpenPlaylist();
 
@@ -227,18 +244,18 @@ namespace MidiBard
                 }
 
                 PluginLog.Information($"Updating MidiBard playlist.");
-                PlaylistManager.AddAsync(HSC.Settings.Playlist.Files.ToArray(), true);
+                HSCM.MidiBardHSCMPlaylistManager.Add(HSC.Settings.Playlist.Files.ToArray());
                 PluginLog.Information($"Added {HSC.Settings.Playlist.Files.Count} files.");
                 ImGuiUtil.AddNotification(NotificationType.Success, $"Added {HSC.Settings.Playlist.Files.Count} files.");
 
                 if (!loggedIn)
                     MidiBard.Ui.Open();
 
-                if (PlaylistManager.CurrentSelected != Configuration.config.prevSelected)
-                    PlaylistManager.CurrentSelected = Configuration.config.prevSelected;
+                if (PlaylistManager.CurrentSelected != Settings.AppSettings.CurrentSongIndex)
+                    PlaylistManager.CurrentSelected = Settings.AppSettings.CurrentSongIndex;
 
-                if (PlaylistManager.CurrentPlaying != Configuration.config.prevSelected)
-                    PlaylistManager.CurrentPlaying = Configuration.config.prevSelected;
+                if (PlaylistManager.CurrentPlaying != Settings.AppSettings.CurrentSongIndex)
+                    PlaylistManager.CurrentPlaying = Settings.AppSettings.CurrentSongIndex;
 
             }
 
@@ -253,6 +270,12 @@ namespace MidiBard
         {
             try
             {
+                if (Configuration.config.Playlist.Count == 0)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot change song from HSCM. No songs on playlist.");
+                    return;
+                }
+
                 wasPlaying = MidiBard.IsPlaying;
 
                 if (wasPlaying)
@@ -265,31 +288,34 @@ namespace MidiBard
 
                 OpenPlaylistSettings();
 
-                Configuration.config.hscmMidiFile = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[index]);
-                Configuration.config.prevSelected = index;
+                Settings.AppSettings.CurrentSong = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[index]);
+                Settings.AppSettings.CurrentSongIndex = index;
 
-                try
+                try//file locking can throw error
                 {
-                    MidiBard.SaveConfig();//file locking can throw error
+                    MidiBard.ConfigMutex.WaitOne();
+                    Settings.Save();
+                    Configuration.config.Save();
+                    MidiBard.ConfigMutex.ReleaseMutex();
                 }
                 catch { }
 
-                ImGuiUtil.AddNotification(NotificationType.Info, $"Changing to '{Configuration.config.hscmMidiFile}' from HSCM playlist.");
+                ImGuiUtil.AddNotification(NotificationType.Info, $"Changing to '{Settings.AppSettings.CurrentSong}' from HSCM playlist.");
 
-                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.hscmMidiFile))
+                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Configuration.config.hscmMidiFile}'.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
                     return;
                 }
 
-                HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.hscmMidiFile];
+                HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Settings.AppSettings.CurrentSong];
 
                 if (!HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
                     UpdateTracks(HSC.Settings.CurrentSongSettings);
 
                 MidiBard.Ui.Open();
 
-                HSCM.MidiPlayerControl.SwitchSongByName(Configuration.config.hscmMidiFile);
+                HSCM.MidiPlayerControl.SwitchSongByName(Settings.AppSettings.CurrentSong, Configuration.config.hscmAutoPlaySong);
             }
 
             catch (Exception e)
@@ -310,21 +336,23 @@ namespace MidiBard
                     return;
                 }
 
-                if (string.IsNullOrEmpty(Configuration.config.hscmMidiFile))
+                if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
                     return;
                 }
 
-                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Configuration.config.hscmMidiFile))
+                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Configuration.config.hscmMidiFile}'.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
                     return;
                 }
 
-                HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Configuration.config.hscmMidiFile];
+                HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Settings.AppSettings.CurrentSong];
 
                 PerformHelpers.SwitchInstrumentFromSong();
+
+                MidiBard.Ui.Open();
             }
 
             catch (Exception e)

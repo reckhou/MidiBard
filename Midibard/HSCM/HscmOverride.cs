@@ -14,12 +14,6 @@ namespace MidiBard
 {
     public partial class MidiBard
     {
-        public static void SaveConfig()
-        {
-            //MidiBard.ConfigMutex.WaitOne();
-            Configuration.config.Save();
-            //MidiBard.ConfigMutex.ReleaseMutex();
-        }
 
         private static void HSCMCleanup()
         {
@@ -84,7 +78,7 @@ namespace MidiBard
 
                 CreateHSCMConfigFileWatcher();
 
-                Settings.LoadHSCMSettings();
+                Settings.Load();
                 PopulateConfigFromMidiBardSettings();
                 UpdateClientInfo();
 

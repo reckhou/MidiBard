@@ -62,7 +62,7 @@ namespace MidiBard.HSC
                     return false;
                 }
 
-                PluginLog.Information($"Instrument switching from HSCM playlist for '{HSC.Settings.CurrentSong}'");
+                PluginLog.Information($"Instrument switching from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'");
                 uint insId = GetInstrumentFromHscPlaylist();
                 PluginLog.Information($"Switching to '{((Instrument)insId).ToString()}'");
 
@@ -70,7 +70,7 @@ namespace MidiBard.HSC
 
                 if (!instrumentEquipped)
                 {
-                    PluginLog.Error($"Failed to equip instrument for '{HSC.Settings.CurrentSong}'.");
+                    PluginLog.Error($"Failed to equip instrument for '{HSC.Settings.AppSettings.CurrentSong}'.");
                     return false;
                 }
 
@@ -156,7 +156,7 @@ namespace MidiBard.HSC
                     return 0;
 
                 if (HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
-                    return 1;
+                    return 0;
 
                 var firstTrack = HSC.Settings.CurrentSongSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
                 if (firstTrack == null)

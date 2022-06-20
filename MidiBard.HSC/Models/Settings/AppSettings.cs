@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace MidiBard.HSC.Models.Settings
 {
-    [JsonObject(MemberSerialization.OptIn)]
+    [JsonObject(MemberSerialization.OptOut)]
     public class AppSettings
     {
 
@@ -18,12 +18,12 @@ namespace MidiBard.HSC.Models.Settings
             this.GeneralSettings = new GeneralSettings();
         }
 
-
-        [JsonProperty]
         public GeneralSettings GeneralSettings { get; set; }
 
 
+        public string CurrentSong { get; set; }
 
 
+        public int CurrentSongIndex { get; set; }
     }
 }

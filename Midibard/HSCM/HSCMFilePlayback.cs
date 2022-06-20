@@ -103,8 +103,7 @@ namespace MidiBard.HSCM
                 }
             }
             PluginLog.Information($"[LoadPlayback] -> {trackName} 2 in {stopwatch.Elapsed.TotalMilliseconds} ms");
-            //int givenIndex = 0;
-            //CurrentTracks.ForEach(tuple => tuple.trackInfo.Index = givenIndex++);
+
 
             var timedEvents = CurrentTracks.Select(i => i.trackChunk).AsParallel()
                 .SelectMany((chunk, index) => chunk.GetTimedEvents().Select(e =>
@@ -124,37 +123,9 @@ namespace MidiBard.HSCM
                 .ThenBy(i => i.compareValue)
                 .Select(i => i.timedEvent);
             PluginLog.Information($"[LoadPlayback] -> {trackName} 3 in {stopwatch.Elapsed.TotalMilliseconds} ms");
-            //var (programTrackChunk, programTrackInfo) =
-            //    CurrentTracks.FirstOrDefault(i => Regex.IsMatch(i.trackInfo.TrackName, @"^Program:.+$", RegexOptions.Compiled | RegexOptions.IgnoreCase));
 
             Array.Fill(CurrentOutputDevice.Channels, new BardPlayDevice.ChannelState());
-            //if (programTrackChunk is not null && programTrackInfo is not null)
-            //{
-            //	PluginLog.Verbose($"FOUND PROGRAM TRACK i:{programTrackInfo.Index}");
 
-            //	foreach (ProgramChangeEvent programChangeEvent in timedEvents
-            //		.Where(e => (int)e.Metadata == programTrackInfo.Index && e.Time == 0)
-            //		.Select(e => e.Event)
-            //		.OfType<ProgramChangeEvent>())
-            //	{
-            //		FourBitNumber channel = programChangeEvent.Channel;
-            //		SevenBitNumber prog = (SevenBitNumber)Math.Max(0, programChangeEvent.ProgramNumber + 1);
-            //		//PluginLog.Verbose($"FOUND INIT PROGRAMCHANGE c:{channel} p:{prog}");
-
-            //		for (int i = 0; i < CurrentOutputDevice.Channels.Length; i++)
-            //		{
-            //			CurrentOutputDevice.Channels[i].Program = prog;
-            //		}
-            //	}
-            //}
-            //else
-            //{
-            //	SevenBitNumber prog = InstrumentPrograms[CurrentInstrument].id;
-            //	for (int i = 0; i < CurrentOutputDevice.Channels.Length; i++)
-            //	{
-            //		CurrentOutputDevice.Channels[i].Program = prog;
-            //	}
-            //}
             PluginLog.Information($"[LoadPlayback] -> {trackName} 3.1 in {stopwatch.Elapsed.TotalMilliseconds} ms");
             var playback = new BardPlayback(timedEvents, CurrentTMap, new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() })
             {
@@ -183,7 +154,28 @@ namespace MidiBard.HSCM
             return playback;
         }
 
-        public static bool LoadPlayback(
+
+        public static bool LoadPlaybackFromSong(
+            string songName,
+            bool startPlaying = false,
+            bool switchInstrument = true,
+            bool hscmProcess = true,
+            bool ignoreLoadSettings = false,
+            bool revertTime = false
+        )
+        {
+            var entry = MidiBardHSCMPlaylistManager.GetSongByName(songName);
+
+            if (entry == null)
+            {
+                PluginLog.Error($"Could not playback for '{songName}'");
+                return false;
+            }
+
+            return LoadPlayback(entry.Value.index, startPlaying, switchInstrument, hscmProcess, ignoreLoadSettings, revertTime);
+        }
+
+        private static bool LoadPlayback(
             int index,
             bool startPlaying = false, 
             bool switchInstrument = true, 
@@ -210,7 +202,7 @@ namespace MidiBard.HSCM
                 Ui.RefreshPlotData();
                 PlaylistManager.CurrentPlaying = index;
 
-                if (!ignoreLoadSettings && Configuration.config.useHscmOverride)
+                if (!ignoreLoadSettings)
                     HSCMPlaylistManager.ApplySettings(true);//this should allow the HSCM playlist to be looped 
 
                 if (switchInstrument)
@@ -225,7 +217,7 @@ namespace MidiBard.HSCM
                     }
                 }
 
-                if (Configuration.config.useHscmOverride && DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)
+                if (DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)
                     return true;
 
                 if (MidiBard.CurrentInstrument != 0 && (wasPlaying || startPlaying))
@@ -239,7 +231,7 @@ namespace MidiBard.HSCM
         }
 
 
-        public static void Playback_Finished(object sender, EventArgs e)
+        private static void Playback_Finished(object sender, EventArgs e)
         {
             Task.Run(async () =>
             {
@@ -247,7 +239,7 @@ namespace MidiBard.HSCM
                 {
                     if (MidiBard.AgentMetronome.EnsembleModeRunning)
                     {
-                        if (Configuration.config.useHscmOverride && Configuration.config.useHscmCloseOnFinish)
+                        if (Configuration.config.useHscmCloseOnFinish)
                         {
                             PerformHelpers.WaitUntilChanged(() => !MidiBard.AgentMetronome.EnsembleModeRunning, 100, 5000);
                             HSC.PerformHelpers.ClosePerformance();
@@ -255,7 +247,7 @@ namespace MidiBard.HSCM
                     }
                     else
                     {
-                        if (Configuration.config.useHscmOverride && Configuration.config.useHscmCloseOnFinish)
+                        if (Configuration.config.useHscmCloseOnFinish)
                             HSC.PerformHelpers.ClosePerformance();
                     }
 

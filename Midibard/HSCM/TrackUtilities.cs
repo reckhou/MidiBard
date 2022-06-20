@@ -12,7 +12,7 @@ namespace MidiBard.HSC
 {
     public class TrackUtilities
     {
-        public static void ShiftTrack(TrackChunk trackChunk, int offset) => trackChunk.ProcessNotes(n => n.Time += offset);
+        public static void ShiftTrack(TrackChunk trackChunk, int offset) => trackChunk.ProcessNotes(n => n.Time += offset, n => n.Time > 0);
 
         public static void Shift(MidiFile midiFile, MidiSequence settings)
         {
