@@ -131,7 +131,7 @@ namespace MidiBard
             {
                 Configuration.config.Save();
             }
-            if (ImGui.InputText("", ref Configuration.config.hscPlayListPath, 1024))
+            if (Configuration.config.useHscmOverride && ImGui.InputText("Playlist Path", ref Configuration.config.hscPlayListPath, 1024))
             {
                 Configuration.config.Save();
             }

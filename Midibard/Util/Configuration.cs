@@ -39,7 +39,7 @@ public class Configuration : IPluginConfiguration
 {
     public static Configuration config;
 
-    public bool useHscmOverride = true;
+    public bool useHscmOverride = false;
     public bool switchInstrumentFromHscmPlaylist = true;
     public bool useHscmChordTrimming = true;
     public bool useHscmTransposing = true;
