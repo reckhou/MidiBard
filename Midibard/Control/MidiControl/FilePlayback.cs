@@ -334,7 +334,6 @@ public static class FilePlayback
             DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Now Playing: {0}", PlaylistManager.FilePathList[index].fileName));
 
             var songName = PlaylistManager.FilePathList[index].fileName;
-
             if (switchInstrument)
             {
                 try
@@ -356,7 +355,7 @@ public static class FilePlayback
                 LrcPath += pathArray[i];
                 LrcPath += "\\";
             }
-
+          
             LrcPath += fileName;
             Lrc lrc = Lrc.InitLrc(LrcPath);
             MidiPlayerControl.LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();

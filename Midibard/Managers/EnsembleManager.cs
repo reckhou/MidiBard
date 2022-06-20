@@ -53,7 +53,7 @@ namespace MidiBard.Managers
                     }
 
                     if (barElapsed == 0 && currentBeat == 0)
-                    {
+                    { 
                         if (Ensemble != 0)
                         {
                             // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
@@ -115,7 +115,7 @@ namespace MidiBard.Managers
 
                     if (barElapsed == -2 && currentBeat == 0)
                     {
-                        PluginLog.Warning($"Prepare: ensemble: {Ensemble}");
+                        PluginLog.Warning($"Prepare: ensemble: {Ensemble}");                     
                         if (Ensemble != 0)
                         {
                             EnsemblePrepare?.Invoke();

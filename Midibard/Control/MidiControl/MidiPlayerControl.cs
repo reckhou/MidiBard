@@ -11,10 +11,8 @@ using FFXIVClientStructs.FFXIV.Client.Game.Group;
 
 namespace MidiBard.Control.MidiControl
 {
-
     internal static class MidiPlayerControl
     {
-
         internal static int playDeltaTime = 0;
         internal static int LRCDeltaTime = 0;
 
@@ -71,8 +69,7 @@ namespace MidiBard.Control.MidiControl
                                 if (AgentMetronome.EnsembleModeRunning)
                                 {
                                     msg = $"/s ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
-                                else
+                                } else
                                 {
                                     msg = $"/p ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
                                 }
@@ -83,9 +80,7 @@ namespace MidiBard.Control.MidiControl
                         LrcIdx = idx;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 PluginLog.LogError($"exception: {ex}");
             }
         }
@@ -97,7 +92,6 @@ namespace MidiBard.Control.MidiControl
 
             int idx = -1;
             double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset / 1000.0f + LRCDeltaTime / 1000.0f;
-
             foreach (double TimeStamp in TimeStamps)
             {
                 if (timeSpan > TimeStamp)
@@ -347,7 +341,7 @@ namespace MidiBard.Control.MidiControl
                             }
                             break;
                     }
-
+                  
                     SwitchSong(prev, playing);
                 }
                 catch (Exception e)
@@ -373,7 +367,7 @@ namespace MidiBard.Control.MidiControl
                 if (totalMicroseconds > dura.TotalMicroseconds) totalMicroseconds = dura.TotalMicroseconds;
                 CurrentPlayback.MoveToTime(new MetricTimeSpan(totalMicroseconds));
             }
-            catch (Exception e)
+            else
             {
                 PluginLog.Warning(e.ToString(), "error when try setting current playback time");
             }
@@ -448,7 +442,7 @@ namespace MidiBard.Control.MidiControl
                 LRCDeltaTime = 0;
                 return;
             }
-
+          
             LRCDeltaTime += delta;
         }
     }
