@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
+using MidiBard.HSC.Helpers;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
@@ -153,7 +154,7 @@ namespace MidiBard.Control.CharacterControl
                     config.TransposeGlobal = transpose;
                 }
 
-                
+
                 var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
                 if (idFromTrackName != null)
                 {
@@ -184,6 +185,8 @@ namespace MidiBard.Control.CharacterControl
                     await SwitchTo((uint)idFromSongName);
                 }
             }
+
+
         }
 
         internal static void UpdateGuitarToneByConfig()

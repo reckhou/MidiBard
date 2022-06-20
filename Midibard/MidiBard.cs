@@ -33,10 +33,16 @@ using playlibnamespace;
 using static MidiBard.DalamudApi.api;
 using Dalamud.Game.Gui;
 using XivCommon;
+using MidiBard.HSC;
+using System.IO.Pipes;
+using System.Threading;
+using MidiBard.Common.IPC;
+using MidiBard.Common.Messaging.Messages;
+using MidiBard.HSC.Helpers;
 
 namespace MidiBard;
 
-public class MidiBard : IDalamudPlugin
+public partial class MidiBard : IDalamudPlugin
 {
     internal static PluginUI Ui { get; set; }
 #if DEBUG
@@ -44,6 +50,8 @@ public class MidiBard : IDalamudPlugin
 #else
     public static bool Debug = false;
 #endif
+
+            public static Mutex ConfigMutex;
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
     internal static Playback CurrentPlayback { get; set; }
@@ -63,7 +71,7 @@ public class MidiBard : IDalamudPlugin
     internal static string[] InstrumentStrings;
 
     internal static IDictionary<SevenBitNumber, uint> ProgramInstruments;
-		
+
     internal static byte CurrentInstrument => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset);
     internal static byte CurrentTone => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset + 1);
     internal static readonly byte[] guitarGroup = { 24, 25, 26, 27, 28 };
@@ -76,7 +84,6 @@ public class MidiBard : IDalamudPlugin
 
     public static XivCommonBase Cbase;
     public static bool SendReloadPlaylistCMD;
-
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
@@ -129,15 +136,15 @@ public class MidiBard : IDalamudPlugin
         _ = EnsembleManager.Instance;
 
 #if DEBUG
-			_ = NetworkManager.Instance;
-			_ = Testhooks.Instance;
+        _ = NetworkManager.Instance;
+        _ = Testhooks.Instance;
 #endif
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
-        CurrentOutputDevice = new BardPlayDevice();
+        CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.BardPlayDevice() : new BardPlayDevice());
         InputDeviceManager.ScanMidiDeviceThread.Start();
 
         Ui = new PluginUI();
@@ -147,6 +154,25 @@ public class MidiBard : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
 
         //if (PluginInterface.IsDev) Ui.Open();
+
+        DalamudApi.api.ClientState.Login += ClientState_Login;
+        DalamudApi.api.ClientState.Logout += ClientState_Logout;
+
+        ConfigMutex = new Mutex(false, "MidiBard.Mutex");
+
+        if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+            Task.Run(() => InitHSCMOverride());
+    }
+
+    private static void ClientState_Logout(object sender, EventArgs e)
+    {
+        HSCMCleanup();
+    }
+
+    private static void ClientState_Login(object sender, EventArgs e)
+    {
+        if (Configuration.config.useHscmOverride)
+            Task.Run(() => InitHSCMOverride(true));
     }
 
     private void Tick(Dalamud.Game.Framework framework)
@@ -169,7 +195,7 @@ public class MidiBard : IDalamudPlugin
             {
                 //if (Configuration.config.StopPlayingWhenEnsembleEnds)
                 //{
-                    MidiPlayerControl.Stop();
+                MidiPlayerControl.Stop();
                 //}
             }
 
@@ -262,32 +288,32 @@ public class MidiBard : IDalamudPlugin
                     }
                     break;
                 case "rewind":
-                {
-                    double timeInSeconds = -5;
-                    try
                     {
-                        timeInSeconds = -double.Parse(argStrings[1]);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                        double timeInSeconds = -5;
+                        try
+                        {
+                            timeInSeconds = -double.Parse(argStrings[1]);
+                        }
+                        catch (Exception e)
+                        {
+                        }
 
-                    MidiPlayerControl.MoveTime(timeInSeconds);
-                }
+                        MidiPlayerControl.MoveTime(timeInSeconds);
+                    }
                     break;
                 case "fastforward":
-                {
-                    double timeInSeconds = 5;
-                    try
                     {
-                        timeInSeconds = double.Parse(argStrings[1]);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                        double timeInSeconds = 5;
+                        try
+                        {
+                            timeInSeconds = double.Parse(argStrings[1]);
+                        }
+                        catch (Exception e)
+                        {
+                        }
 
-                    MidiPlayerControl.MoveTime(timeInSeconds);
-                }
+                        MidiPlayerControl.MoveTime(timeInSeconds);
+                    }
                     break;
             }
         }
@@ -326,6 +352,8 @@ public class MidiBard : IDalamudPlugin
                 PluginLog.Error($"{e}");
             }
             DalamudApi.api.Dispose();
+
+            HSCMCleanup();
         }
         catch (Exception e2)
         {

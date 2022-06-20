@@ -10,14 +10,12 @@ using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 
 namespace MidiBard.Control.MidiControl
-{ 
-
+{
     internal static class MidiPlayerControl
     {
-
         internal static int playDeltaTime = 0;
         internal static int LRCDeltaTime = 0;
-    
+
         public enum e_stat
         {
             Stopped,
@@ -53,7 +51,7 @@ namespace MidiBard.Control.MidiControl
                         return;
                     }
                     else
-                    {                      
+                    {
                         if (IsLeader)
                         {
                             string msg = "";
@@ -82,8 +80,7 @@ namespace MidiBard.Control.MidiControl
                         LrcIdx = idx;
                     }
                 }
-            } catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 PluginLog.LogError($"exception: {ex}");
             }
         }
@@ -94,14 +91,14 @@ namespace MidiBard.Control.MidiControl
                 return -1;
 
             int idx = -1;
-            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset/1000.0f + LRCDeltaTime/1000.0f;
-
+            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset / 1000.0f + LRCDeltaTime / 1000.0f;
             foreach (double TimeStamp in TimeStamps)
             {
                 if (timeSpan > TimeStamp)
                 {
                     idx++;
-                } else
+                }
+                else
                 {
                     break;
                 }
@@ -112,7 +109,7 @@ namespace MidiBard.Control.MidiControl
 
         internal static void Play()
         {
-	        playDeltaTime = 0;
+            playDeltaTime = 0;
             LRCDeltaTime = 0;
             if (CurrentPlayback != null)
             {
@@ -184,7 +181,8 @@ namespace MidiBard.Control.MidiControl
                 {
                     LrcIdx = -1;
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 PluginLog.LogError(e.Message);
             }
@@ -343,7 +341,7 @@ namespace MidiBard.Control.MidiControl
                             }
                             break;
                     }
-
+                  
                     SwitchSong(prev, playing);
                 }
                 catch (Exception e)
@@ -369,9 +367,26 @@ namespace MidiBard.Control.MidiControl
                 if (totalMicroseconds > dura.TotalMicroseconds) totalMicroseconds = dura.TotalMicroseconds;
                 CurrentPlayback.MoveToTime(new MetricTimeSpan(totalMicroseconds));
             }
-            catch (Exception e)
+            else
             {
                 PluginLog.Warning(e.ToString(), "error when try setting current playback time");
+            }
+        }
+
+        public static void SetSpeed(float speed)
+        {
+            Configuration.config.playSpeed = speed;
+            SetSpeed();
+        }
+
+        public static void SetSpeed()
+        {
+            Configuration.config.playSpeed = Math.Max(0.1f, Configuration.config.playSpeed);
+            var currenttime = MidiBard.CurrentPlayback?.GetCurrentTime(TimeSpanType.Midi);
+            if (currenttime is not null)
+            {
+                MidiBard.CurrentPlayback.Speed = Configuration.config.playSpeed;
+                MidiBard.CurrentPlayback?.MoveToTime(currenttime);
             }
         }
 
@@ -394,28 +409,30 @@ namespace MidiBard.Control.MidiControl
             });
         }
 
-	    internal static void ChangeDeltaTime(int delta)
-		{
-			if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
-			{
-				playDeltaTime = 0;
-                LRCDeltaTime = 0;
-				return;
-			}
 
-			var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-			long msTime = currentTime.TotalMicroseconds;
-			//PluginLog.LogDebug("curTime:" + msTime);
-			if (msTime + delta * 1000 < 0)
-			{
-				return;
-			}
-			msTime += delta * 1000;
-			MetricTimeSpan newTime = new MetricTimeSpan(msTime);
+
+        internal static void ChangeDeltaTime(int delta)
+        {
+            if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+            {
+                playDeltaTime = 0;
+                LRCDeltaTime = 0;
+                return;
+            }
+
+            var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+            long msTime = currentTime.TotalMicroseconds;
+            //PluginLog.LogDebug("curTime:" + msTime);
+            if (msTime + delta * 1000 < 0)
+            {
+                return;
+            }
+            msTime += delta * 1000;
+            MetricTimeSpan newTime = new MetricTimeSpan(msTime);
             //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
-			CurrentPlayback.MoveToTime(newTime);
-			playDeltaTime += delta;
-		}
+            CurrentPlayback.MoveToTime(newTime);
+            playDeltaTime += delta;
+        }
 
         internal static void ChangeLRCDeltaTime(int delta)
         {
@@ -425,7 +442,7 @@ namespace MidiBard.Control.MidiControl
                 LRCDeltaTime = 0;
                 return;
             }
-
+          
             LRCDeltaTime += delta;
         }
     }

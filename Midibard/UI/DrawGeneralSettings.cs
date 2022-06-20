@@ -126,11 +126,21 @@ namespace MidiBard
             }
             ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
+
+            if (ImGui.Checkbox("Use HSC override".Localize(), ref Configuration.config.useHscmOverride))
+            {
+                Configuration.config.Save();
+            }
+            if (ImGui.InputText("", ref Configuration.config.hscPlayListPath, 1024))
+            {
+                Configuration.config.Save();
+            }
+            ImGuiUtil.ToolTip("HSC playlist path".Localize());
+
             if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
             {
                 Configuration.config.Save();
             }
-
             ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);

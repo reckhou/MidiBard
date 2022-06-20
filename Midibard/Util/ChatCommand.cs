@@ -80,6 +80,17 @@ namespace MidiBard
 				MidiPlayerControl.Stop();
 				SwitchInstrument.SwitchTo(0);
 			}
+
+
+			else if (cmd == "hscmstart") 
+			{
+				Task.Run(() => MidiBard.InitHSCMOverride());
+			}
+
+			else if (cmd == "hscmrestart")
+			{
+				Task.Run(() => MidiBard.RestartHSCMOverride());
+			}
 		}
 	}
 }

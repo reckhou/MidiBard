@@ -214,6 +214,7 @@ namespace MidiBard
             {
                 MidiPlayerControl.ChangeLRCDeltaTime(-100);
             }
+          
             ImGui.SameLine();           
             if (ImGui.Button("+100ms"))
             {

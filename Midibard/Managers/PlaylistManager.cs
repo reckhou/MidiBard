@@ -114,6 +114,7 @@ namespace MidiBard
         //	Task.Run(async () => await Reload(Configuration.config.Playlist.ToArray()));
         //}
 
+
         internal static async Task AddAsync(string[] filePaths, bool reload = false)
         {
             if (reload)
@@ -143,7 +144,7 @@ namespace MidiBard
                 MidiFile file = null;
 
                 if (Path.GetExtension(path).Equals(".mmsong"))
-                    file =  await LoadMMSongFile(path);
+                    file = await LoadMMSongFile(path);
                 else if (Path.GetExtension(path).Equals(".mid"))
                     file = await LoadMidiFile(path);
 
@@ -198,61 +199,61 @@ namespace MidiBard
                     using (var f = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         loaded = MidiFile.Read(f, readingSettings);
-                    //PluginLog.Log(f.Name);
-                    //PluginLog.LogDebug($"{loaded.OriginalFormat}, {loaded.TimeDivision}, Duration: {loaded.GetDuration<MetricTimeSpan>().Hours:00}:{loaded.GetDuration<MetricTimeSpan>().Minutes:00}:{loaded.GetDuration<MetricTimeSpan>().Seconds:00}:{loaded.GetDuration<MetricTimeSpan>().Milliseconds:000}");
-                    //foreach (var chunk in loaded.Chunks) PluginLog.LogDebug($"{chunk}");
+                        //PluginLog.Log(f.Name);
+                        //PluginLog.LogDebug($"{loaded.OriginalFormat}, {loaded.TimeDivision}, Duration: {loaded.GetDuration<MetricTimeSpan>().Hours:00}:{loaded.GetDuration<MetricTimeSpan>().Minutes:00}:{loaded.GetDuration<MetricTimeSpan>().Seconds:00}:{loaded.GetDuration<MetricTimeSpan>().Milliseconds:000}");
+                        //foreach (var chunk in loaded.Chunks) PluginLog.LogDebug($"{chunk}");
 
-                    //try
-                    //{
-                    //	loaded.ProcessChords(chord =>
-                    //	{
-                    //		try
-                    //		{
-                    //			//PluginLog.Warning($"{chord} Time:{chord.Time} Length:{chord.Length} NotesCount:{chord.Notes.Count()}");
-                    //			var i = 0;
-                    //			foreach (var chordNote in chord.Notes.OrderBy(j => j.NoteNumber))
-                    //			{
-                    //				var starttime = chordNote.GetTimedNoteOnEvent().Time;
-                    //				var offtime = chordNote.GetTimedNoteOffEvent().Time;
+                        //try
+                        //{
+                        //	loaded.ProcessChords(chord =>
+                        //	{
+                        //		try
+                        //		{
+                        //			//PluginLog.Warning($"{chord} Time:{chord.Time} Length:{chord.Length} NotesCount:{chord.Notes.Count()}");
+                        //			var i = 0;
+                        //			foreach (var chordNote in chord.Notes.OrderBy(j => j.NoteNumber))
+                        //			{
+                        //				var starttime = chordNote.GetTimedNoteOnEvent().Time;
+                        //				var offtime = chordNote.GetTimedNoteOffEvent().Time;
 
-                    //				chordNote.Time += i;
-                    //				if (chordNote.Length - i < 0)
-                    //				{
-                    //					chordNote.Length = 0;
-                    //				}
-                    //				else
-                    //				{
-                    //					chordNote.Length -= i;
-                    //				}
+                        //				chordNote.Time += i;
+                        //				if (chordNote.Length - i < 0)
+                        //				{
+                        //					chordNote.Length = 0;
+                        //				}
+                        //				else
+                        //				{
+                        //					chordNote.Length -= i;
+                        //				}
 
 
-                    //				i++;
+                        //				i++;
 
-                    //				//PluginLog.Verbose($"[{i}]Note:{chordNote} start/processed:[{starttime}/{chordNote.GetTimedNoteOnEvent().Time}] off/processed:[{offtime}/{chordNote.GetTimedNoteOffEvent().Time}]");
-                    //			}
-                    //		}
-                    //		catch (Exception e)
-                    //		{
-                    //			try
-                    //			{
-                    //				PluginLog.Verbose($"{chord.Channel} {chord} {chord.Time} {e}");
-                    //			}
-                    //			catch (Exception exception)
-                    //			{
-                    //				PluginLog.Verbose($"error when processing a chord: {exception}");
-                    //			}
-                    //		}
-                    //	}, chord => chord.Notes.Count() > 1);
+                        //				//PluginLog.Verbose($"[{i}]Note:{chordNote} start/processed:[{starttime}/{chordNote.GetTimedNoteOnEvent().Time}] off/processed:[{offtime}/{chordNote.GetTimedNoteOffEvent().Time}]");
+                        //			}
+                        //		}
+                        //		catch (Exception e)
+                        //		{
+                        //			try
+                        //			{
+                        //				PluginLog.Verbose($"{chord.Channel} {chord} {chord.Time} {e}");
+                        //			}
+                        //			catch (Exception exception)
+                        //			{
+                        //				PluginLog.Verbose($"error when processing a chord: {exception}");
+                        //			}
+                        //		}
+                        //	}, chord => chord.Notes.Count() > 1);
 
-                    //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
-                    //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
-                    //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
-                    //}
-                    //catch (Exception e)
-                    //{
-                    //	PluginLog.Error(e, $"error when processing chords on {filePath}");
-                    //}
-                }
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //	//PluginLog.Error(" \n \n \n \n \n \n \n ");
+                        //}
+                        //catch (Exception e)
+                        //{
+                        //	PluginLog.Error(e, $"error when processing chords on {filePath}");
+                        //}
+                    }
 
                     PluginLog.Debug($"[LoadMidiFile] -> {filePath} OK! in {stopwatch.Elapsed.TotalMilliseconds} ms");
                 }
