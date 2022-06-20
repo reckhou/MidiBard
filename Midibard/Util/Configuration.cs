@@ -39,6 +39,22 @@ public class Configuration : IPluginConfiguration
 {
     public static Configuration config;
 
+    public bool useHscmOverride = true;
+    public bool switchInstrumentFromHscmPlaylist = true;
+    public bool useHscmChordTrimming = true;
+    public bool useHscmTransposing = true;
+    public bool useHscmTrimByTrack = false;
+    public bool useHscmCloseOnFinish = false;
+    public bool useHscmSendReadyCheck = false;
+    public bool hscmAutoPlaySong = false;
+    public int hscmOverrideDelay { get; internal set; } = 5000;
+    public bool hscmOfflineTesting { get; internal set; } = false;
+
+    public string hscmMidiFile;
+    public string hscPlayListPath = "playlists";
+
+    public int prevSelected;
+
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
@@ -113,6 +129,8 @@ public class Configuration : IPluginConfiguration
     //public bool SyncSongSelection = false;
     //public bool SyncMuteUnMute = false;
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
+    public int switchInstrumentDelay = 3000;
+
     [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
     //public void Save()

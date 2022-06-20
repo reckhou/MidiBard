@@ -43,7 +43,7 @@ namespace MidiBard.Managers
                     byte Ensemble;
                     byte beatsPerBar;
                     int barElapsed;
-                    
+
                     unsafe
                     {
                         var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
@@ -81,7 +81,7 @@ namespace MidiBard.Managers
                                 stopWatch.Stop();
                                 Lrc._lrc.Offset += stopWatch.ElapsedMilliseconds - compensation;
                                 PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
-                                
+
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
                                 {
                                     try
@@ -127,9 +127,9 @@ namespace MidiBard.Managers
                                     var playing = PlaylistManager.CurrentPlaying;
                                     if (playing == -1)
                                     {
-                                    // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
-                                    // the instrument should have been switched already when loading the song in this occasion.
-                                    await FilePlayback.LoadPlayback(0, false, !Configuration.config.bmpTrackNames);
+                                        // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
+                                        // the instrument should have been switched already when loading the song in this occasion.
+                                        await FilePlayback.LoadPlayback(0, false, !Configuration.config.bmpTrackNames);
                                     }
                                     else
                                     {

@@ -102,7 +102,8 @@ namespace MidiBard
                     }
                 }
                 _lrc.LrcWord = dicword.OrderBy(t => t.Key).ToDictionary(t => t.Key, p => p.Value);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 PluginLog.LogVerbose($"LRC: {ex.Message}");
             }

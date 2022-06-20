@@ -43,7 +43,7 @@ public class ConfigurationPrivate : IPluginConfiguration
                             Thread.Sleep(500);
                             continue;
                         }
-                        
+
                         Load();
                         loggedIn = true;
                         return;
@@ -89,7 +89,7 @@ public class ConfigurationPrivate : IPluginConfiguration
             PluginLog.Error(e, "Error when saving private config");
             ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving private config");
         }
-        
+
     }
 
     public static void Load()
@@ -115,7 +115,9 @@ public class ConfigurationPrivate : IPluginConfiguration
                     if (loadedCharacterConfiguration == null)
                     {
                         config = new ConfigurationPrivate();
-                    } else {
+                    }
+                    else
+                    {
                         config = loadedCharacterConfiguration;
                     }
                 }
@@ -124,13 +126,14 @@ public class ConfigurationPrivate : IPluginConfiguration
                     config = new ConfigurationPrivate();
                     config.EnabledTracks[0] = true; // always enable the 1st track for new user
                 }
-               return;
+                return;
             }
 
             if (playerData == null)
             {
                 PluginLog.LogDebug("PlayerData NULL");
-            } else
+            }
+            else
             {
                 PluginLog.LogDebug(playerData.HomeWorld.GameData == null ? "playerData.HomeWorld.GameData == null" : "");
             }

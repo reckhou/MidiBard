@@ -18,6 +18,8 @@ using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
+using System.IO;
+using MidiBard.Common;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -67,7 +69,7 @@ public static class FilePlayback
                     .Where(i => i.Events.Any(j => j is NoteOnEvent))
                     .Select((i, index) =>
                     {
-                        var noteEvents = i.Events.Where(i=>i is NoteEvent or ProgramChangeEvent or TextEvent);
+                        var noteEvents = i.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
                         var notes = noteEvents.GetNotes().ToArray();
                         var trackChunk = new TrackChunk(noteEvents);
                         return (trackChunk, GetTrackInfos(notes, trackChunk, index));
@@ -306,6 +308,10 @@ public static class FilePlayback
         });
     }
 
+    /// <summary>
+    /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
+    /// </summary>
+
     internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
@@ -326,11 +332,12 @@ public static class FilePlayback
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
             DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Now Playing: {0}", PlaylistManager.FilePathList[index].fileName));
+
+            var songName = PlaylistManager.FilePathList[index].fileName;
             if (switchInstrument)
             {
                 try
                 {
-                    var songName = PlaylistManager.FilePathList[index].fileName;
                     await SwitchInstrument.WaitSwitchInstrumentForSong(songName);
                 }
                 catch (Exception e)
@@ -348,7 +355,7 @@ public static class FilePlayback
                 LrcPath += pathArray[i];
                 LrcPath += "\\";
             }
- 
+          
             LrcPath += fileName;
             Lrc lrc = Lrc.InitLrc(LrcPath);
             MidiPlayerControl.LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();

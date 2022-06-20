@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Standards;
 using MidiBard.Control.CharacterControl;
+using MidiBard.HSC;
 using MidiBard.Util;
 using playlibnamespace;
 
@@ -65,7 +66,7 @@ internal class BardPlayDevice : IOutputDevice
     /// <param name="midiEvent">Raw midi event</param>
     /// <param name="metadata">Currently is track index</param>
     /// <returns></returns>
-    public bool SendEventWithMetadata(MidiEvent midiEvent, object metadata)
+    public virtual bool SendEventWithMetadata(MidiEvent midiEvent, object metadata)
     {
         if (!MidiBard.AgentPerformance.InPerformanceMode) return false;
 
@@ -124,7 +125,7 @@ internal class BardPlayDevice : IOutputDevice
         return SendMidiEvent(midiEvent, trackIndex);
     }
 
-    private void HandleToneSwitchEvent(NoteOnEvent noteOnEvent)
+    protected void HandleToneSwitchEvent(NoteOnEvent noteOnEvent)
     {
         // if (CurrentChannel != noteOnEvent.Channel)
         // {
@@ -145,7 +146,7 @@ internal class BardPlayDevice : IOutputDevice
         }
     }
 
-    private unsafe bool SendMidiEvent(MidiEvent midiEvent, int? trackIndex)
+    protected unsafe bool SendMidiEvent(MidiEvent midiEvent, int? trackIndex)
     {
         switch (midiEvent)
         {
@@ -264,15 +265,19 @@ internal class BardPlayDevice : IOutputDevice
         return false;
     }
 
-    static string GetNoteName(NoteEvent note) => $"{note.GetNoteName().ToString().Replace("Sharp", "#")}{note.GetNoteOctave()}";
+    protected static string GetNoteName(NoteEvent note) => $"{note.GetNoteName().ToString().Replace("Sharp", "#")}{note.GetNoteOctave()}";
 
-    public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave)
+
+    public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
     {
-        noteNumber = noteNumber - 48 +
-                     Configuration.config.TransposeGlobal +
-                     (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
+
+        noteNumber = noteNumber - 48;
 
         octave = 0;
+
+            noteNumber += Configuration.config.TransposeGlobal +
+                         (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
+
         if (Configuration.config.AdaptNotesOOR)
         {
             while (noteNumber < 0)
