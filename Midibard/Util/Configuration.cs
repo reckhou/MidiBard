@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Configuration;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
+using MidiBard.Common;
+using Newtonsoft.Json;
 
 namespace MidiBard;
 
@@ -35,74 +40,101 @@ public enum UILang
     CN
 }
 
+[JsonObject(MemberSerialization.OptOut)]
+
 public class Configuration : IPluginConfiguration
 {
-    public static Configuration config;
 
-    public bool useHscmOverride = false;
-    public bool switchInstrumentFromHscmPlaylist = true;
-    public bool useHscmChordTrimming = true;
-    public bool useHscmTransposing = true;
-    public bool useHscmTrimByTrack = false;
-    public bool useHscmCloseOnFinish = false;
-    public bool useHscmSendReadyCheck = false;
-    public bool hscmAutoPlaySong = false;
-    public int hscmOverrideDelay { get; internal set; } = 5000;
-    public bool hscmOfflineTesting { get; internal set; } = false;
+    public static Configuration Create(RefConfiguration config)
+    {
 
-    public string hscmMidiFile;
-    public string hscPlayListPath = "playlists";
+        Configuration obj = new Configuration();
 
-    public int prevSelected;
+        var fields = config.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).ToDictionary(f => f.Name, f => f);
+        var props = obj.GetType().GetProperties().ToDictionary(p => p.Name, p => p);
+
+        foreach (var field in fields)
+        {
+            object val = field.Value.GetValue(config);
+            props[field.Key].SetValue(obj, val);
+        }
+
+        return obj;
+    }
+
+    static Configuration()
+    {
+        config = new RefConfiguration();
+    }
+
+    [Newtonsoft.Json.JsonIgnore]
+    public static RefConfiguration config;
+
+
+    public bool useHscmOverride { get; set; } = true;
+    public bool switchInstrumentFromHscmPlaylist { get; set; } = true;
+    public bool useHscmChordTrimming { get; set; } = true;
+    public bool useHscmTransposing { get; set; } = true;
+    public bool useHscmTrimByTrack { get; set; } = false;
+    public bool useHscmCloseOnFinish { get; set; } = false;
+    public bool useHscmSendReadyCheck { get; set; } = false;
+    public bool hscmAutoPlaySong { get; set; } = false;
+    public int hscmOverrideDelay { get; set; } = 5000;
+    public bool hscmOfflineTesting { get; set; } = false;
+
+    public string hscmMidiFile { get; set; }
+    public string hscPlayListPath { get; set; } = "playlists";
+
+    public int prevSelected { get; set; }
 
     public int Version { get; set; }
-    public bool Debug;
-    public bool DebugAgentInfo;
-    public bool DebugDeviceInfo;
-    public bool DebugOffsets;
-    public bool DebugKeyStroke;
-    public bool DebugMisc;
-    public bool DebugEnsemble;
+    public bool Debug { get; set; }
+    public bool DebugAgentInfo { get; set; }
+    public bool DebugDeviceInfo { get; set; }
+    public bool DebugOffsets { get; set; }
+    public bool DebugKeyStroke { get; set; }
+    public bool DebugMisc { get; set; }
+    public bool DebugEnsemble { get; set; }
 
-    public List<string> Playlist = new List<string>();
+    public List<string> Playlist { get; set; } = new List<string>();
 
-    public float playSpeed = 1f;
-    public float secondsBetweenTracks = 3;
-    public int PlayMode = 0;
-    public int TransposeGlobal = 0;
-    public bool AdaptNotesOOR = true;
+    public float playSpeed { get; set; } = 1f;
+    public float secondsBetweenTracks { get; set; } = 3;
+    public int PlayMode { get; set; } = 0;
+    public int TransposeGlobal { get; set; } = 0;
+    public bool AdaptNotesOOR { get; set; } = true;
 
-    public bool MonitorOnEnsemble = true;
-    public bool AutoOpenPlayerWhenPerforming = true;
-    public int? SoloedTrack = null;
-    public int[] TonesPerTrack = new int[100];
-    public bool EnableTransposePerTrack = false;
-    public int[] TransposePerTrack = new int[100];
-    public int uiLang = DalamudApi.api.PluginInterface.UiLanguage == "zh" ? 1 : 0;
-    public bool showMusicControlPanel = true;
-    public bool showSettingsPanel = true;
-    public int playlistSizeY = 10;
-    public bool miniPlayer = false;
-    public bool enableSearching = false;
+    public bool MonitorOnEnsemble { get; set; } = true;
+    public bool AutoOpenPlayerWhenPerforming { get; set; } = true;
+    public int? SoloedTrack { get; set; } = null;
+    public int[] TonesPerTrack { get; set; } = new int[100];
+    public bool EnableTransposePerTrack { get; set; } = false;
+    public int[] TransposePerTrack { get; set; } = new int[100];
+    public int uiLang { get; set; } = DalamudApi.api.PluginInterface.UiLanguage == "zh" ? 1 : 0;
+    public bool showMusicControlPanel { get; set; } = true;
+    public bool showSettingsPanel { get; set; } = true;
+    public int playlistSizeY { get; set; } = 10;
+    public bool miniPlayer { get; set; } = false;
+    public bool enableSearching { get; set; } = false;
 
-    public bool autoSwitchInstrumentBySongName = true;
-    public bool autoTransposeBySongName = true;
+    public bool autoSwitchInstrumentBySongName { get; set; } = true;
+    public bool autoTransposeBySongName { get; set; } = true;
 
-    public bool bmpTrackNames = false;
-    public bool autoPostPartyChatCommand = false;
+    public bool bmpTrackNames { get; set; } = false;
+    public bool autoPostPartyChatCommand { get; set; } = false;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
 
 
-    public Vector4 themeColor = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E);
-    public Vector4 themeColorDark = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E) * new Vector4(0.25f, 0.25f, 0.25f, 1);
-    public Vector4 themeColorTransparent = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E) * new Vector4(1, 1, 1, 0.33f);
+    public Vector4 themeColor { get; set; } = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E);
+    public Vector4 themeColorDark { get; set; } = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E) * new Vector4(0.25f, 0.25f, 0.25f, 1);
+    public Vector4 themeColorTransparent { get; set; } = ImGui.ColorConvertU32ToFloat4(0x9C60FF8E) * new Vector4(1, 1, 1, 0.33f);
 
-    public bool lazyNoteRelease = true;
-    public string lastUsedMidiDeviceName = "";
-    public bool autoRestoreListening = false;
-    public string lastOpenedFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+    public bool lazyNoteRelease { get; set; } = true;
+    public string lastUsedMidiDeviceName { get; set; } = "";
+    public bool autoRestoreListening { get; set; } = false;
+    public string lastOpenedFolderPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
 
     //public bool autoStartNewListening = false;
 
@@ -116,22 +148,23 @@ public class Configuration : IPluginConfiguration
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    public bool useLegacyFileDialog;
-    public bool PlotTracks;
-    public bool LockPlot;
+    public bool useLegacyFileDialog { get; set; }
+    public bool PlotTracks { get; set; }
+    public bool LockPlot { get; set; }
 
     //public float plotScale = 10f;
 
 
     //public List<EnsembleTrack> EnsembleTracks = new List<EnsembleTrack>();
-    public bool StopPlayingWhenEnsembleEnds = false;
+    public bool StopPlayingWhenEnsembleEnds { get; set; } = false;
     //public bool SyncPlaylist = false;
     //public bool SyncSongSelection = false;
     //public bool SyncMuteUnMute = false;
-    public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
-    public int switchInstrumentDelay = 3000;
+    public GuitarToneMode GuitarToneMode { get; set; } = GuitarToneMode.Off;
+    public int switchInstrumentDelay { get; set; } = 3000;
 
-    [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
+    [Newtonsoft.Json.JsonIgnore]
+    public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
     //public void Save()
     //{
@@ -140,21 +173,29 @@ public class Configuration : IPluginConfiguration
     //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
     //}
 
+    private static string ConfigFilePath => Path.Combine(DalamudApi.api.PluginInterface.GetPluginConfigDirectory(), $"{nameof(MidiBard)}.json");
+
     public static void Init()
     {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
+        config = new RefConfiguration();
+
         ConfigurationPrivate.Init();
     }
 
-    public void Save(bool reloadplaylist = false)
+    public static void Save(bool reloadplaylist = false)
     {
         Task.Run(() =>
         {
             try
             {
                 var startNew = Stopwatch.StartNew();
-                DalamudApi.api.PluginInterface.SavePluginConfig(this);
-                ConfigurationPrivate.config.Save();
+                var outConfig = Create(config);
+
+                MidiBard.DoMutexAction(() => {
+                    FileHelpers.Save(outConfig, ConfigFilePath);
+                    ConfigurationPrivate.config.Save();
+                });
+
                 PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
                 if (reloadplaylist && config.autoPostPartyChatCommand)
                 {
@@ -171,7 +212,8 @@ public class Configuration : IPluginConfiguration
 
     public static void Load()
     {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
+        var loadedConfig = FileHelpers.Load<Configuration>(ConfigFilePath) ?? new Configuration();
+        config = RefConfiguration.Create(loadedConfig);
         ConfigurationPrivate.Load();
     }
 

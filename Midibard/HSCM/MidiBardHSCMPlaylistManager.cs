@@ -70,7 +70,7 @@ namespace MidiBard.HSCM
             try
             {
                 //MidiBard.ConfigMutex.WaitOne();
-                Configuration.config.Save();
+                Configuration.Save();
                 //MidiBard.ConfigMutex.ReleaseMutex();
             }
             catch { }

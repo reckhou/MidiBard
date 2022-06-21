@@ -60,7 +60,7 @@ namespace MidiBard
             Configuration.config.Playlist.Clear();
             FilePathList.Clear();
             CurrentPlaying = -1;
-            Configuration.config.Save(true);
+            Configuration.Save(true);
         }
 
         public static void Remove(int index)
@@ -74,7 +74,7 @@ namespace MidiBard
                 {
                     currentPlaying--;
                 }
-                Configuration.config.Save(true);
+                Configuration.Save(true);
             }
             catch (Exception e)
             {

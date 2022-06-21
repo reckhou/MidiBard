@@ -62,7 +62,7 @@ namespace MidiBard
 
             if (ImGui.Checkbox("Auto restart listening".Localize(), ref Configuration.config.autoRestoreListening))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Try auto restart listening last used midi device".Localize());
@@ -75,14 +75,14 @@ namespace MidiBard
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth() / 3.36f);
             if (ImGuiUtil.EnumCombo("Tone mode".Localize(), ref Configuration.config.GuitarToneMode, _toolTips))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Choose how MidiBard will handle MIDI channels and ProgramChange events(current only affects guitar tone changing)".Localize());
 
             if (ImGui.Checkbox("Tracks visualization".Localize(), ref Configuration.config.PlotTracks))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Draw midi tracks in a new window\nshowing the on/off and actual transposition of each track".Localize());
@@ -90,7 +90,7 @@ namespace MidiBard
 
             if (ImGui.Checkbox("Follow playback".Localize() + $" ({timeWindow:F2}s)###followPlayBack", ref Configuration.config.LockPlot))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             if (ImGui.IsItemHovered())
@@ -104,7 +104,7 @@ namespace MidiBard
 
             if (ImGui.Checkbox("Auto open MidiBard".Localize(), ref Configuration.config.AutoOpenPlayerWhenPerforming))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Open MidiBard window automatically when entering performance mode".Localize());
@@ -115,38 +115,38 @@ namespace MidiBard
 
             if (ImGui.Checkbox("Monitor ensemble".Localize(), ref Configuration.config.MonitorOnEnsemble))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Auto start ensemble when entering in-game party ensemble mode.".Localize());
 
             if (ImGui.Checkbox("Auto switch instrument by track name(BMP Rules)".Localize(), ref Configuration.config.bmpTrackNames))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
 
             if (ImGui.Checkbox("Use HSC override".Localize(), ref Configuration.config.useHscmOverride))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             if (Configuration.config.useHscmOverride && ImGui.InputText("Playlist Path", ref Configuration.config.hscPlayListPath, 1024))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ImGuiUtil.ToolTip("HSC playlist path".Localize());
 
             if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
             if (ImGui.Checkbox("Auto post command".Localize(), ref Configuration.config.autoPostPartyChatCommand))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
 
@@ -175,12 +175,12 @@ namespace MidiBard
             if (ImGui.Combo("UI Language".Localize(), ref Configuration.config.uiLang, uilangStrings, 2))
             {
                 MidiBard.Localizer = new Localizer((UILang)Configuration.config.uiLang);
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             if (ImGui.Checkbox("Auto switch instrument by file name".Localize(), ref Configuration.config.autoSwitchInstrumentBySongName))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
 
             ImGuiUtil.ToolTip("Auto switch instrument on demand. If you need this, \nplease add #instrument name# before file name.\nE.g. #harp#demo.mid".Localize());

@@ -295,7 +295,7 @@ namespace MidiBard
                 {
                     MidiBard.ConfigMutex.WaitOne();
                     Settings.Save();
-                    Configuration.config.Save();
+                    Configuration.Save();
                     MidiBard.ConfigMutex.ReleaseMutex();
                 }
                 catch { }

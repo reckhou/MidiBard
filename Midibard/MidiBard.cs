@@ -323,6 +323,45 @@ public partial class MidiBard : IDalamudPlugin
         }
     }
 
+    public static void DoMutexAction(System.Action action)
+    {
+        action();
+        //Mutex mutex = null;
+        //bool hasHandle = false;
+
+        //try
+        //{
+        //    mutex = Mutex.OpenExisting("MidiBard.Mutex");
+        //}
+        //catch (WaitHandleCannotBeOpenedException)
+        //{
+        //    mutex = new Mutex(true, "MidiBard.Mutex");
+        //}
+        //try
+        //{
+        //    hasHandle = mutex.WaitOne(5000);
+        //    if (hasHandle)
+        //    {
+        //        PluginLog.Information("GOT THE HANDLE OF TEH MUTEX")
+        //        action();
+        //        mutex?.ReleaseMutex();
+        //    }
+        //}
+        //catch (AbandonedMutexException)
+        //{
+        //    // Log the fact that the mutex was abandoned in another process,
+        //    // it will still get acquired
+        //    action();
+        //    hasHandle = true;
+        //}
+        //finally
+        //{
+        //    // edited by acidzombie24, added if statement
+        //    if (hasHandle)
+        //        mutex?.ReleaseMutex();
+        //}
+    }
+
     #region IDisposable Support
 
     void FreeUnmanagedResources()

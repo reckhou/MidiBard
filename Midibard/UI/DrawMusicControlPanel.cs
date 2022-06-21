@@ -46,26 +46,26 @@ namespace MidiBard
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 Configuration.config.secondsBetweenTracks = 0;
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ToolTip("Delay time before play next track.".Localize());
 
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
             if (ImGui.InputInt("Transpose".Localize(), ref Configuration.config.TransposeGlobal, 12))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 Configuration.config.TransposeGlobal = 0;
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ToolTip("Transpose, measured by semitone. \nRight click to reset.".Localize());
             ImGui.PopItemWidth();
 
             if (ImGui.Checkbox("Auto adapt notes".Localize(), ref Configuration.config.AdaptNotesOOR))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ToolTip("Adapt high/low pitch notes which are out of range\r\ninto 3 octaves we can play".Localize());
 
@@ -73,12 +73,12 @@ namespace MidiBard
 
             if (ImGui.Checkbox("Transpose per track".Localize(), ref Configuration.config.EnableTransposePerTrack))
             {
-                Configuration.config.Save();
+                Configuration.Save();
             }
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 Array.Clear(Configuration.config.TransposePerTrack, 0, Configuration.config.TransposePerTrack.Length);
-                Configuration.config.Save();
+                Configuration.Save();
             }
             ToolTip("Transpose per track, right click to reset all tracks' transpose offset back to zero.".Localize());
             //ImGui.SameLine();

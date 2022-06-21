@@ -64,7 +64,7 @@ public partial class PluginUI
                         if (ImGui.Checkbox("##checkbox", ref ConfigurationPrivate.config.EnabledTracks[i]))
                         {
                             JudgeSwitchInstrument(i);
-                            Configuration.config.Save();
+                            Configuration.Save();
                         }
 
                         if (Configuration.config.EnableTransposePerTrack)
