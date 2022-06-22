@@ -10,6 +10,7 @@ using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using System.Threading.Tasks;
 using static MidiBard.MidiBard;
+using MidiBard.Managers;
 
 namespace MidiBard
 {

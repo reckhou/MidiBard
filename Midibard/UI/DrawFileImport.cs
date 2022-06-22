@@ -10,6 +10,7 @@ using Dalamud.Logging;
 using ImGuiNET;
 using Microsoft.Win32;
 using MidiBard.DalamudApi;
+using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 

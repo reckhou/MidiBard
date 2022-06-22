@@ -51,7 +51,7 @@ public partial class MidiBard : IDalamudPlugin
     public static bool Debug = false;
 #endif
 
-            public static Mutex ConfigMutex;
+    private static Mutex configMutex;
     internal static BardPlayDevice CurrentOutputDevice { get; set; }
     internal static MidiFile CurrentOpeningMidiFile { get; }
     internal static Playback CurrentPlayback { get; set; }
@@ -144,7 +144,7 @@ public partial class MidiBard : IDalamudPlugin
 
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
-        CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.BardPlayDevice() : new BardPlayDevice());
+        CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.MidiControl.BardPlayDevice() : new BardPlayDevice());
         InputDeviceManager.ScanMidiDeviceThread.Start();
 
         Ui = new PluginUI();
@@ -158,7 +158,7 @@ public partial class MidiBard : IDalamudPlugin
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout;
 
-        ConfigMutex = new Mutex(false, "MidiBard.Mutex");
+        configMutex = new Mutex(false, "MidiBard.Mutex");
 
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());
@@ -326,25 +326,16 @@ public partial class MidiBard : IDalamudPlugin
     public static void DoMutexAction(System.Action action)
     {
         action();
-        //Mutex mutex = null;
         //bool hasHandle = false;
 
         //try
         //{
-        //    mutex = Mutex.OpenExisting("MidiBard.Mutex");
-        //}
-        //catch (WaitHandleCannotBeOpenedException)
-        //{
-        //    mutex = new Mutex(true, "MidiBard.Mutex");
-        //}
-        //try
-        //{
-        //    hasHandle = mutex.WaitOne(5000);
+        //    hasHandle = configMutex.WaitOne(5000);
         //    if (hasHandle)
         //    {
-        //        PluginLog.Information("GOT THE HANDLE OF TEH MUTEX")
+        //        PluginLog.Information("GOT THE HANDLE OF TEH MUTEX");
         //        action();
-        //        mutex?.ReleaseMutex();
+        //        configMutex?.ReleaseMutex();
         //    }
         //}
         //catch (AbandonedMutexException)
@@ -358,7 +349,7 @@ public partial class MidiBard : IDalamudPlugin
         //{
         //    // edited by acidzombie24, added if statement
         //    if (hasHandle)
-        //        mutex?.ReleaseMutex();
+        //        configMutex?.ReleaseMutex();
         //}
     }
 

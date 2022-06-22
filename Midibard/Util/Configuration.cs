@@ -53,7 +53,7 @@ public class Configuration : IPluginConfiguration
         var fields = config.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).ToDictionary(f => f.Name, f => f);
         var props = obj.GetType().GetProperties().ToDictionary(p => p.Name, p => p);
 
-        foreach (var field in fields)
+        foreach (var field in fields.ToArray())
         {
             object val = field.Value.GetValue(config);
             props[field.Key].SetValue(obj, val);
@@ -81,7 +81,7 @@ public class Configuration : IPluginConfiguration
     public bool hscmAutoPlaySong { get; set; } = false;
     public int hscmOverrideDelay { get; set; } = 5000;
     public bool hscmOfflineTesting { get; set; } = false;
-
+    public bool hscmShowUI { get; set; } = false;
     public string hscmMidiFile { get; set; }
     public string hscPlayListPath { get; set; } = "playlists";
 

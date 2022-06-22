@@ -52,10 +52,13 @@ namespace MidiBard.HSC
             ImGuiUtil.AddNotification(NotificationType.Success, $"Performance mode closed");
         }
 
-        public static bool SwitchInstrumentFromSong()
+        public static bool SwitchInstrumentFromSong(bool force =false)
         {
             try
             {
+                if (!Configuration.config.switchInstrumentFromHscmPlaylist && !force)
+                    return MidiBard.CurrentInstrument != 0;
+
                 if (HSC.Settings.SwitchInstrumentFailed)
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");

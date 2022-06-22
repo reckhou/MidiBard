@@ -27,7 +27,7 @@ public class RefConfiguration
         var fields = obj.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).ToDictionary(f => f.Name, f => f);
         var props = config.GetType().GetProperties().ToDictionary(p => p.Name, p => p);
 
-        foreach (var prop in props)
+        foreach (var prop in props.ToArray())
         {
             object val = prop.Value.GetValue(config);
             fields[prop.Key].SetValue(obj, val);
@@ -46,6 +46,7 @@ public class RefConfiguration
     public bool hscmAutoPlaySong = false;
     public int hscmOverrideDelay = 5000;
     public bool hscmOfflineTesting = false;
+    public bool hscmShowUI;
 
     public string hscmMidiFile;
     public string hscPlayListPath = "playlists";

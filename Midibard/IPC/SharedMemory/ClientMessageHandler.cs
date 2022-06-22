@@ -19,6 +19,7 @@ namespace MidiBard
         private static MessageHandler msgHandler;
         private static bool hscmClientHandlerRunning;
         private static EventWaitHandle hscmWaitHandle;
+        private static EventWaitHandle waitHandle;
 
         private static void StopClientMessageHandler()
         {
@@ -51,7 +52,7 @@ namespace MidiBard
 
                 PluginLog.Information($"Started client message event handling.");
 
-                while (Configuration.config.useHscmOverride && hscmClientHandlerRunning && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+                while (hscmClientHandlerRunning && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
                     if (!hscmClientHandlerRunning)
                     {
@@ -63,7 +64,7 @@ namespace MidiBard
 
                     PluginLog.Information($"Client waiting for message.");
 
-                    bool success = hscmWaitHandle.WaitOne();
+                    bool success = waitHandle.WaitOne();
                     PluginLog.Information($"Client message sent.");
 
                     if (success)
@@ -74,7 +75,7 @@ namespace MidiBard
                         break;
                     }
 
-                    success = hscmWaitHandle.Reset();
+                    success = waitHandle.Reset();
                     if (!success)
                     {
                         PluginLog.Error($"An error occured when releasing event wait handle");
@@ -96,6 +97,10 @@ namespace MidiBard
         {
             try
             {
+
+                if (!Configuration.config.useHscmOverride)
+                    return;
+
                 int[] buffer = new int[2];
                 int total = Common.IPC.SharedMemory.Read(buffer, 2);
                 PluginLog.Information($"Buffer: {buffer[0]} {buffer[1]}");

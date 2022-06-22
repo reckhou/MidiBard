@@ -20,7 +20,6 @@ namespace MidiBard.HSC.Models.Settings
 
         public GeneralSettings GeneralSettings { get; set; }
 
-
         public string CurrentSong { get; set; }
 
 

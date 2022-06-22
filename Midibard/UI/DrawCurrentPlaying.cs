@@ -5,6 +5,7 @@ using Dalamud.Logging;
 using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
+using MidiBard.Managers;
 
 namespace MidiBard;
 
