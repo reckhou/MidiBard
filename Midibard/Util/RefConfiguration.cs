@@ -30,13 +30,19 @@ public class RefConfiguration
         foreach (var prop in props.ToArray())
         {
             object val = prop.Value.GetValue(config);
-            fields[prop.Key].SetValue(obj, val);
+            if (fields.ContainsKey(prop.Key))
+            {
+                fields[prop.Key].SetValue(obj, val);
+            } else
+            {
+                PluginLog.LogInformation($"{prop.Key} doesn't exist in config, skipping...");
+            }
         }
 
         return obj;
     }
 
-    public bool useHscmOverride = true;
+    public bool useHscmOverride = false;
     public bool switchInstrumentFromHscmPlaylist = true;
     public bool useHscmChordTrimming = true;
     public bool useHscmTransposing = true;

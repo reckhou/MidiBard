@@ -67,7 +67,6 @@ public class Configuration : IPluginConfiguration
         config = new RefConfiguration();
     }
 
-    [Newtonsoft.Json.JsonIgnore]
     public static RefConfiguration config;
 
 
@@ -213,7 +212,11 @@ public class Configuration : IPluginConfiguration
     {
         var loadedConfig = FileHelpers.Load<Configuration>(ConfigFilePath) ?? new Configuration();
         config = RefConfiguration.Create(loadedConfig);
-        ConfigurationPrivate.Load();
+        LoadPrivate();
     }
 
+    public static void LoadPrivate()
+    {
+        ConfigurationPrivate.Load();
+    }
 }
