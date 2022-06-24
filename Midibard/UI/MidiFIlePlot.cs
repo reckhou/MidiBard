@@ -12,6 +12,7 @@ using ImPlotNET;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control;
+using MidiBard.Managers;
 
 namespace MidiBard;
 
@@ -124,7 +125,7 @@ public partial class PluginUI
 
                     foreach (var (start, end, noteNumber) in notes.Where(i => i.end > xMin && i.start < xMax))
                     {
-                        var translatedNoteNum = BardPlayDevice.GetTranslatedNoteNum(noteNumber, trackInfo.Index, out _, true) + 48;
+                        var translatedNoteNum = BardPlayDevice.GetTranslatedNote(noteNumber, trackInfo.Index, out _, true) + 48;
                         drawList.AddRectFilled(
                             ImPlot.PlotToPixels(start, translatedNoteNum + 1),
                             ImPlot.PlotToPixels(end, translatedNoteNum),

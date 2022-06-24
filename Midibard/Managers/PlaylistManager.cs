@@ -17,10 +17,11 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Tools;
 using MidiBard.Control.CharacterControl;
 using MidiBard.DalamudApi;
+using MidiBard.HSC;
 using MidiBard.Managers.Ipc;
 using Newtonsoft.Json;
 
-namespace MidiBard
+namespace MidiBard.Managers
 {
 
     static class PlaylistManager
@@ -60,7 +61,7 @@ namespace MidiBard
             Configuration.config.Playlist.Clear();
             FilePathList.Clear();
             CurrentPlaying = -1;
-            Configuration.config.Save(true);
+            Configuration.Save(true);
         }
 
         public static void Remove(int index)
@@ -74,7 +75,7 @@ namespace MidiBard
                 {
                     currentPlaying--;
                 }
-                Configuration.config.Save(true);
+                Configuration.Save(true);
             }
             catch (Exception e)
             {
@@ -183,6 +184,16 @@ namespace MidiBard
 
         internal static async Task<MidiFile> LoadMidiFile(string filePath)
         {
+            var midiFile = await _LoadMidiFile(filePath);
+
+            if (Configuration.config.useHscmOverride)
+                MidiProcessor.Process(midiFile, Path.GetFileNameWithoutExtension(filePath));
+
+            return midiFile;
+        }
+
+        private static async Task<MidiFile> _LoadMidiFile(string filePath)
+        {
             PluginLog.Debug($"[LoadMidiFile] -> {filePath} START");
             MidiFile loaded = null;
             var stopwatch = Stopwatch.StartNew();
@@ -266,7 +277,6 @@ namespace MidiBard
 
             return loaded;
         }
-
 
         internal static async Task<MidiFile> LoadMMSongFile(string filePath)
         {

@@ -33,5 +33,8 @@ namespace MidiBard.HSC.Models.Settings
 
         public bool AutoPlayOnSelect { get; set; }
 
+        public bool ShowMidiBardUI { get; set; }
+        public bool EnableMidiBardControl { get; set; }
+
     }
 }

@@ -9,11 +9,51 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MidiBard.Common;
+using MidiBard.IPC.SharedMemory;
 
 namespace MidiBard
 {
     public partial class MidiBard
     {
+        private static MessageHandler msgHandler;
+        private static EventWaitHandle hscmWaitHandle;
+        private static EventWaitHandle waitHandle;
+
+        private static bool hscmConnected;
+        private static bool hscmOverrideStarted;
+
+        private static void StartHscmScanner()
+        {
+            ImGuiUtil.AddNotification(NotificationType.Info, $"Connecting to HSCM.");
+
+            while (hscmOverrideStarted && DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting)
+            {
+                if (!hscmOverrideStarted)
+                {
+                    PluginLog.Information($"Stopping HSCM scanner.");
+                    break;
+                }
+                  
+                bool hscmFound = !ProcessFinder.Find("hscm").IsNullOrEmpty();
+
+                if (!hscmFound)
+                {
+                    if (hscmConnected)
+                    {
+                        PluginLog.Information("HSCM exited. stopping client message handler.");
+                        StopClientMessageHandler();
+                    }
+                }
+
+                if (hscmFound)
+                {
+                    if (!hscmConnected)
+                        TryConnectHscm();
+                }
+                Thread.Sleep(1000);
+            }
+        }
 
         private static void HSCMCleanup()
         {
@@ -21,32 +61,21 @@ namespace MidiBard
             {
                 PluginLog.Information($"Stopping HSCM override and cleaning up.");
 
+                hscmOverrideStarted = false;
+
                 StopClientMessageHandler();
 
-                hscmWaitHandle?.Set();
+                waitHandle?.Set();
+                waitHandle?.Close();
+                hscmWaitHandle?.Close();
 
                 Common.IPC.SharedMemory.Clear();
                 Common.IPC.SharedMemory.Close();
-                hscmWaitHandle?.Close();
 
                 DalamudApi.api.ClientState.Login -= ClientState_Login;
                 DalamudApi.api.ClientState.Logout -= ClientState_Logout;
 
-                hscmFileWatcher?.Stop();
-                hscmFileWatcher?.Dispose();
-                hscmFileWatcher = null;
-
-                if (msgHandler != null)
-                {
-                    msgHandler.ChangeSongMessageReceived -= MsgHandler_ChangeSongMessageReceived;
-                    msgHandler.ReloadPlaylistMessageReceived -= MsgHandler_ReloadPlaylistMessageReceived;
-                    msgHandler.ReloadPlaylistSettingsMessageReceived -= MsgHandler_ReloadPlaylistSettingsMessageReceived;
-                    msgHandler.SwitchInstrumentsMessageReceived -= MsgHandler_SwitchInstrumentsMessageReceived;
-                    msgHandler.RestartHscmOverrideMessageReceived -= MsgHandler_RestartHscmOverrideMessageReceived;
-                    msgHandler.ClosePerformanceMessageReceived -= MsgHandler_ClosePerformanceMessageReceived;
-
-                    msgHandler = null;
-                }
+                DisposeHSCMConfigFileWatcher();
 
                 HSC.Settings.Cleanup();
             }
@@ -82,14 +111,14 @@ namespace MidiBard
                 PopulateConfigFromMidiBardSettings();
                 UpdateClientInfo();
 
-                HSCMPlaylistManager.Reload(loggedIn);
-                HSCMPlaylistManager.ReloadSettingsAndSwitch(loggedIn);
-
-                WaitForHscm();
-
-                StartClientMessageHander();
+                HSCM.PlaylistManager.Reload(loggedIn);
+                HSCM.PlaylistManager.ReloadSettingsAndSwitch(loggedIn);
 
                 ImGuiUtil.AddNotification(NotificationType.Success, $"HSCM override started success.");
+
+                hscmOverrideStarted = true;
+
+                Task.Run(() => StartHscmScanner());
             }
             catch (Exception ex)
             {
@@ -97,20 +126,44 @@ namespace MidiBard
             }
         }
 
-        private static void WaitForHscm()
+        private static void TryConnectHscm()
         {
-            ImGuiUtil.AddNotification(NotificationType.Info, $"Connecting to HSCM.");
-            hscmWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, $"MidiBard.WaitEvent.{HSC.Settings.CharIndex}");
-            if (hscmWaitHandle == null)
+            hscmWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, $"HSCM.WaitEvent.{HSC.Settings.CharIndex}");
+
+            try
             {
-                ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot connect to HSCM.");
-                PluginLog.Error($"An error occured opening event wait handle.");
+                waitHandle = EventWaitHandle.OpenExisting($"MidiBard.WaitEvent.{HSC.Settings.CharIndex}");
+            }
+            catch (Exception ex) 
+            {
+                //PluginLog.Error($"An error occured opening wait event. Message: {ex.Message}");
                 return;
             }
-            bool success = hscmWaitHandle.WaitOne();
-            ImGuiUtil.AddNotification(NotificationType.Success, $"Connected to HSCM.");
-        }
 
+            try
+            {
+                bool opened = Common.IPC.SharedMemory.CreateOrOpen();
+
+                if (!opened)
+                {
+                    //ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot connect to HSCM");
+                    PluginLog.Error($"An error occured opening or accessing shared memory.");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error($"An error occured opening or accessing shared memory. Message: {ex.Message}");
+                return;
+            }
+
+            hscmConnected = true;
+
+            hscmWaitHandle.Set();//signal HSCM we are connected
+            ImGuiUtil.AddNotification(NotificationType.Success, $"Connected to HSCM.");
+
+            Task.Run(() => StartClientMessageHander());
+        }
 
         private static void PopulateConfigFromMidiBardSettings()
         {
@@ -121,6 +174,8 @@ namespace MidiBard
             Configuration.config.useHscmCloseOnFinish = Settings.AppSettings.GeneralSettings.CloseOnFinish;
             Configuration.config.useHscmSendReadyCheck = Settings.AppSettings.GeneralSettings.SendReadyCheckOnEquip;
             Configuration.config.hscmAutoPlaySong = Settings.AppSettings.GeneralSettings.AutoPlayOnSelect;
+            Configuration.config.useHscmOverride = Settings.AppSettings.GeneralSettings.EnableMidiBardControl;
+            Configuration.config.hscmShowUI = Settings.AppSettings.GeneralSettings.ShowMidiBardUI;
 
             PluginLog.Information($"useHscmChordTrimming: {Configuration.config.useHscmChordTrimming}");
             PluginLog.Information($"useHscmTrimByTrack: {Configuration.config.useHscmTrimByTrack}");
@@ -129,6 +184,8 @@ namespace MidiBard
             PluginLog.Information($"useHscmCloseOnFinish: {Configuration.config.useHscmCloseOnFinish}");
             PluginLog.Information($"useHscmSendReadyCheck: {Configuration.config.useHscmSendReadyCheck}");
             PluginLog.Information($"hscmAutoPlaySong: {Configuration.config.hscmAutoPlaySong}");
+            PluginLog.Information($"useHscmOverride: {Configuration.config.useHscmOverride}");
+            PluginLog.Information($"hscmShowUI: {Configuration.config.hscmShowUI}");
         }
 
         private static void UpdateClientInfo()

@@ -4,6 +4,7 @@ using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
+using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using static MidiBard.ImGuiUtil;
 

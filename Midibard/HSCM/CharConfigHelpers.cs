@@ -18,7 +18,7 @@ namespace MidiBard
         public static int GetCharIndex(string charName)
         {
             string filePath = Path.Join(HSC.Settings.CurrentAppPath, CharConfigFileName);
-            var charConfig =  FileHelpers.Load<CharacterConfig>(filePath);
+            var charConfig = Common.FileHelpers.Load<CharacterConfig>(filePath);
 
             if (charConfig == null || string.IsNullOrEmpty(charName))
                 return -1;

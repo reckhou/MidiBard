@@ -1,4 +1,5 @@
-﻿using MidiBard.HSC.Helpers;
+﻿using MidiBard.Common;
+using MidiBard.HSC.Helpers;
 using MidiBard.HSC.Models.Settings;
 using MidiBard.HSC.Music;
 using System;

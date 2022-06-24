@@ -20,6 +20,8 @@ using MidiBard.Util;
 using static MidiBard.MidiBard;
 using System.IO;
 using MidiBard.Common;
+using MidiBard.Managers;
+using MidiBard.HSC;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -156,7 +158,7 @@ public static class FilePlayback
             PluginLog.Information($"  - [{i}]: {ProgramNames.GetGMProgramName((byte)prog)} ({prog})");
         }
 
-        playback.Finished += Playback_Finished;
+        playback.Finished += Configuration.config.useHscmOverride ? HSCM_Playback_Finished : MidiBard_Playback_Finished;
         PluginLog.Information($"[LoadPlayback] -> {trackName} OK! in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
         return playback;
@@ -215,7 +217,7 @@ public static class FilePlayback
         }
     }
 
-    private static void Playback_Finished(object sender, EventArgs e)
+    private static void MidiBard_Playback_Finished(object sender, EventArgs e)
     {
         Task.Run(async () =>
         {
@@ -308,11 +310,171 @@ public static class FilePlayback
         });
     }
 
+
+
+    private static void HSCM_Playback_Finished(object sender, EventArgs e)
+    {
+        Task.Run(async() =>
+        {
+            try
+            {
+                if (MidiBard.AgentMetronome.EnsembleModeRunning)
+                {
+                    if (Configuration.config.useHscmCloseOnFinish)
+                    {
+                        PerformHelpers.WaitUntilChanged(() => !MidiBard.AgentMetronome.EnsembleModeRunning, 100, 5000);
+                        HSC.PerformHelpers.ClosePerformance();
+                    }
+                }
+                else
+                {
+                    if (Configuration.config.useHscmCloseOnFinish)
+                        HSC.PerformHelpers.ClosePerformance();
+                }
+
+                FilePlayback.PerformWaiting(Configuration.config.secondsBetweenTracks);
+                if (needToCancel)
+                {
+                    needToCancel = false;
+                    return;
+                }
+
+                switch ((PlayMode)Configuration.config.PlayMode)
+                {
+                    case PlayMode.Single:
+                        break;
+
+                    case PlayMode.SingleRepeat:
+                        CurrentPlayback.MoveToStart();
+                        Control.MidiControl.MidiPlayerControl.DoPlay();
+                        break;
+
+                    case PlayMode.ListOrdered:
+                        if (Managers.PlaylistManager.CurrentPlaying + 1 < Managers.PlaylistManager.FilePathList.Count)
+                        {
+                            if (await LoadPlayback(Managers.PlaylistManager.CurrentPlaying + 1, true))
+                            {
+                            }
+                        }
+
+                        break;
+
+                    case PlayMode.ListRepeat:
+                        if (Managers.PlaylistManager.CurrentPlaying + 1 < Managers.PlaylistManager.FilePathList.Count)
+                        {
+                            if (await LoadPlayback(Managers.PlaylistManager.CurrentPlaying + 1, true))
+                            {
+                            }
+                        }
+                        else
+                        {
+                            if (await LoadPlayback(0, true))
+                            {
+                            }
+                        }
+
+                        break;
+
+                    case PlayMode.Random:
+
+                        if (Managers.PlaylistManager.FilePathList.Count == 1)
+                        {
+                            CurrentPlayback.MoveToStart();
+                            break;
+                        }
+
+                        try
+                        {
+                            var r = new Random();
+                            int nexttrack;
+                            do
+                            {
+                                nexttrack = r.Next(0, Managers.PlaylistManager.FilePathList.Count);
+                            } while (nexttrack == Managers.PlaylistManager.CurrentPlaying);
+
+                            if (await LoadPlayback(nexttrack, true))
+                            {
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            PluginLog.Error(exception, "error when random next");
+                        }
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch (Exception exception)
+            {
+                PluginLog.Error(exception, "Unexpected exception when Playback finished.");
+            }
+        });
+    }
+
     /// <summary>
     /// for now just assigns ensemble member to tracks from hsc playlist before playback for current MIDI
     /// </summary>
 
     internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
+    {
+        if (Configuration.config.useHscmOverride)
+            return await HSCM_LoadPlayback(index, startPlaying);
+        return await MidiBard_LoadPlayback(index, startPlaying, switchInstrument);
+    }
+
+    private static async Task<bool> HSCM_LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
+    {
+        var wasPlaying = IsPlaying;
+        CurrentPlayback?.Dispose();
+        CurrentPlayback = null;
+
+        MidiFile midiFile = await PlaylistManager.LoadMidiFile(index);
+        if (midiFile == null)
+        {
+            // delete file if can't be loaded(likely to be deleted locally)
+            PluginLog.Debug($"[LoadPlayback] removing {index}");
+            //PluginLog.Debug($"[LoadPlayback] removing {PlaylistManager.FilePathList[index].path}");
+            Managers.PlaylistManager.FilePathList.RemoveAt(index);
+            return false;
+        }
+        else
+        {
+            CurrentPlayback = GetFilePlayback(midiFile, Managers.PlaylistManager.FilePathList[index].displayName);
+            Ui.RefreshPlotData();
+            Managers.PlaylistManager.CurrentPlaying = index;
+
+            HSCM.PlaylistManager.ApplySettings(true);//this should allow the HSCM playlist to be looped 
+
+            if (switchInstrument)
+            {
+                try
+                {
+                    PerformHelpers.SwitchInstrumentFromSong();
+                }
+                catch (Exception e)
+                {
+                    PluginLog.Warning(e.ToString());
+                }
+            }
+
+            if (DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)
+                return true;
+
+            if (MidiBard.CurrentInstrument != 0 && (wasPlaying || startPlaying))
+                Control.MidiControl.MidiPlayerControl.DoPlay();
+
+            //if (revertTime && wasPlaying)
+            //    CurrentPlayback.MoveToTime(HSC.Settings.PrevTime);
+            PrepareLyrics(index);
+
+            return true;
+        }
+    }
+
+    private static async Task<bool> MidiBard_LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
         var wasPlaying = IsPlaying;
         CurrentPlayback?.Dispose();
@@ -347,33 +509,41 @@ public static class FilePlayback
             }
 
 
-            string[] pathArray = PlaylistManager.FilePathList[index].path.Split("\\");
-            string LrcPath = "";
-            string fileName = Path.GetFileNameWithoutExtension(PlaylistManager.FilePathList[index].path) + ".lrc";
-            for (int i = 0; i < pathArray.Length - 1; i++)
-            {
-                LrcPath += pathArray[i];
-                LrcPath += "\\";
-            }
-          
-            LrcPath += fileName;
-            Lrc lrc = Lrc.InitLrc(LrcPath);
-            MidiPlayerControl.LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
-#if DEBUG
-            PluginLog.LogVerbose($"Title: {lrc.Title}, Artist: {lrc.Artist}, Album: {lrc.Album}, LrcBy: {lrc.LrcBy}, Offset: {lrc.Offset}");
-            foreach(var pair in lrc.LrcWord)
-            {
-                PluginLog.LogVerbose($"{pair.Key}, {pair.Value}");
-            }
-
-#endif
             if (switchInstrument && (wasPlaying || startPlaying))
             {
                 MidiPlayerControl.DoPlay();
             }
 
+            PrepareLyrics(index);
+
             return true;
         }
+    }
+
+    private static void PrepareLyrics(int index)
+    {
+
+
+        string[] pathArray = PlaylistManager.FilePathList[index].path.Split("\\");
+        string LrcPath = "";
+        string fileName = Path.GetFileNameWithoutExtension(PlaylistManager.FilePathList[index].path) + ".lrc";
+        for (int i = 0; i < pathArray.Length - 1; i++)
+        {
+            LrcPath += pathArray[i];
+            LrcPath += "\\";
+        }
+
+        LrcPath += fileName;
+        Lrc lrc = Lrc.InitLrc(LrcPath);
+        MidiPlayerControl.LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
+#if DEBUG
+            PluginLog.LogVerbose($"Title: {lrc.Title}, Artist: {lrc.Artist}, Album: {lrc.Album}, LrcBy: {lrc.LrcBy}, Offset: {lrc.Offset}");
+            foreach (var pair in lrc.LrcWord)
+            {
+                PluginLog.LogVerbose($"{pair.Key}, {pair.Value}");
+            }
+
+#endif
     }
 
     private static bool needToCancel { get; set; } = false;

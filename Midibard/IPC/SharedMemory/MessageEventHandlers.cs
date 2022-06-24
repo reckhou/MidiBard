@@ -15,25 +15,25 @@ namespace MidiBard
         private static void MsgHandler_ChangeSongMessageReceived(object sender, int index)
         {
             PluginLog.Information($"Received change song '{index}' message.");
-            Task.Run(() => HSCMPlaylistManager.ChangeSong(index));
+            Task.Run(() => HSCM.PlaylistManager.ChangeSong(index));
         }
 
         private static void MsgHandler_ReloadPlaylistSettingsMessageReceived(object sender, EventArgs e)
         {
             PluginLog.Information($"Received reload playlist settings message.");
-            Task.Run(() => HSCMPlaylistManager.ReloadSettingsAndSwitch());
+            Task.Run(() => HSCM.PlaylistManager.ReloadSettingsAndSwitch());
         }
 
         private static void MsgHandler_ReloadPlaylistMessageReceived(object sender, EventArgs e)
         {
             PluginLog.Information($"Received reload playlist message.");
-            Task.Run(() => HSCMPlaylistManager.Reload());
+            Task.Run(() => HSCM.PlaylistManager.Reload());
         }
 
         private static void MsgHandler_SwitchInstrumentsMessageReceived(object sender, EventArgs e)
         {
             PluginLog.Information($"Received switch instruments message.");
-            Task.Run(() => HSCMPlaylistManager.SwitchInstruments());
+            Task.Run(() => HSCM.PlaylistManager.SwitchInstruments());
         }
 
         private static void MsgHandler_RestartHscmOverrideMessageReceived(object sender, EventArgs e)

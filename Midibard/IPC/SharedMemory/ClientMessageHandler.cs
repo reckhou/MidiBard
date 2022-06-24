@@ -16,30 +16,27 @@ namespace MidiBard
 {
     public partial class MidiBard
     {
-        private static MessageHandler msgHandler;
-        private static bool hscmClientHandlerRunning;
-        private static EventWaitHandle hscmWaitHandle;
 
         private static void StopClientMessageHandler()
         {
-            hscmClientHandlerRunning = false;
+            hscmConnected = false;
+
+            msgHandler.ChangeSongMessageReceived -= MsgHandler_ChangeSongMessageReceived;
+            msgHandler.ReloadPlaylistMessageReceived -= MsgHandler_ReloadPlaylistMessageReceived;
+            msgHandler.ReloadPlaylistSettingsMessageReceived -= MsgHandler_ReloadPlaylistSettingsMessageReceived;
+            msgHandler.SwitchInstrumentsMessageReceived -= MsgHandler_SwitchInstrumentsMessageReceived;
+            msgHandler.RestartHscmOverrideMessageReceived -= MsgHandler_RestartHscmOverrideMessageReceived;
+            msgHandler.ClosePerformanceMessageReceived -= MsgHandler_ClosePerformanceMessageReceived;
+
+            msgHandler = null;
         }
 
         private static void StartClientMessageHander()
         {
             try
             {
-                hscmClientHandlerRunning = true;
+                hscmConnected = true;
 
-                bool opened = Common.IPC.SharedMemory.CreateOrOpen();
-
-                if (!opened)
-                {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot connect to HSCM");
-                    PluginLog.Error($"An error occured opening or accessing shared memory.");
-                    return;
-                }
-  
                 msgHandler = new IPC.SharedMemory.MessageHandler();
 
                 msgHandler.ChangeSongMessageReceived += MsgHandler_ChangeSongMessageReceived;
@@ -51,9 +48,9 @@ namespace MidiBard
 
                 PluginLog.Information($"Started client message event handling.");
 
-                while (Configuration.config.useHscmOverride && hscmClientHandlerRunning && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+                while (hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
-                    if (!hscmClientHandlerRunning)
+                    if (!hscmConnected)
                     {
                         PluginLog.Information($"Stopping client message event handler.");
                         // Clean up here, then...
@@ -63,7 +60,7 @@ namespace MidiBard
 
                     PluginLog.Information($"Client waiting for message.");
 
-                    bool success = hscmWaitHandle.WaitOne();
+                    bool success = waitHandle.WaitOne();
                     PluginLog.Information($"Client message sent.");
 
                     if (success)
@@ -74,7 +71,7 @@ namespace MidiBard
                         break;
                     }
 
-                    success = hscmWaitHandle.Reset();
+                    success = waitHandle.Reset();
                     if (!success)
                     {
                         PluginLog.Error($"An error occured when releasing event wait handle");
@@ -96,6 +93,10 @@ namespace MidiBard
         {
             try
             {
+
+                if (!Configuration.config.useHscmOverride)
+                    return;
+
                 int[] buffer = new int[2];
                 int total = Common.IPC.SharedMemory.Read(buffer, 2);
                 PluginLog.Information($"Buffer: {buffer[0]} {buffer[1]}");

@@ -10,6 +10,7 @@ using Dalamud.Logging;
 using ImGuiNET;
 using Microsoft.Win32;
 using MidiBard.DalamudApi;
+using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 
@@ -69,7 +70,7 @@ public partial class PluginUI
                     {
                         await Coroutine.WaitUntil(() => array != null, 5000);
                         await PlaylistManager.AddAsync(array);
-                        Configuration.config.Save(true);
+                        Configuration.Save(true);
                     });
                 }
                 catch (Exception e)
@@ -147,7 +148,7 @@ public partial class PluginUI
                     Task.Run(async () =>
                     {
                         await PlaylistManager.AddAsync(filePath);
-                        Configuration.config.Save(true);
+                        Configuration.Save(true);
                     });
                 }
 
@@ -171,7 +172,7 @@ public partial class PluginUI
                 if (b) Task.Run(async () =>
                 {
                     await PlaylistManager.AddAsync(strings);
-                    Configuration.config.Save(true);
+                    Configuration.Save(true);
                 });
 
                 _isImportRunning = false;

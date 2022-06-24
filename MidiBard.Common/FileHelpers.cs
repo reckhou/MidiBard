@@ -9,7 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MidiBard.HSC
+namespace MidiBard.Common
 {
     public class FileHelpers
     {
