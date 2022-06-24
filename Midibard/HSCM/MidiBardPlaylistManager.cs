@@ -39,7 +39,9 @@ namespace MidiBard.HSCM
             var count = filePaths.Length;
             var success = 0;
 
-            foreach (var path in filePaths.Where(p => !Managers.PlaylistManager.FilePathList.Select(f => f.path).Contains(p)))
+            filePaths = filePaths.ToArray().Where(p => !Managers.PlaylistManager.FilePathList.Select(f => f.path).Contains(p)).ToArray();
+
+            foreach (var path in filePaths)
             {
                 try
                 {

@@ -48,9 +48,9 @@ namespace MidiBard
 
                 PluginLog.Information($"Started client message event handling.");
 
-                while (hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+                while (Configuration.config.useHscmOverride && hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
-                    if (!hscmConnected)
+                    if (!hscmConnected || !Configuration.config.useHscmOverride)
                     {
                         PluginLog.Information($"Stopping client message event handler.");
                         // Clean up here, then...
@@ -60,23 +60,34 @@ namespace MidiBard
 
                     PluginLog.Information($"Client waiting for message.");
 
-                    bool success = waitHandle.WaitOne();
-                    PluginLog.Information($"Client message sent.");
-
-                    if (success)
-                        ConsumeMessage();
-                    else
+                    try
                     {
-                        PluginLog.Error($"An error occured waiting on event signal");
+                        bool success = waitHandle.WaitOne();
+                        PluginLog.Information($"Client message sent.");
+
+                        if (success)
+                            ConsumeMessage();
+                        else
+                        {
+                            PluginLog.Error($"An error occured waiting on event signal");
+                            break;
+                        }
+
+                        success = waitHandle.Reset();
+                        if (!success)
+                        {
+                            PluginLog.Error($"An error occured when releasing event wait handle");
+                            break;
+                        }
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        PluginLog.Error($"HSCM Disconnected. Stopping client message event handler.");
+                        StopClientMessageHandler();
+                        hscmWaitHandle.Set();
                         break;
                     }
 
-                    success = waitHandle.Reset();
-                    if (!success)
-                    {
-                        PluginLog.Error($"An error occured when releasing event wait handle");
-                        break;
-                    }
                     Thread.Sleep(10);
                 }
 
@@ -93,10 +104,6 @@ namespace MidiBard
         {
             try
             {
-
-                if (!Configuration.config.useHscmOverride)
-                    return;
-
                 int[] buffer = new int[2];
                 int total = Common.IPC.SharedMemory.Read(buffer, 2);
                 PluginLog.Information($"Buffer: {buffer[0]} {buffer[1]}");
