@@ -1,12 +1,12 @@
 {
-  "Author": "Ori Beastle, SpuriousSnail86 Original version by akira0245.",
+  "Author": "akira0245, Ori Beastle, SpuriousSnail86.",
   "Name": "MidiBard 2",
   "Punchline": "Bard performance using midi files or keyboard. Supported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "RepoUrl": "https://github.com/reckhou/MidiBard",
   "Tags": [
     "bard",
-	"sound",
+    "sound",
     "utility"
   ],
   "DalamudApiLevel": 6,

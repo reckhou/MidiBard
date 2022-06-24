@@ -131,11 +131,8 @@ namespace MidiBard
             {
                 Configuration.Save();
             }
-            if (Configuration.config.useHscmOverride && ImGui.InputText("Playlist Path", ref Configuration.config.hscPlayListPath, 1024))
-            {
-                Configuration.Save();
-            }
-            ImGuiUtil.ToolTip("HSC playlist path".Localize());
+            
+            ImGuiUtil.ToolTip("HSC override mode, use only when HSCM is running.".Localize());
 
             if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
             {

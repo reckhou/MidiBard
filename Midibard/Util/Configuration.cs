@@ -71,7 +71,7 @@ public class Configuration : IPluginConfiguration
     public static RefConfiguration config;
 
 
-    public bool useHscmOverride { get; set; } = true;
+    public bool useHscmOverride { get; set; } = false;
     public bool switchInstrumentFromHscmPlaylist { get; set; } = true;
     public bool useHscmChordTrimming { get; set; } = true;
     public bool useHscmTransposing { get; set; } = true;
