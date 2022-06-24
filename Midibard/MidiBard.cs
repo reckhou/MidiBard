@@ -121,6 +121,7 @@ public partial class MidiBard : IDalamudPlugin
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         Configuration.Init();
+        Configuration.Load();
 
         Localizer = new Localizer((UILang)Configuration.config.uiLang);
 
@@ -166,11 +167,15 @@ public partial class MidiBard : IDalamudPlugin
 
     private static void ClientState_Logout(object sender, EventArgs e)
     {
-        HSCMCleanup();
+        if (Configuration.config.useHscmOverride)
+        {
+            HSCMCleanup();
+        }
     }
 
     private static void ClientState_Login(object sender, EventArgs e)
     {
+        Configuration.LoadPrivate();
         if (Configuration.config.useHscmOverride)
             Task.Run(() => InitHSCMOverride(true));
     }
@@ -383,7 +388,10 @@ public partial class MidiBard : IDalamudPlugin
             }
             DalamudApi.api.Dispose();
 
-            HSCMCleanup();
+            if (Configuration.config.useHscmOverride)
+            {
+                HSCMCleanup();
+            }
         }
         catch (Exception e2)
         {

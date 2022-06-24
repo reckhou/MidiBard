@@ -127,10 +127,12 @@ namespace MidiBard
             ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
 
-            if (ImGui.Checkbox("Use HSC override".Localize(), ref Configuration.config.useHscmOverride))
+            if (ImGui.Checkbox("Use HSCM override".Localize(), ref Configuration.config.useHscmOverride))
             {
                 Configuration.Save();
             }
+            
+            ImGuiUtil.ToolTip("HSCM override mode, use only when HSCM is running.".Localize());
 
             if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
             {

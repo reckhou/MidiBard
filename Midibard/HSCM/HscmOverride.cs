@@ -82,15 +82,17 @@ namespace MidiBard
             catch (Exception ex)
             {
                 PluginLog.Error($"An error occured on HSC override cleanup. Message: {ex.Message}");
-
             }
         }
 
         public static void RestartHSCMOverride()
         {
-            HSCMCleanup();
-            Thread.Sleep(1000);
-            InitHSCMOverride();
+            if (Configuration.config.useHscmOverride)
+            {
+                HSCMCleanup();
+                Thread.Sleep(1000);
+                InitHSCMOverride();
+            }
         }
 
         public static void InitHSCMOverride(bool loggedIn = false)
