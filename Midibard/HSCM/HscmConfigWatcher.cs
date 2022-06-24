@@ -27,6 +27,16 @@ namespace MidiBard
             hscmFileWatcher.OnCreated += HSCMConfigFileChanged;
             hscmFileWatcher.Start();
         }
+
+        static void DisposeHSCMConfigFileWatcher()
+        {
+            hscmFileWatcher.OnChanged -= HSCMConfigFileChanged;
+            hscmFileWatcher.OnCreated -= HSCMConfigFileChanged;
+            hscmFileWatcher?.Stop();
+            hscmFileWatcher?.Dispose();
+            hscmFileWatcher = null;
+        }
+
         private static void HandleFileChangedOrCreated(string path)
         {
 

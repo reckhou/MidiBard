@@ -49,7 +49,6 @@ public class RefConfiguration
     public bool hscmShowUI;
 
     public string hscmMidiFile;
-    public string hscPlayListPath = "playlists";
 
     public int prevSelected;
 

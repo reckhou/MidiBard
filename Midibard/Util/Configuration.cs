@@ -83,7 +83,6 @@ public class Configuration : IPluginConfiguration
     public bool hscmOfflineTesting { get; set; } = false;
     public bool hscmShowUI { get; set; } = false;
     public string hscmMidiFile { get; set; }
-    public string hscPlayListPath { get; set; } = "playlists";
 
     public int prevSelected { get; set; }
 

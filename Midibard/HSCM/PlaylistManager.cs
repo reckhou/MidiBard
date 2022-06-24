@@ -110,7 +110,7 @@ namespace MidiBard.HSCM
 
         private static void OpenPlaylist()
         {
-            string path = Path.Join(HSC.Settings.CurrentAppPath, Configuration.config.hscPlayListPath);
+            string path = HSC.Settings.CurrentAppPath;
 
             var files = Directory.GetFiles(path, "*.pl");
 
@@ -132,7 +132,7 @@ namespace MidiBard.HSCM
 
         private static void OpenPlaylistSettings()
         {
-            string path = Path.Join(HSC.Settings.CurrentAppPath, Configuration.config.hscPlayListPath);
+            string path = HSC.Settings.CurrentAppPath;
 
             var files = Directory.GetFiles(path, "*.json");
 
@@ -176,8 +176,6 @@ namespace MidiBard.HSCM
 
         public static void ReloadSettingsAndSwitch(bool loggedIn = false)
         {
-            ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
-
             try
             {
                 if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
@@ -185,6 +183,8 @@ namespace MidiBard.HSCM
                     ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
                     return;
                 }
+
+                ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
 
                 wasPlaying = MidiBard.IsPlaying;
 
@@ -244,7 +244,7 @@ namespace MidiBard.HSCM
 
                 if (HSC.Settings.Playlist == null || HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No songs in HSCM playlist.");
+                    ImGuiUtil.AddNotification(NotificationType.Info, $"No songs in HSCM playlist.");
                     Managers.PlaylistManager.CurrentPlaying = -1;
                     Managers.PlaylistManager.CurrentSelected = -1;
                     ClearTracks();
@@ -354,6 +354,12 @@ namespace MidiBard.HSCM
                 if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
+                    return;
+                }
+
+                if (HSC.Settings.PlaylistSettings == null || HSC.Settings.PlaylistSettings.Settings.IsNullOrEmpty())
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings are loaded.");
                     return;
                 }
 
