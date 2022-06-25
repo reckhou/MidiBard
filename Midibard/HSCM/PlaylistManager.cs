@@ -156,6 +156,9 @@ namespace MidiBard.HSCM
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                    return;
+
                 if (fromCurrent)
                     Settings.AppSettings.CurrentSong = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[Managers.PlaylistManager.CurrentPlaying]);
 
@@ -177,6 +180,12 @@ namespace MidiBard.HSCM
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist settings failed. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings.");
 
                 HSC.Settings.PlaylistSettings.Settings.Clear();
@@ -230,6 +239,12 @@ namespace MidiBard.HSCM
 
         public static bool Reload(bool loggedIn = false)
         {
+            if (HSC.Settings.CharIndex == -1)
+            {
+                ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist failed. Character config not loaded for '{HSC.Settings.CharName}'.");
+                return false;
+            }
+
             ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist.");
 
             try
@@ -286,6 +301,12 @@ namespace MidiBard.HSCM
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot change song from HSCM. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 if (HSC.Settings.Playlist == null || HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot change song from HSCM. No songs on playlist.");
@@ -332,6 +353,12 @@ namespace MidiBard.HSCM
 
                 PluginLog.Information($"Total playlist settings saved '{HSC.Settings.PlaylistSettings.Settings.Count}'.");
 
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist settings failed. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 if (!HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
                     UpdateTracks(HSC.Settings.CurrentSongSettings);
 
@@ -351,6 +378,13 @@ namespace MidiBard.HSCM
         {
             try
             {
+
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 wasPlaying = MidiBard.IsPlaying;
 
                 if (wasPlaying)

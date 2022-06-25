@@ -27,6 +27,12 @@ namespace MidiBard.HSC
 
         public static void ClosePerformance()
         {
+            if (HSC.Settings.CharIndex == -1)
+            {
+                ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot close performance mode. Character config not loaded for '{HSC.Settings.CharName}'.");
+                return;
+            }
+
             if (HSC.Settings.SwitchInstrumentFailed)
             {
                 ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
@@ -60,6 +66,12 @@ namespace MidiBard.HSC
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return false;
+                }
+
                 if (!Configuration.config.switchInstrumentFromHscmPlaylist && !force)
                     return MidiBard.CurrentInstrument != 0;
 
@@ -158,6 +170,8 @@ namespace MidiBard.HSC
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                    return 0;
 
                 if (HSC.Settings.CurrentSongSettings == null)
                     return 0;

@@ -50,6 +50,9 @@ namespace MidiBard
 
                 while (Configuration.config.useHscmOverride && hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
+
+                    if (HSC.Settings.CharIndex == -1) continue;//dont do anything until we have the char config loaded
+
                     if (!hscmConnected || !Configuration.config.useHscmOverride)
                     {
                         PluginLog.Information($"Stopping client message event handler.");
