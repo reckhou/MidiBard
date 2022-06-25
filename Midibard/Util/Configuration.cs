@@ -182,14 +182,15 @@ public class Configuration : IPluginConfiguration
 
     public static void Save(bool reloadplaylist = false)
     {
-        Task.Run(() =>
-        {
+
             try
             {
                 var startNew = Stopwatch.StartNew();
                 var outConfig = Create(config);
 
-                MidiBard.DoMutexAction(() => {
+                config.Playlist = config.Playlist.ToList();
+
+                MidiBard.DoLockedWriteAction(() => {
                     FileHelpers.Save(outConfig, ConfigFilePath);
                     ConfigurationPrivate.config.Save();
                 });
@@ -205,18 +206,22 @@ public class Configuration : IPluginConfiguration
                 PluginLog.Error(e, "Error when saving config");
                 ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving config");
             }
-        });
+  
     }
 
     public static void Load()
     {
-        var loadedConfig = FileHelpers.Load<Configuration>(ConfigFilePath) ?? new Configuration();
+        Configuration loadedConfig = new Configuration();
+
+        MidiBard.DoLockedReadAction(() => loadedConfig = FileHelpers.Load<Configuration>(ConfigFilePath) ?? new Configuration());
+
         config = RefConfiguration.Create(loadedConfig);
+
         LoadPrivate();
     }
 
     public static void LoadPrivate()
     {
-        ConfigurationPrivate.Load();
+        MidiBard.DoLockedReadAction(() => ConfigurationPrivate.Load());
     }
 }

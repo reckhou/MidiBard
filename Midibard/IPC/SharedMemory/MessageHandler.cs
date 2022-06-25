@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MidiBard.IPC.SharedMemory
 {
-    public enum MessageType { ReloadPlaylist = 1, ReloadPlaylistSettings = 2, ChangeSong = 3, SwitchInstruments = 4, Restart = 5, Close = 6 }
+    public enum MessageType { ReloadPlaylist = 1, ReloadPlaylistSettings = 2, ChangeSong = 3, SwitchInstruments = 4, Restart = 5, Close = 6, KillClient = 7 }
 
     public class MessageHandler
     {
@@ -27,6 +27,7 @@ namespace MidiBard.IPC.SharedMemory
 
         public event EventHandler ClosePerformanceMessageReceived;
 
+        public event EventHandler<int> KillClientMessageReceived;
         public void HandleMessage(MessageType type, int args)
         {
 
@@ -55,6 +56,10 @@ namespace MidiBard.IPC.SharedMemory
 
                 case MessageType.Close:
                     ClosePerformanceMessageReceived.Invoke(this, EventArgs.Empty);
+                    break;
+
+                case MessageType.KillClient:
+                    KillClientMessageReceived.Invoke(this, args);
                     break;
             }
         }

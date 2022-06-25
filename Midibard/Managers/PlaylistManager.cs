@@ -61,7 +61,7 @@ namespace MidiBard.Managers
             Configuration.config.Playlist.Clear();
             FilePathList.Clear();
             CurrentPlaying = -1;
-            Configuration.Save(true);
+            MidiBard.DoLockedWriteAction(() => Configuration.Save(true));
         }
 
         public static void Remove(int index)
@@ -75,7 +75,7 @@ namespace MidiBard.Managers
                 {
                     currentPlaying--;
                 }
-                Configuration.Save(true);
+                MidiBard.DoLockedWriteAction(() => Configuration.Save(true));
             }
             catch (Exception e)
             {

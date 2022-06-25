@@ -47,5 +47,16 @@ namespace MidiBard
             PluginLog.Information($"Received close performance message.");
             Task.Run(() => PerformHelpers.ClosePerformance());
         }
+
+        private static void MsgHandler_KillClientMessageReceived(object sender, int index)
+        {
+            PluginLog.Information($"Received Kill client '{index}' message.");
+            if (index == HSC.Settings.CharIndex)
+            {
+                StopClientMessageHandler();
+                hscmWaitHandle.Set();
+            }
+        }
+
     }
 }

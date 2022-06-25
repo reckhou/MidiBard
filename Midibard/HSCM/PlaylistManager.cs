@@ -53,7 +53,7 @@ namespace MidiBard.HSCM
             if (!MidiBard.CurrentTracks.IsNullOrEmpty())
                 MidiBard.CurrentTracks.Clear();
 
-            MidiBard.DoMutexAction(() => Configuration.Save());
+            MidiBard.DoLockedWriteAction(() => Configuration.Save());
         }
 
         private static void UpdateTracks(MidiSequence seq)
@@ -61,7 +61,7 @@ namespace MidiBard.HSCM
             if (ConfigurationPrivate.config.EnabledTracks.IsNullOrEmpty() || seq.Tracks.IsNullOrEmpty())
                 return;
 
-            PluginLog.Information($"Updating tracks of '{Configuration.config.hscmMidiFile}' from HSCM playlist.");
+            PluginLog.Information($"Updating tracks of '{Settings.AppSettings.CurrentSong}' from HSCM playlist.");
 
             int index = 0;
 
@@ -70,7 +70,7 @@ namespace MidiBard.HSCM
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
 
-            foreach (var track in seq.Tracks)
+            foreach (var track in seq.Tracks.ToArray())
             {
                 var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.OctaveOffset };
 
@@ -105,7 +105,7 @@ namespace MidiBard.HSCM
                 index++;
             }
 
-            MidiBard.DoMutexAction(() => Configuration.Save());
+            MidiBard.DoLockedWriteAction(() => Configuration.Save());
         }
 
         private static void OpenPlaylist()
@@ -116,8 +116,7 @@ namespace MidiBard.HSCM
 
             if (files.IsNullOrEmpty())
             {
-
-                PluginLog.Information($"No HSCM playlists found.'");
+                ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlists found.");
                 return;
             }
 
@@ -125,7 +124,7 @@ namespace MidiBard.HSCM
 
             PluginLog.Information($"HSCM playlist path: '{playlistFile}'");
 
-            MidiBard.DoMutexAction(() => HSC.Playlist.Playlist.OpenPlaylist(playlistFile, false));
+            MidiBard.DoLockedReadAction(() => HSC.Playlist.Playlist.OpenPlaylist(playlistFile, false));
 
             PluginLog.Information($"Load HSCM playlist '{playlistFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
@@ -134,12 +133,12 @@ namespace MidiBard.HSCM
         {
             string path = HSC.Settings.CurrentAppPath;
 
-            var files = Directory.GetFiles(path, "*.json");
+            var files = Directory.GetFiles(path, "*.settings.json");
 
             if (files.IsNullOrEmpty())
             {
 
-                PluginLog.Information($"No HSCM playlist settings found.'");
+                ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings found.'");
                 return;
             }
 
@@ -148,7 +147,7 @@ namespace MidiBard.HSCM
 
             PluginLog.Information($"HSCM playlist settings path: '{settingsFile}'");
 
-            MidiBard.DoMutexAction(() => HSC.Playlist.Playlist.LoadPlaylistSettings(settingsFile));
+            MidiBard.DoLockedReadAction(() => HSC.Playlist.Playlist.LoadPlaylistSettings(settingsFile));
 
             PluginLog.Information($"Load HSCM playlist '{settingsFile}' success. total songs: {HSC.Settings.Playlist.Files.Count}");
         }
@@ -157,6 +156,9 @@ namespace MidiBard.HSCM
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                    return;
+
                 if (fromCurrent)
                     Settings.AppSettings.CurrentSong = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[Managers.PlaylistManager.CurrentPlaying]);
 
@@ -178,19 +180,17 @@ namespace MidiBard.HSCM
         {
             try
             {
-                if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
+                if (HSC.Settings.CharIndex == -1)
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist settings failed. Character config not loaded for '{HSC.Settings.CharName}'.");
                     return;
                 }
 
-                ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
-
-                wasPlaying = MidiBard.IsPlaying;
+                ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings.");
 
                 HSC.Settings.PlaylistSettings.Settings.Clear();
 
-                MidiBard.DoMutexAction(() => OpenPlaylistSettings());
+                MidiBard.DoLockedReadAction(() => OpenPlaylistSettings());
 
                 if (HSC.Settings.PlaylistSettings == null || HSC.Settings.PlaylistSettings.Settings.IsNullOrEmpty())
                 {
@@ -198,11 +198,22 @@ namespace MidiBard.HSCM
                     return;
                 }
 
-                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
+                if (string.IsNullOrEmpty(Settings.AppSettings.CurrentSong))
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
+                    //ImGuiUtil.AddNotification(NotificationType.Error, $"No MIDI file chosen on HSCM playlist.");
                     return;
                 }
+
+                //ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
+
+
+                if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
+                {
+                    //ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
+                    return;
+                }
+
+                wasPlaying = MidiBard.IsPlaying;
 
                 ApplySettings();
 
@@ -226,21 +237,30 @@ namespace MidiBard.HSCM
             }
         }
 
-        public static void Reload(bool loggedIn = false)
+        public static bool Reload(bool loggedIn = false)
         {
+            if (HSC.Settings.CharIndex == -1)
+            {
+                ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist failed. Character config not loaded for '{HSC.Settings.CharName}'.");
+                return false;
+            }
+
             ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist.");
 
             try
             {
                 HSC.Settings.Playlist.Clear();
+
                 try
                 {
                     Managers.PlaylistManager.Clear();
                 }
-                catch { }
+                catch (Exception ex) {
+                    PluginLog.Error($"Clearing playlist failed. Message: {ex.Message}.");
+                    return false;
+                }
 
-
-                MidiBard.DoMutexAction(() => OpenPlaylist());
+                MidiBard.DoLockedReadAction(() => OpenPlaylist());
 
                 if (HSC.Settings.Playlist == null || HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
@@ -248,7 +268,7 @@ namespace MidiBard.HSCM
                     Managers.PlaylistManager.CurrentPlaying = -1;
                     Managers.PlaylistManager.CurrentSelected = -1;
                     ClearTracks();
-                    return;
+                    return false;
                 }
 
                 PluginLog.Information($"Updating MidiBard playlist.");
@@ -265,12 +285,15 @@ namespace MidiBard.HSCM
                 if (Managers.PlaylistManager.CurrentPlaying != Settings.AppSettings.CurrentSongIndex)
                     Managers.PlaylistManager.CurrentPlaying = Settings.AppSettings.CurrentSongIndex;
 
+                return true;
+
             }
 
             catch (Exception e)
             {
                 ImGuiUtil.AddNotification(NotificationType.Error, $"Reloading HSCM playlist failed.");
                 PluginLog.Error(e, $"Reloading HSCM playlist failed. {e.Message}");
+                return false;
             }
         }
 
@@ -278,6 +301,12 @@ namespace MidiBard.HSCM
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot change song from HSCM. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 if (HSC.Settings.Playlist == null || HSC.Settings.Playlist.Files.IsNullOrEmpty())
                 {
                     ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot change song from HSCM. No songs on playlist.");
@@ -294,17 +323,17 @@ namespace MidiBard.HSCM
 
                 HSC.Settings.PlaylistSettings.Settings.Clear();
 
-                MidiBard.DoMutexAction(() => OpenPlaylistSettings());
+                MidiBard.DoLockedReadAction(() => OpenPlaylistSettings());
 
                 Settings.AppSettings.CurrentSong = Path.GetFileNameWithoutExtension(HSC.Settings.Playlist.Files[index]);
                 Settings.AppSettings.CurrentSongIndex = index;
 
 
-                PluginLog.Information($"TOTAL {HSC.Settings.Playlist.Files.Count}");
+                PluginLog.Information($"Total playlist files '{HSC.Settings.Playlist.Files.Count}'.");
 
                 try//file locking can throw error
                 {
-                    MidiBard.DoMutexAction(() => {
+                    MidiBard.DoLockedWriteAction(() => {
                         Settings.Save();
                         Configuration.Save();
                     });
@@ -322,7 +351,13 @@ namespace MidiBard.HSCM
                 HSC.Settings.CurrentSongSettings = HSC.Settings.PlaylistSettings.Settings[Settings.AppSettings.CurrentSong];
 
 
-                PluginLog.Information($"TOTAL2 {HSC.Settings.PlaylistSettings.Settings.Count}");
+                PluginLog.Information($"Total playlist settings saved '{HSC.Settings.PlaylistSettings.Settings.Count}'.");
+
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Reload playlist settings failed. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
 
                 if (!HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
                     UpdateTracks(HSC.Settings.CurrentSongSettings);
@@ -343,6 +378,13 @@ namespace MidiBard.HSCM
         {
             try
             {
+
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return;
+                }
+
                 wasPlaying = MidiBard.IsPlaying;
 
                 if (wasPlaying)

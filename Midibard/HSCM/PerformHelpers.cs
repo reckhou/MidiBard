@@ -27,6 +27,12 @@ namespace MidiBard.HSC
 
         public static void ClosePerformance()
         {
+            if (HSC.Settings.CharIndex == -1)
+            {
+                ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot close performance mode. Character config not loaded for '{HSC.Settings.CharName}'.");
+                return;
+            }
+
             if (HSC.Settings.SwitchInstrumentFailed)
             {
                 ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
@@ -39,6 +45,9 @@ namespace MidiBard.HSC
                 MidiPlayerControl.Stop();
             //ImGuiUtil.AddNotification(NotificationType.Error, "Cannot close instrument while playing.");
 
+            if (MidiBard.CurrentInstrument == 0)
+                return;
+
             PerformActions.DoPerformAction(0);
             bool success = WaitUntilChanged(() => MidiBard.CurrentInstrument == 0, 100, 3000);
 
@@ -46,6 +55,7 @@ namespace MidiBard.HSC
             {
                 SwitchInstrumentFailed();
                 PluginLog.Error($"Failed to unequip instrument.");
+                return;
             }
 
             Thread.Sleep(200);
@@ -56,6 +66,12 @@ namespace MidiBard.HSC
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                {
+                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    return false;
+                }
+
                 if (!Configuration.config.switchInstrumentFromHscmPlaylist && !force)
                     return MidiBard.CurrentInstrument != 0;
 
@@ -154,6 +170,8 @@ namespace MidiBard.HSC
         {
             try
             {
+                if (HSC.Settings.CharIndex == -1)
+                    return 0;
 
                 if (HSC.Settings.CurrentSongSettings == null)
                     return 0;
@@ -198,7 +216,7 @@ namespace MidiBard.HSC
                 if (MidiBard.CurrentInstrument == 0)
                 {
                     PerformActions.DoPerformAction(instrumentId);
-                    success = WaitUntilChanged(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+                    success = WaitUntilChanged(() => MidiBard.CurrentInstrument == instrumentId, 100, timeOut);
 
                     if (!success)
                     {

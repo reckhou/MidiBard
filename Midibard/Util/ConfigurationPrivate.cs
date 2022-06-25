@@ -109,17 +109,11 @@ public class ConfigurationPrivate : IPluginConfiguration
                 var configFileInfo = GetConfigFileInfo(playerName, playerWorld, contentId);
                 if (configFileInfo.Exists)
                 {
-                    var fileText = File.ReadAllText(configFileInfo.FullName);
+                    ConfigurationPrivate loadedConfig = new ConfigurationPrivate();
+                        
+                    MidiBard.DoLockedReadAction(() => loadedConfig = FileHelpers.Load<ConfigurationPrivate>(configFileInfo.FullName));
 
-                    var loadedCharacterConfiguration = JsonConvert.DeserializeObject<ConfigurationPrivate>(fileText);
-                    if (loadedCharacterConfiguration == null)
-                    {
-                        config = new ConfigurationPrivate();
-                    }
-                    else
-                    {
-                        config = loadedCharacterConfiguration;
-                    }
+                    config = loadedConfig ?? new ConfigurationPrivate();
                 }
                 else
                 {

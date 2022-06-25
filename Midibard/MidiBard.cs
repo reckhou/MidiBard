@@ -143,6 +143,7 @@ public partial class MidiBard : IDalamudPlugin
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
+        if (!Configuration.config.useHscmOverride)
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
         CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.MidiControl.BardPlayDevice() : new BardPlayDevice());
@@ -159,7 +160,7 @@ public partial class MidiBard : IDalamudPlugin
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout;
 
-        configMutex = new Mutex(false, "MidiBard.Mutex");
+
 
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());
@@ -224,7 +225,7 @@ public partial class MidiBard : IDalamudPlugin
                  "reloadplaylist → Reload playlist on all clients from the same PC, use after making any changes on the playlist.")]
     public void Command2(string command, string args) => OnCommand(command, args);
 
-    async Task OnCommand(string command, string args)
+    void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         PluginLog.Debug($"command: {command}, {string.Join('|', argStrings)}");
@@ -328,34 +329,22 @@ public partial class MidiBard : IDalamudPlugin
         }
     }
 
-    public static void DoMutexAction(System.Action action)
+    public static void DoLockedWriteAction(System.Action action)
     {
-        action();
-        //bool hasHandle = false;
+        //configMutex = new Mutex(true, "MidiBard.Mutex");
 
-        //try
-        //{
-        //    hasHandle = configMutex.WaitOne(5000);
-        //    if (hasHandle)
-        //    {
-        //        PluginLog.Information("GOT THE HANDLE OF TEH MUTEX");
-        //        action();
-        //        configMutex?.ReleaseMutex();
-        //    }
-        //}
-        //catch (AbandonedMutexException)
-        //{
-        //    // Log the fact that the mutex was abandoned in another process,
-        //    // it will still get acquired
-        //    action();
-        //    hasHandle = true;
-        //}
-        //finally
-        //{
-        //    // edited by acidzombie24, added if statement
-        //    if (hasHandle)
-        //        configMutex?.ReleaseMutex();
-        //}
+        //configMutex.WaitOne();
+            action();
+/*        configMutex.ReleaseMutex()*/;
+    }
+
+    public static void DoLockedReadAction(System.Action action)
+    {
+        //configMutex = new Mutex(true, "MidiBard.Mutex");
+
+        //configMutex.WaitOne();
+        action();
+        //configMutex.ReleaseMutex();
     }
 
     #region IDisposable Support
