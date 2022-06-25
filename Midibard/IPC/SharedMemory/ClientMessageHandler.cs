@@ -20,23 +20,22 @@ namespace MidiBard
         private static void StopClientMessageHandler()
         {
             hscmConnected = false;
-
+            waitHandle.Set();
             msgHandler.ChangeSongMessageReceived -= MsgHandler_ChangeSongMessageReceived;
             msgHandler.ReloadPlaylistMessageReceived -= MsgHandler_ReloadPlaylistMessageReceived;
             msgHandler.ReloadPlaylistSettingsMessageReceived -= MsgHandler_ReloadPlaylistSettingsMessageReceived;
             msgHandler.SwitchInstrumentsMessageReceived -= MsgHandler_SwitchInstrumentsMessageReceived;
             msgHandler.RestartHscmOverrideMessageReceived -= MsgHandler_RestartHscmOverrideMessageReceived;
             msgHandler.ClosePerformanceMessageReceived -= MsgHandler_ClosePerformanceMessageReceived;
-
+            msgHandler.KillClientMessageReceived -= MsgHandler_KillClientMessageReceived; 
             msgHandler = null;
         }
+
 
         private static void StartClientMessageHander()
         {
             try
             {
-                hscmConnected = true;
-
                 msgHandler = new IPC.SharedMemory.MessageHandler();
 
                 msgHandler.ChangeSongMessageReceived += MsgHandler_ChangeSongMessageReceived;
@@ -45,6 +44,7 @@ namespace MidiBard
                 msgHandler.SwitchInstrumentsMessageReceived += MsgHandler_SwitchInstrumentsMessageReceived;
                 msgHandler.RestartHscmOverrideMessageReceived += MsgHandler_RestartHscmOverrideMessageReceived;
                 msgHandler.ClosePerformanceMessageReceived += MsgHandler_ClosePerformanceMessageReceived;
+                msgHandler.KillClientMessageReceived += MsgHandler_KillClientMessageReceived;
 
                 PluginLog.Information($"Started client message event handling.");
 
@@ -60,31 +60,22 @@ namespace MidiBard
 
                     PluginLog.Information($"Client waiting for message.");
 
-                    try
+
+                    bool success = waitHandle.WaitOne();
+                    PluginLog.Information($"Client message sent.");
+
+                    if (success)
+                        ConsumeMessage();
+                    else
                     {
-                        bool success = waitHandle.WaitOne();
-                        PluginLog.Information($"Client message sent.");
-
-                        if (success)
-                            ConsumeMessage();
-                        else
-                        {
-                            PluginLog.Error($"An error occured waiting on event signal");
-                            break;
-                        }
-
-                        success = waitHandle.Reset();
-                        if (!success)
-                        {
-                            PluginLog.Error($"An error occured when releasing event wait handle");
-                            break;
-                        }
+                        PluginLog.Error($"An error occured waiting on event signal");
+                        break;
                     }
-                    catch (ObjectDisposedException ex)
+
+                    success = waitHandle.Reset();
+                    if (!success)
                     {
-                        PluginLog.Error($"HSCM Disconnected. Stopping client message event handler.");
-                        StopClientMessageHandler();
-                        hscmWaitHandle.Set();
+                        PluginLog.Error($"An error occured when releasing event wait handle");
                         break;
                     }
 

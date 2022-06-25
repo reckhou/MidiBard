@@ -160,7 +160,7 @@ public partial class MidiBard : IDalamudPlugin
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout;
 
-        configMutex = new Mutex(false, "MidiBard.Mutex");
+
 
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());
@@ -331,36 +331,20 @@ public partial class MidiBard : IDalamudPlugin
 
     public static void DoLockedWriteAction(System.Action action)
     {
-        //var rwLock = new ReaderWriterLock();
+        //configMutex = new Mutex(true, "MidiBard.Mutex");
 
-        //rwLock.AcquireWriterLock(5000);
-        //try
-        //{
+        //configMutex.WaitOne();
             action();
-            // do write
-        //}
-        //catch { }
-        //finally
-        //{
-        //    rwLock.ReleaseWriterLock();
-        //}
+/*        configMutex.ReleaseMutex()*/;
     }
 
     public static void DoLockedReadAction(System.Action action)
     {
-        //var rwLock = new ReaderWriterLock();
+        //configMutex = new Mutex(true, "MidiBard.Mutex");
 
-        //rwLock.AcquireReaderLock(5000);
-        //try
-        //{
-            action();
-            // do write
-        //}
-        //catch { }
-        //finally
-        //{
-        //    rwLock.ReleaseReaderLock();
-        //}
+        //configMutex.WaitOne();
+        action();
+        //configMutex.ReleaseMutex();
     }
 
     #region IDisposable Support

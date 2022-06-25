@@ -65,8 +65,8 @@ namespace MidiBard
 
                 StopClientMessageHandler();
 
-                waitHandle?.Set();
                 waitHandle?.Close();
+                hscmWaitHandle?.Set();
                 hscmWaitHandle?.Close();
 
                 Common.IPC.SharedMemory.Clear();
@@ -130,11 +130,12 @@ namespace MidiBard
 
         private static void TryConnectHscm()
         {
-            hscmWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, $"HSCM.WaitEvent.{HSC.Settings.CharIndex}");
-
             try
             {
+                hscmWaitHandle = EventWaitHandle.OpenExisting($"HSCM.WaitEvent.{HSC.Settings.CharIndex}");
                 waitHandle = EventWaitHandle.OpenExisting($"MidiBard.WaitEvent.{HSC.Settings.CharIndex}");
+                if (hscmWaitHandle == null || waitHandle == null)
+                    return;
             }
             catch (Exception ex) 
             {
