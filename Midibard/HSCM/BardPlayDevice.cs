@@ -147,15 +147,18 @@ internal class BardPlayDevice : Control.BardPlayDevice
                 }
             case NoteOnEvent noteOnEvent:
                 {
-                    //PluginLog.Verbose($"[NoteOnEvent] [{trackIndex}:{noteOnEvent.Channel}] {noteOnEvent.NoteNumber,-3}");
-
+#if DEBUG
+                    PluginLog.Verbose($"[NoteOnEvent] [{trackIndex}:{noteOnEvent.Channel}] {noteOnEvent.NoteNumber,-3}");
+#endif
                     var noteNum = GetTranslatedNoteNum(noteOnEvent.NoteNumber, trackIndex, out int octave);
                     var s = $"[N][DOWN][{trackIndex}:{noteOnEvent.Channel}] {GetNoteName(noteOnEvent)} ({noteNum})";
 
                     if (noteNum is < 0 or > 36)
                     {
                         s += "(out of range)";
-                        //PluginLog.Verbose(s);
+#if DEBUG
+                        PluginLog.Verbose(s);
+#endif
                         return false;
                     }
 
@@ -169,12 +172,14 @@ internal class BardPlayDevice : Control.BardPlayDevice
                             if (playlib.ReleaseKey(noteNum))
                             {
                                 MidiBard.AgentPerformance.Struct->PressingNoteNumber = -100;
-                                // PluginLog.Verbose($"[N][PUP ][{trackIndex}:{noteOnEvent.Channel}] {GetNoteName(noteOnEvent)} ({noteNum})");
+#if DEBUG
+                                PluginLog.Verbose($"[N][PUP ][{trackIndex}:{noteOnEvent.Channel}] {GetNoteName(noteOnEvent)} ({noteNum})");
+#endif
                             }
                         }
-
-                        //PluginLog.Verbose(s);
-
+#if DEBUG
+                        PluginLog.Verbose(s);
+#endif
                         if (playlib.PressKey(noteNum, ref MidiBard.AgentPerformance.Struct->NoteOffset,
                                 ref MidiBard.AgentPerformance.Struct->OctaveOffset))
                         {
@@ -199,8 +204,9 @@ internal class BardPlayDevice : Control.BardPlayDevice
                     }
 
                     // only release a key when it been pressing
-                    // PluginLog.Verbose($"[N][UP  ][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
-
+#if DEBUG
+                    PluginLog.Verbose($"[N][UP  ][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
+#endif
                     if (playlib.ReleaseKey(noteNum))
                     {
                         MidiBard.AgentPerformance.Struct->PressingNoteNumber = -100;

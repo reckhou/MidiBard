@@ -169,10 +169,78 @@ internal class BardPlayDevice : IOutputDevice
                             throw new ArgumentOutOfRangeException();
                     }
 
+                    break;
+                }
+            case NoteOnEvent noteOnEvent:
+                {
+#if DEBUG
+                    PluginLog.Verbose($"[NoteOnEvent] [{trackIndex}:{noteOnEvent.Channel}] {noteOnEvent.NoteNumber,-3}");
+#endif
+                    var noteNum = GetTranslatedNoteNum(noteOnEvent.NoteNumber, trackIndex, out int octave);
+                    var s = $"[N][DOWN][{trackIndex}:{noteOnEvent.Channel}] {GetNoteName(noteOnEvent)} ({noteNum})";
+
+                    if (noteNum is < 0 or > 36)
+                    {
+                        s += "(out of range)";
+#if DEBUG
+                        PluginLog.Verbose(s);
+#endif
+                        return false;
+                    }
+
+                    if (octave != 0) s += $"[adapted {octave:+#;-#;0} Oct]";
+
+                    {
+                        if (MidiBard.AgentPerformance.noteNumber - 39 == noteNum)
+                        {
+                            // release repeated note in order to press it again
+
+                            if (playlib.ReleaseKey(noteNum))
+                            {
+                                MidiBard.AgentPerformance.Struct->PressingNoteNumber = -100;
+#if DEBUG
+                                PluginLog.Verbose($"[N][PUP ][{trackIndex}:{noteOnEvent.Channel}] {GetNoteName(noteOnEvent)} ({noteNum})");
+#endif
+                            }
+                        }
+#if DEBUG
+                        PluginLog.Verbose(s);
+#endif
+                        if (playlib.PressKey(noteNum, ref MidiBard.AgentPerformance.Struct->NoteOffset,
+                                ref MidiBard.AgentPerformance.Struct->OctaveOffset))
+                        {
+                            MidiBard.AgentPerformance.Struct->PressingNoteNumber = noteNum + 39;
+                            return true;
+                        }
+                    }
 
                     break;
                 }
+            case NoteOffEvent noteOffEvent:
+                {
+                    var noteNum = GetTranslatedNoteNum(noteOffEvent.NoteNumber, trackIndex, out _);
+                    if (noteNum is < 0 or > 36) return false;
 
+                    if (MidiBard.AgentPerformance.Struct->PressingNoteNumber - 39 != noteNum)
+                    {
+#if DEBUG
+                        PluginLog.Verbose($"[N][IGOR][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
+#endif
+                        return false;
+                    }
+
+                    // only release a key when it been pressing
+#if DEBUG
+                    PluginLog.Verbose($"[N][UP  ][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
+#endif
+                    if (playlib.ReleaseKey(noteNum))
+                    {
+                        MidiBard.AgentPerformance.Struct->PressingNoteNumber = -100;
+                        return true;
+                    }
+
+                    break;
+                }
         }
 
         return false;
