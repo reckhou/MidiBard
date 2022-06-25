@@ -143,6 +143,7 @@ public partial class MidiBard : IDalamudPlugin
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
+        if (!Configuration.config.useHscmOverride)
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
         CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.MidiControl.BardPlayDevice() : new BardPlayDevice());
@@ -224,7 +225,7 @@ public partial class MidiBard : IDalamudPlugin
                  "reloadplaylist → Reload playlist on all clients from the same PC, use after making any changes on the playlist.")]
     public void Command2(string command, string args) => OnCommand(command, args);
 
-    async Task OnCommand(string command, string args)
+    void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         PluginLog.Debug($"command: {command}, {string.Join('|', argStrings)}");
@@ -328,33 +329,37 @@ public partial class MidiBard : IDalamudPlugin
         }
     }
 
-    public static void DoMutexAction(System.Action action)
+    public static void DoLockedWriteAction(System.Action action)
     {
-        action();
-        //bool hasHandle = false;
+        //var rwLock = new ReaderWriterLock();
 
+        //rwLock.AcquireWriterLock(5000);
         //try
         //{
-        //    hasHandle = configMutex.WaitOne(5000);
-        //    if (hasHandle)
-        //    {
-        //        PluginLog.Information("GOT THE HANDLE OF TEH MUTEX");
-        //        action();
-        //        configMutex?.ReleaseMutex();
-        //    }
+            action();
+            // do write
         //}
-        //catch (AbandonedMutexException)
-        //{
-        //    // Log the fact that the mutex was abandoned in another process,
-        //    // it will still get acquired
-        //    action();
-        //    hasHandle = true;
-        //}
+        //catch { }
         //finally
         //{
-        //    // edited by acidzombie24, added if statement
-        //    if (hasHandle)
-        //        configMutex?.ReleaseMutex();
+        //    rwLock.ReleaseWriterLock();
+        //}
+    }
+
+    public static void DoLockedReadAction(System.Action action)
+    {
+        //var rwLock = new ReaderWriterLock();
+
+        //rwLock.AcquireReaderLock(5000);
+        //try
+        //{
+            action();
+            // do write
+        //}
+        //catch { }
+        //finally
+        //{
+        //    rwLock.ReleaseReaderLock();
         //}
     }
 

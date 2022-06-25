@@ -17,7 +17,7 @@ namespace MidiBard.HSC
             if (processes.IsNullOrEmpty())
                 return null;
 
-            return processes.Where(p => p.MainWindowHandle.ToInt32() > 0 && !p.HasExited && !p.MainWindowTitle.IsNullOrEmpty()).ToArray();
+            return processes;
         }
 
     }

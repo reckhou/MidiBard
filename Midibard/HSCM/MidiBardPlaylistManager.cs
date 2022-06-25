@@ -41,6 +41,7 @@ namespace MidiBard.HSCM
 
             filePaths = filePaths.ToArray().Where(p => !Managers.PlaylistManager.FilePathList.Select(f => f.path).Contains(p)).ToArray();
 
+
             foreach (var path in filePaths)
             {
                 try
@@ -55,7 +56,7 @@ namespace MidiBard.HSCM
             }
             try
             {
-                MidiBard.DoMutexAction(() => Configuration.Save());
+                MidiBard.DoLockedWriteAction(() => Configuration.Save());
             }
             catch { }
             PluginLog.Information($"File import all complete! success: {success} total: {count}");

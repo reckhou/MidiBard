@@ -39,6 +39,9 @@ namespace MidiBard.HSC
                 MidiPlayerControl.Stop();
             //ImGuiUtil.AddNotification(NotificationType.Error, "Cannot close instrument while playing.");
 
+            if (MidiBard.CurrentInstrument == 0)
+                return;
+
             PerformActions.DoPerformAction(0);
             bool success = WaitUntilChanged(() => MidiBard.CurrentInstrument == 0, 100, 3000);
 
@@ -46,6 +49,7 @@ namespace MidiBard.HSC
             {
                 SwitchInstrumentFailed();
                 PluginLog.Error($"Failed to unequip instrument.");
+                return;
             }
 
             Thread.Sleep(200);
@@ -198,7 +202,7 @@ namespace MidiBard.HSC
                 if (MidiBard.CurrentInstrument == 0)
                 {
                     PerformActions.DoPerformAction(instrumentId);
-                    success = WaitUntilChanged(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+                    success = WaitUntilChanged(() => MidiBard.CurrentInstrument == instrumentId, 100, timeOut);
 
                     if (!success)
                     {
