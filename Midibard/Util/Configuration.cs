@@ -171,7 +171,7 @@ public class Configuration : IPluginConfiguration
     //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
     //}
 
-    private static string ConfigFilePath => Path.Combine(DalamudApi.api.PluginInterface.GetPluginConfigDirectory(), $"{nameof(MidiBard)}.json");
+    private static string ConfigFilePath => Path.Combine(DalamudApi.api.PluginInterface.GetPluginConfigDirectory(), $"{Assembly.GetCallingAssembly().GetName().Name}.json");
 
     public static void Init()
     {
