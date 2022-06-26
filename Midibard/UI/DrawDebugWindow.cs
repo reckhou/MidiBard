@@ -24,7 +24,7 @@ using ImPlotNET;
 using Lumina.Excel.GeneratedSheets;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Devices;
+using Melanchall.DryWetMidi.Multimedia;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control;
 using MidiBard.DalamudApi;
@@ -66,7 +66,7 @@ namespace MidiBard
 			//PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 2));
 			try
 			{
-				if (config.DebugAgentInfo && Begin(nameof(MidiBard) + "AgentInfo"))
+				if (Configuration.config.DebugAgentInfo && Begin(nameof(MidiBard) + "AgentInfo"))
 				{
 					try
 					{
@@ -168,7 +168,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (config.DebugDeviceInfo && Begin(nameof(MidiBard) + "DeviceInfo"))
+				if (Configuration.config.DebugDeviceInfo && Begin(nameof(MidiBard) + "DeviceInfo"))
 				{
 					try
 					{
@@ -221,9 +221,9 @@ namespace MidiBard
 						}
 
 						TextUnformatted(
-							$"InputDevices: {InputDevice.GetDevicesCount()}\n{string.Join("\n", InputDevice.GetAll().Select(i => $"[{i.Id}] {i.Name}"))}");
+							$"InputDevices: {InputDevice.GetDevicesCount()}\n{string.Join("\n", InputDevice.GetAll().Select(i => $"[{i.DeviceName()}] {i.Name}"))}");
 						TextUnformatted(
-							$"OutputDevices: {OutputDevice.GetDevicesCount()}\n{string.Join("\n", OutputDevice.GetAll().Select(i => $"[{i.Id}] {i.Name}({i.DeviceType})"))}");
+							$"OutputDevices: {OutputDevice.GetDevicesCount()}\n{string.Join("\n", OutputDevice.GetAll().Select(i => $"{i.Name}"))}");
 
 						TextUnformatted(
 							$"CurrentInputDevice: \n{InputDeviceManager.CurrentInputDevice} Listening: {InputDeviceManager.CurrentInputDevice?.IsListeningForEvents}");
@@ -447,7 +447,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (config.DebugOffsets && Begin(nameof(MidiBard) + "Offsets"))
+				if (Configuration.config.DebugOffsets && Begin(nameof(MidiBard) + "Offsets"))
 				{
 					try
 					{
@@ -491,7 +491,7 @@ namespace MidiBard
 				}
 				End();
 
-				if (config.DebugKeyStroke && Begin(nameof(MidiBard) + "KeyStroke"))
+				if (Configuration.config.DebugKeyStroke && Begin(nameof(MidiBard) + "KeyStroke"))
 				{
 					TextUnformatted($"useRawHook: {Testhooks.Instance?.playnoteHook?.IsEnabled}");
 					if (Button("useRawhook"))
