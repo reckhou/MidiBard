@@ -79,7 +79,7 @@ public partial class MidiBard : IDalamudPlugin
 
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
 
-    public string Name => "MidiBard 2";
+    public string Name => "MidiBard 2 - Preview Build";
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
