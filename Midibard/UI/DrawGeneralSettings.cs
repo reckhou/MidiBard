@@ -139,17 +139,22 @@ namespace MidiBard
                 Configuration.Save();
             }
             ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
-
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
-            if (ImGui.Checkbox("Auto post command".Localize(), ref Configuration.config.autoPostPartyChatCommand))
+           
+            if (!Configuration.config.useHscmOverride)
             {
-                Configuration.Save();
+                ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+                if (ImGui.Checkbox("Auto post command".Localize(), ref Configuration.config.autoPostPartyChatCommand))
+                {
+                    Configuration.Save();
+                }
+                ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
+            } else
+            {
+                Configuration.config.autoPostPartyChatCommand = false;
             }
-            ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
 
             //ImGui.Checkbox("Override guitar tones".Localize(), ref Configuration.config.OverrideGuitarTones);
             //ImGuiUtil.ToolTip("Assign different guitar tones for each midi tracks".Localize());
-
 
             ImGuiUtil.ColorPickerWithPalette(1000, "Theme color".Localize(), ref Configuration.config.themeColor, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
             //if (ImGui.ColorEdit4("Theme color".Localize(), ref Configuration.config.themeColor,

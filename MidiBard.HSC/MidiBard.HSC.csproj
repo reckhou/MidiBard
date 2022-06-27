@@ -13,7 +13,22 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SharedMemory" Version="2.3.2" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <Reference Include="Dalamud">
+      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ImGui.NET">
+      <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\MidiBard.Common\MidiBard.Common.csproj" />
   </ItemGroup>

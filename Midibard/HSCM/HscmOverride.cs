@@ -170,6 +170,11 @@ namespace MidiBard
 
         private static void PopulateConfigFromMidiBardSettings()
         {
+            if (!Settings.HSCMConfigExists)
+            {
+                return;
+            }
+
             Configuration.config.useHscmChordTrimming = Settings.AppSettings.GeneralSettings.EnableMidiBardTrim;
             Configuration.config.useHscmTrimByTrack = Settings.AppSettings.GeneralSettings.EnableMidiBardTrimFromTracks;
             Configuration.config.useHscmTransposing = Settings.AppSettings.GeneralSettings.EnableMidiBardTranspose;
@@ -189,6 +194,8 @@ namespace MidiBard
             PluginLog.Information($"hscmAutoPlaySong: {Configuration.config.hscmAutoPlaySong}");
             PluginLog.Information($"useHscmOverride: {Configuration.config.useHscmOverride}");
             PluginLog.Information($"hscmShowUI: {Configuration.config.hscmShowUI}");
+
+            Configuration.Save();
         }
 
         private static void UpdateClientInfo()
