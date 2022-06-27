@@ -1,6 +1,6 @@
 
 
-# **MidiBard**
+# **MidiBard 2**
 
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
 
@@ -8,10 +8,10 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
-MidiBard is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It was originally authored by [akira0245](https://github.com/akira0245/MidiBard), now developed by [Ori](https://github.com/reckhou/MidiBard) and other developers after he quit for real-life reasons.
+`MidiBard 2` is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It was originally authored by [akira0245](https://github.com/akira0245/MidiBard), now developed by [Ori](https://github.com/reckhou/MidiBard) and other developers after he quit for real-life reasons.
 
 
-# Why MidiBard?
+# Why MidiBard 2?
 
 * No need to set key bindings and hotbars on your every bards. 
 * Minimal delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
@@ -37,13 +37,13 @@ Please open ``Dalamud Settings``, on ``Experimental`` page, add a ``Custom Plugi
 
 [![DD5JTJH.png](https://i.imgur.com/DD5JTJH.png)](https://i.imgur.com/DD5JTJH.png)
 
-Back to `Plugin Installer`, search `Midibard` and install.
+Back to `Plugin Installer`, search `Midibard 2` and install.
 
 ![enter image description here](https://i.imgur.com/4BH682e.png)
 
 # Recommend Settings
 
-If you are new to `MidiBard`, please use those settings below. Those settings are recommended for the band.
+If you are new to `MidiBard 2`, please use those settings below. Those settings are recommended for the band.
 
 ![image](https://i.imgur.com/wFsYNDy.png)
 
