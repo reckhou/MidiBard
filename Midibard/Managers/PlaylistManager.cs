@@ -185,9 +185,10 @@ namespace MidiBard.Managers
         internal static async Task<MidiFile> LoadMidiFile(string filePath)
         {
             var midiFile = await _LoadMidiFile(filePath);
+            string songName = Path.GetFileNameWithoutExtension(filePath);
 
             if (Configuration.config.useHscmOverride)
-                MidiProcessor.Process(midiFile, Path.GetFileNameWithoutExtension(filePath));
+                MidiProcessor.Process(midiFile, songName);
 
             return midiFile;
         }

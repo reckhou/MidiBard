@@ -133,6 +133,7 @@ public class RefConfiguration
     //public bool SyncMuteUnMute = false;
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
     public int switchInstrumentDelay = 3000;
+    internal bool useHscmSongCache = false;
 
     public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 

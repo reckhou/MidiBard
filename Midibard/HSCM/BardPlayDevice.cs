@@ -52,9 +52,6 @@ internal class BardPlayDevice : Control.BardPlayDevice
                 {
                     return false;
                 }
-
-                if (Configuration.config.useHscmOverride && !PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
-                    return false;
             }
 
             if (midiEvent is NoteOnEvent noteOnEvent)
@@ -215,40 +212,6 @@ internal class BardPlayDevice : Control.BardPlayDevice
     }
 
 
-    private static Settings.TrackTransposeInfo GetHSCTrackInfo(int trackIndex, int noteNumber)
-    {
-        if (Settings.MappedTracks.ContainsKey(trackIndex))
-            return Settings.MappedTracks[trackIndex];
-
-        if (!Settings.TrackInfo.ContainsKey(trackIndex))
-            return null;
-
-        return Settings.TrackInfo[trackIndex];
-    }
-
-    private static int TransposeFromHSCPlaylist(int noteNumber, int? trackIndex, bool plotting = false)
-    {
-        //PluginLog.Information("Transposing from HSCM playlist");
-
-        if (plotting)
-            return 0;
-
-        int noteNum = 0;
-
-        var trackInfo = GetHSCTrackInfo(trackIndex.Value, noteNumber);
-
-        if (trackInfo == null)
-            return 0;
-
-        if (trackInfo.OctaveOffset != 0)
-            noteNum += 12 * trackInfo.OctaveOffset;
-
-        if (trackInfo.KeyOffset != 0)
-            noteNum += trackInfo.KeyOffset;
-
-        return 12 * Settings.OctaveOffset + Settings.KeyOffset + noteNum;
-    }
-
     public override int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
     {
         //PluginLog.Information("Playing note");
@@ -256,9 +219,6 @@ internal class BardPlayDevice : Control.BardPlayDevice
 
         octave = 0;
 
-        if (Configuration.config.useHscmOverride && Configuration.config.useHscmTransposing)
-            noteNumber += TransposeFromHSCPlaylist(noteNumber, trackIndex, plotting);
-        else
             noteNumber += Configuration.config.TransposeGlobal +
                          (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
 

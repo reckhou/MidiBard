@@ -69,9 +69,12 @@ namespace MidiBard.HSCM
             HSC.Settings.MappedTracks = new Dictionary<int, TrackTransposeInfo>();
             HSC.Settings.TrackInfo = new Dictionary<int, TrackTransposeInfo>();
 
+            var tracks = seq.Tracks.ToArray();
 
-            foreach (var track in seq.Tracks.ToArray())
+            Parallel.ForEach(tracks, track => 
             {
+                    int index = track.Key;
+
                 var info = new TrackTransposeInfo() { KeyOffset = track.Value.KeyOffset, OctaveOffset = track.Value.OctaveOffset };
 
                 if (!HSC.Settings.TrackInfo.ContainsKey(index))
@@ -102,8 +105,7 @@ namespace MidiBard.HSCM
                 }
                 else
                     ConfigurationPrivate.config.EnabledTracks[index] = false;
-                index++;
-            }
+            });
 
             MidiBard.DoLockedWriteAction(() => Configuration.Save());
         }
@@ -176,6 +178,8 @@ namespace MidiBard.HSCM
             }
         }
 
+        private static bool ShouldShiftTracks() => CurrentSongSettings.Tracks.Any(t => t.Value.TimeOffset != 0);
+
         public static void ReloadSettingsAndSwitch(bool loggedIn = false)
         {
             try
@@ -206,7 +210,6 @@ namespace MidiBard.HSCM
 
                 //ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM playlist settings for '{Settings.AppSettings.CurrentSong}'.");
 
-
                 if (!HSC.Settings.PlaylistSettings.Settings.ContainsKey(Settings.AppSettings.CurrentSong))
                 {
                     //ImGuiUtil.AddNotification(NotificationType.Error, $"No HSCM playlist settings loaded for '{Settings.AppSettings.CurrentSong}'.");
@@ -214,18 +217,29 @@ namespace MidiBard.HSCM
                 }
 
                 wasPlaying = MidiBard.IsPlaying;
+                HSC.Settings.PrevTime = null;
 
+                //we only want the settings to change for the current song playing. dont apply settings for any other songs selected
+                 if (wasPlaying && Managers.PlaylistManager.CurrentPlaying != Settings.AppSettings.CurrentSongIndex) return;
+                
                 ApplySettings();
 
-                if (wasPlaying)
-                    HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
+                if (!loggedIn && Configuration.config.hscmShowUI)//open UI if required so user can see tracks changed
+                    MidiBard.Ui.Open();
 
+                bool shouldRestart = wasPlaying && (Configuration.config.useHscmChordTrimming || ShouldShiftTracks()); //dont restart song if we dont have to
                 bool switchInstruments = !loggedIn && !wasPlaying && Configuration.config.switchInstrumentFromHscmPlaylist;
 
-                SwitchSongByName(Settings.AppSettings.CurrentSong, wasPlaying, switchInstruments);
-
-                if (!loggedIn && Configuration.config.hscmShowUI)
-                    MidiBard.Ui.Open();
+                if (shouldRestart)
+                {
+                    HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
+                    SwitchSongByName(Settings.AppSettings.CurrentSong, true, false);
+                }
+                else
+                {
+                    if (switchInstruments) //if an instrument was chosen on a track switch to it if needed
+                        PerformHelpers.SwitchInstrumentFromSong();
+                }
 
                 ImGuiUtil.AddNotification(NotificationType.Success, $"Reload HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' complete.");
             }
@@ -365,7 +379,7 @@ namespace MidiBard.HSCM
                 if (Configuration.config.hscmShowUI)
                     MidiBard.Ui.Open();
 
-                SwitchSongByName(Settings.AppSettings.CurrentSong, Configuration.config.hscmAutoPlaySong, true);
+                SwitchSongByName(Settings.AppSettings.CurrentSong, Configuration.config.hscmAutoPlaySong, Configuration.config.switchInstrumentFromHscmPlaylist);
             }
 
             catch (Exception e)

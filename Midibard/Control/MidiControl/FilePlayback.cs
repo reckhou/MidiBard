@@ -47,11 +47,13 @@ public static class FilePlayback
         try
         {
             CurrentTracks = midifile.GetTrackChunks()
-                .Where(i => i.Events.Any(j => j is NoteOnEvent))
-                .Select((i, index) =>
+                .Select((t, i) => new { track = t, index = i}).AsParallel()
+                .Where(t => t.track.Events.Any(ev => ev is NoteOnEvent))
+                .OrderBy(t => t.index)
+                .Select(t =>
                 {
-                    var notes = i.GetNotes().ToArray();
-                    return (i, GetTrackInfos(notes, i, index));
+                    var notes = t.track.GetNotes().ToArray();
+                    return (t.track, GetTrackInfos(notes, t.track, t.index));
                 }).ToList();
         }
         catch (Exception exception1)
@@ -67,14 +69,17 @@ public static class FilePlayback
                 PluginLog.Debug($"[LoadPlayback] file.GetTrackChunks.Events.Count {trackChunks.First().Events.Count}");
                 PluginLog.Debug($"[LoadPlayback] file.GetTrackChunks.Events.OfType<NoteEvent>.Count {trackChunks.First().Events.OfType<NoteEvent>().Count()}");
 
-                CurrentTracks = trackChunks
-                    .Where(i => i.Events.Any(j => j is NoteOnEvent))
-                    .Select((i, index) =>
+
+                CurrentTracks = midifile.GetTrackChunks()
+                    .Select((t, i) => new { track = t, index = i }).AsParallel()
+                    .Where(t => t.track.Events.Any(ev => ev is NoteOnEvent))
+                    .OrderBy(t => t.index)
+                    .Select(t =>
                     {
-                        var noteEvents = i.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
+                        var noteEvents = t.track.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
                         var notes = noteEvents.GetNotes().ToArray();
                         var trackChunk = new TrackChunk(noteEvents);
-                        return (trackChunk, GetTrackInfos(notes, trackChunk, index));
+                        return (trackChunk, GetTrackInfos(notes, trackChunk, t.index));
                     }).ToList();
             }
             catch (Exception exception2)
@@ -103,7 +108,8 @@ public static class FilePlayback
             }))
             .OrderBy(e => e.timedEvent.Time)
             .ThenBy(i => i.compareValue)
-            .Select(i => i.timedEvent);
+            .Select(i => i.timedEvent).ToArray(); //this is crucial as have executed a parallel query 
+
         PluginLog.Information($"[LoadPlayback] -> {trackName} 3 in {stopwatch.Elapsed.TotalMilliseconds} ms");
         //var (programTrackChunk, programTrackInfo) =
         //    CurrentTracks.FirstOrDefault(i => Regex.IsMatch(i.trackInfo.TrackName, @"^Program:.+$", RegexOptions.Compiled | RegexOptions.IgnoreCase));
@@ -157,6 +163,9 @@ public static class FilePlayback
             uint prog = CurrentOutputDevice.Channels[i].Program;
             PluginLog.Information($"  - [{i}]: {ProgramNames.GetGMProgramName((byte)prog)} ({prog})");
         }
+
+       if (Configuration.config.useHscmOverride && Configuration.config.useHscmSongCache)//cache for faster processing
+            HSC.SongCache.AddOrUpdate(trackName, (CurrentTMap, timedEvents)); 
 
         playback.Finished += Configuration.config.useHscmOverride ? HSCM_Playback_Finished : MidiBard_Playback_Finished;
         PluginLog.Information($"[LoadPlayback] -> {trackName} OK! in {stopwatch.Elapsed.TotalMilliseconds} ms");
@@ -431,47 +440,56 @@ public static class FilePlayback
         CurrentPlayback?.Dispose();
         CurrentPlayback = null;
 
-        MidiFile midiFile = await PlaylistManager.LoadMidiFile(index);
-        if (midiFile == null)
+        //dont load midi file if already stored in cache- huge performance improvements doing adjustments e.g chord trimming
+        //this should be included in MidiBard_LoadPlayback in the future as its very beneficial
+        if (!Configuration.config.useHscmSongCache || !HSC.SongCache.IsCached(HSC.Settings.AppSettings.CurrentSong))
         {
-            // delete file if can't be loaded(likely to be deleted locally)
-            PluginLog.Debug($"[LoadPlayback] removing {index}");
-            //PluginLog.Debug($"[LoadPlayback] removing {PlaylistManager.FilePathList[index].path}");
-            Managers.PlaylistManager.FilePathList.RemoveAt(index);
-            return false;
-        }
-        else
-        {
-            CurrentPlayback = GetFilePlayback(midiFile, Managers.PlaylistManager.FilePathList[index].displayName);
-            Ui.RefreshPlotData();
-            Managers.PlaylistManager.CurrentPlaying = index;
+            var midiFile = await PlaylistManager.LoadMidiFile(index);
 
-            HSCM.PlaylistManager.ApplySettings(true);//this should allow the HSCM playlist to be looped 
-
-            if (switchInstrument)
+            if (midiFile == null)
             {
-                try
-                {
-                    PerformHelpers.SwitchInstrumentFromSong();
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Warning(e.ToString());
-                }
+                // delete file if can't be loaded(likely to be deleted locally)
+                PluginLog.Debug($"[LoadPlayback] removing {index}");
+                //PluginLog.Debug($"[LoadPlayback] removing {PlaylistManager.FilePathList[index].path}");
+                Managers.PlaylistManager.FilePathList.RemoveAt(index);
+                return false;
             }
 
-            if (DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)
-                return true;
-
-            if (MidiBard.CurrentInstrument != 0 && (wasPlaying || startPlaying))
-                Control.MidiControl.MidiPlayerControl.DoPlay();
-
-            //if (revertTime && wasPlaying)
-            //    CurrentPlayback.MoveToTime(HSC.Settings.PrevTime);
-            PrepareLyrics(index);
-
-            return true;
+            CurrentPlayback = await Task.Run(() => GetFilePlayback(midiFile, Managers.PlaylistManager.FilePathList[index].displayName)); //this can be slow so needs another task
         }
+        else
+            CurrentPlayback = await Task.Run(() => HSC.PlaybackUtilities.GetCachedPlayback(HSC.Settings.AppSettings.CurrentSong));
+
+        Ui.RefreshPlotData();
+        Managers.PlaylistManager.CurrentPlaying = index;
+
+        HSCM.PlaylistManager.ApplySettings(true);//this should allow the HSCM playlist to be looped 
+
+        if (switchInstrument)
+        {
+            try
+            {
+                await PerformHelpers.SwitchInstrumentFromSong();
+            }
+            catch (Exception e)
+            {
+                PluginLog.Warning(e.ToString());
+            }
+        }
+
+        PrepareLyrics(index);//dont forget this!
+
+        if (DalamudApi.api.PartyList.IsInParty() && Configuration.config.useHscmSendReadyCheck)//dont start the song if we are sending a ready check
+            return true;
+
+        if (MidiBard.CurrentInstrument != 0 && (wasPlaying || startPlaying))
+            Control.MidiControl.MidiPlayerControl.DoPlay();
+
+        if (wasPlaying && HSC.Settings.PrevTime != null)//jump back to the position before the song restarted e.g after chord trimming if we should
+            CurrentPlayback.MoveToTime(HSC.Settings.PrevTime);
+
+
+        return true;
     }
 
     private static async Task<bool> MidiBard_LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)

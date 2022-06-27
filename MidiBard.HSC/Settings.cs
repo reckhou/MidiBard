@@ -82,8 +82,10 @@ namespace MidiBard.HSC
 
         public static string CurrentAppPath { get; set; }
         public static bool SwitchInstrumentFailed { get; set; }
-        public static ITimeSpan PrevTime { get; set; }
+        public static ITimeSpan? PrevTime { get; set; }
         public static bool SavedConfig { get; set; }
+
+
 
         public static void Load()
         {
