@@ -187,9 +187,9 @@ namespace MidiBard.Managers
             var midiFile = await _LoadMidiFile(filePath);
             string songName = Path.GetFileNameWithoutExtension(filePath);
 
-            if (Configuration.config.useHscmOverride)
-                MidiProcessor.Process(midiFile, songName);
-
+            if (Configuration.config.useHscmOverride && HSC.Settings.CurrentSongSettings != null)
+                MidiProcessor.Process(midiFile, HSC.Settings.CurrentSongSettings);
+             
             return midiFile;
         }
 

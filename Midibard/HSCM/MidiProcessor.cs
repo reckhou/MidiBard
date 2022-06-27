@@ -14,7 +14,7 @@ namespace MidiBard.HSC
 {
     internal class MidiProcessor
     {
-        public static void Process(IEnumerable<TimedEventWithTrackChunkIndex> timedObjs, MidiSequence settings)
+        public static void Process(TimedEventWithTrackChunkIndex[] timedObjs, MidiSequence settings)
         {
             var tracks = timedObjs.GroupBy(to => (int)to.Metadata)
                 .Select(to => new { index = to.Key, track = TimedObjectUtilities.ToTrackChunk(to.ToArray()) })
