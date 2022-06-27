@@ -53,6 +53,7 @@ public class RefConfiguration
     public int hscmOverrideDelay = 5000;
     public bool hscmOfflineTesting = false;
     public bool hscmShowUI;
+    public bool useHscmSongCache = true;
 
     public string hscmMidiFile;
 
@@ -133,8 +134,7 @@ public class RefConfiguration
     //public bool SyncMuteUnMute = false;
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
     public int switchInstrumentDelay = 3000;
-    internal bool useHscmSongCache = false;
-
+  
     public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
 }

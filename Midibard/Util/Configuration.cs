@@ -82,7 +82,7 @@ public class Configuration : IPluginConfiguration
     public bool hscmOfflineTesting { get; set; } = false;
     public bool hscmShowUI { get; set; } = false;
 
-    public bool useHscmSongCache { get; set; } = false;
+    public bool useHscmSongCache { get; set; } = true;
     public string hscmMidiFile { get; set; }
 
     public int prevSelected { get; set; }
