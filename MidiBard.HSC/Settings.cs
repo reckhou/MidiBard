@@ -14,6 +14,7 @@ using MidiBard.HSC.Music;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Interaction;
 using Newtonsoft.Json;
+using Dalamud.Logging;
 
 namespace MidiBard.HSC
 {
@@ -84,6 +85,7 @@ namespace MidiBard.HSC
         public static bool SwitchInstrumentFailed { get; set; }
         public static ITimeSpan? PrevTime { get; set; }
         public static bool SavedConfig { get; set; }
+        public static bool HSCMConfigExists { get; set; }
 
 
 
@@ -91,11 +93,18 @@ namespace MidiBard.HSC
         {
 
             var filePath = Path.Combine(HSC.Settings.CurrentAppPath, HscmSettingsFileName);
-
+            PluginLog.LogDebug($"Load HSCM Setting: {filePath}");
             var appSettings = FileHelpers.Load<AppSettings>(filePath);
 
             if (appSettings != null)
+            {
                 AppSettings = appSettings;
+                HSCMConfigExists = true;
+            } else
+            {
+                PluginLog.LogDebug($"HSCM AppSettings not exist: {filePath}");
+                HSCMConfigExists = false;
+            }
         }
 
         public static void Save()
@@ -103,7 +112,7 @@ namespace MidiBard.HSC
             SavedConfig = true;
 
             var filePath = Path.Combine(HSC.Settings.CurrentAppPath, HscmSettingsFileName);
-
+            PluginLog.LogDebug($"Save HSCM Setting: {filePath}");
             FileHelpers.Save(AppSettings, filePath);
 
         }

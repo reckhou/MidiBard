@@ -1,0 +1,14 @@
+{
+  "Author": "akira0245, Ori, SpuriousSnail86",
+  "Name": "MidiBard 2 - Preview",
+  "Punchline": "[BETA] Bard performance using midi files or keyboard.\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
+  "Description": "[WARNING] This is the preview build of MidiBard 2, it's mostly stable but you may still experience bugs/crashes.\nBard performance using midi files or keyboard.\n- HSCM controller support\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
+  "RepoUrl": "https://github.com/reckhou/MidiBard2",
+  "Tags": [
+    "bard",
+    "sound",
+    "utility"
+  ],
+  "DalamudApiLevel": 6,
+  "IconUrl": "https://i.imgur.com/2Lr2Che.png"
+}

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidiBard2", "Midibard\MidiBard2.csproj", "{07727526-FA4F-435C-85BF-2DE96BD41470}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MidiBard2Preview", "Midibard\MidiBard2Preview.csproj", "{07727526-FA4F-435C-85BF-2DE96BD41470}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBard.Common", "MidiBard.Common\MidiBard.Common.csproj", "{4451702D-2BA2-4899-A82E-307263A8C29E}"
 EndProject

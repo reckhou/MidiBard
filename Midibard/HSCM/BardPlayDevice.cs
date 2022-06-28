@@ -10,63 +10,28 @@ using MidiBard.HSC;
 using MidiBard.Util;
 using playlibnamespace;
 
-namespace MidiBard.Control;
+namespace MidiBard.HSCM.MidiControl;
 
-internal class BardPlayDevice : IOutputDevice
+internal class BardPlayDevice : Control.BardPlayDevice
 {
-    internal struct ChannelState
+
+
+    public BardPlayDevice() : base()
     {
-        public SevenBitNumber Program { get; set; }
-
-        public ChannelState(SevenBitNumber? program)
-        {
-            this.Program = program ?? SevenBitNumber.MinValue;
-        }
-    }
-
-    public readonly ChannelState[] Channels;
-    public FourBitNumber CurrentChannel;
-
-    public event EventHandler<MidiEventSentEventArgs> EventSent;
-
-    public BardPlayDevice()
-    {
-        Channels = new ChannelState[16];
-        CurrentChannel = FourBitNumber.MinValue;
-    }
-
-    public void PrepareForEventsSending()
-    {
+        PluginLog.Information("Loaded HSCM bard play device");
     }
 
     /// <summary>
     /// Midi events send from input device
     /// </summary>
     /// <param name="midiEvent">Raw midi event</param>
-    public void SendEvent(MidiEvent midiEvent)
+    public new void SendEvent(MidiEvent midiEvent)
     {
         SendEventWithMetadata(midiEvent, null);
     }
 
-    record MidiEventMetaData
-    {
-        public enum EventSource
-        {
-            Playback,
-            MidiListener
-        }
 
-        public int TrackIndex { get; init; }
-        public EventSource Source { get; init; }
-    }
-
-    /// <summary>
-    /// Directly invoked by midi events sent from file playback
-    /// </summary>
-    /// <param name="midiEvent">Raw midi event</param>
-    /// <param name="metadata">Currently is track index</param>
-    /// <returns></returns>
-    public virtual bool SendEventWithMetadata(MidiEvent midiEvent, object metadata)
+    public override bool SendEventWithMetadata(MidiEvent midiEvent, object metadata)
     {
 
         if (!MidiBard.AgentPerformance.InPerformanceMode) return false;
@@ -87,6 +52,9 @@ internal class BardPlayDevice : IOutputDevice
                 {
                     return false;
                 }
+
+                if (Configuration.config.useHscmOverride && !PerformHelpers.ShouldPlayNote(midiEvent, trackIndexValue))
+                    return false;
             }
 
             if (midiEvent is NoteOnEvent noteOnEvent)
@@ -126,29 +94,9 @@ internal class BardPlayDevice : IOutputDevice
         return SendMidiEvent(midiEvent, trackIndex);
     }
 
-    protected void HandleToneSwitchEvent(NoteOnEvent noteOnEvent)
+    protected unsafe override bool SendMidiEvent(MidiEvent midiEvent, int? trackIndex)
     {
-        // if (CurrentChannel != noteOnEvent.Channel)
-        // {
-        //     PluginLog.Verbose($"[N][Channel][{trackIndex}:{noteOnEvent.Channel}] Changing channel from {CurrentChannel} to {noteOnEvent.Channel}");
-        CurrentChannel = noteOnEvent.Channel;
-        // }
-        SevenBitNumber program = Channels[CurrentChannel].Program;
-        if (MidiBard.ProgramInstruments.TryGetValue(program, out var instrumentId))
-        {
-            var instrument = MidiBard.Instruments[instrumentId];
-            if (instrument.IsGuitar)
-            {
-                int tone = instrument.GuitarTone;
-                playlib.GuitarSwitchTone(tone);
-                // var (id, name) = MidiBard.InstrumentPrograms[MidiBard.ProgramInstruments[prog]];
-                // PluginLog.Verbose($"[N][NoteOn][{trackIndex}:{noteOnEvent.Channel}] Changing guitar program to [{id} t:({tone})] {name} ({(GeneralMidiProgram)(byte)prog})");
-            }
-        }
-    }
-
-    protected unsafe virtual bool SendMidiEvent(MidiEvent midiEvent, int? trackIndex)
-    {
+        //PluginLog.Information("Playing note");
         switch (midiEvent)
         {
             case ProgramChangeEvent @event:
@@ -159,6 +107,31 @@ internal class BardPlayDevice : IOutputDevice
                             break;
                         case GuitarToneMode.Standard:
                             Channels[@event.Channel].Program = @event.ProgramNumber;
+
+                            //int PCChannel = @event.Channel;
+                            //SevenBitNumber currentProgram = Channels[PCChannel].Program;
+                            //SevenBitNumber newProgram = @event.ProgramNumber;
+
+                            //PluginLog.Verbose($"[N][ProgramChange][{trackIndex}:{@event.Channel}] {@event.ProgramNumber,-3} {@event.GetGMProgramName()}");
+
+                            //if (currentProgram == newProgram) break;
+
+                            //if (MidiBard.PlayingGuitar)
+                            //{
+                            //    uint instrument = MidiBard.ProgramInstruments[newProgram];
+                            //    //if (!MidiBard.guitarGroup.Contains((byte)instrument))
+                            //    //{
+                            //    //    newProgram = MidiBard.Instruments[MidiBard.CurrentInstrument].ProgramNumber;
+                            //    //    instrument = MidiBard.ProgramInstruments[newProgram];
+                            //    //}
+
+                            //    if (Channels[PCChannel].Program != newProgram)
+                            //    {
+                            //        PluginLog.Verbose($"[N][ProgramChange][{trackIndex}:{@event.Channel}] Changing guitar program to ({instrument} {MidiBard.Instruments[instrument].FFXIVDisplayName}) {@event.GetGMProgramName()}");
+                            //    }
+                            //}
+
+                            //Channels[PCChannel].Program = newProgram;
                             break;
                         case GuitarToneMode.Simple:
                             Array.Fill(Channels, new ChannelState(@event.ProgramNumber));
@@ -168,6 +141,7 @@ internal class BardPlayDevice : IOutputDevice
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
 
                     break;
                 }
@@ -224,7 +198,7 @@ internal class BardPlayDevice : IOutputDevice
                     if (MidiBard.AgentPerformance.Struct->PressingNoteNumber - 39 != noteNum)
                     {
 #if DEBUG
-                        PluginLog.Verbose($"[N][IGOR][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
+                        //PluginLog.Verbose($"[N][IGOR][{trackIndex}:{noteOffEvent.Channel}] {GetNoteName(noteOffEvent)} ({noteNum})");
 #endif
                         return false;
                     }
@@ -246,47 +220,53 @@ internal class BardPlayDevice : IOutputDevice
         return false;
     }
 
-    protected static string GetNoteName(NoteEvent note) => $"{note.GetNoteName().ToString().Replace("Sharp", "#")}{note.GetNoteOctave()}";
 
-
-    public static int GetTranslatedNote(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
+    private static Settings.TrackTransposeInfo GetHSCTrackInfo(int trackIndex, int noteNumber)
     {
+        if (Settings.MappedTracks.ContainsKey(trackIndex))
+            return Settings.MappedTracks[trackIndex];
 
-        noteNumber = noteNumber - 48;
+        if (!Settings.TrackInfo.ContainsKey(trackIndex))
+            return null;
 
-        octave = 0;
-
-        noteNumber += Configuration.config.TransposeGlobal +
-                     (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
-
-        if (Configuration.config.AdaptNotesOOR)
-        {
-            while (noteNumber < 0)
-            {
-                noteNumber += 12;
-                octave++;
-            }
-
-            while (noteNumber > 36)
-            {
-                noteNumber -= 12;
-                octave--;
-            }
-        }
-
-        return noteNumber;
+        return Settings.TrackInfo[trackIndex];
     }
 
-    public virtual int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
+    private static int TransposeFromHSCPlaylist(int noteNumber, int? trackIndex, bool plotting = false)
     {
+        //PluginLog.Information("Transposing from HSCM playlist");
 
+        if (plotting)
+            return 0;
+
+        int noteNum = 0;
+
+        var trackInfo = GetHSCTrackInfo(trackIndex.Value, noteNumber);
+
+        if (trackInfo == null)
+            return 0;
+
+        if (trackInfo.OctaveOffset != 0)
+            noteNum += 12 * trackInfo.OctaveOffset;
+
+        if (trackInfo.KeyOffset != 0)
+            noteNum += trackInfo.KeyOffset;
+
+        return 12 * Settings.OctaveOffset + Settings.KeyOffset + noteNum;
+    }
+
+    public override int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
+    {
+        //PluginLog.Information("Playing note");
         noteNumber = noteNumber - 48;
 
         octave = 0;
 
-        if (!Configuration.config.useHscmOverride || !Configuration.config.useHscmTransposing)
+        if (Configuration.config.useHscmOverride && Configuration.config.useHscmTransposing)
+            noteNumber += TransposeFromHSCPlaylist(noteNumber, trackIndex, plotting);
+        else
             noteNumber += Configuration.config.TransposeGlobal +
-                     (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
+                         (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
 
         if (Configuration.config.AdaptNotesOOR)
         {
@@ -305,28 +285,4 @@ internal class BardPlayDevice : IOutputDevice
 
         return noteNumber;
     }
-
-    //bool GetKey( ,int midiNoteNumber, int trackIndex, out int key, out int octave)
-    //{
-    //	octave = 0;
-
-    //	key = midiNoteNumber - 48 +
-    //	          Configuration.config.TransposeGlobal +
-    //	          (Configuration.config.EnableTransposePerTrack ? Configuration.config.TransposePerTrack[trackIndex] : 0);
-    //	if (Configuration.config.AdaptNotesOOR)
-    //	{
-    //		while (key < 0)
-    //		{
-    //			key += 12;
-    //			octave++;
-    //		}
-    //		while (key > 36)
-    //		{
-    //			key -= 12;
-    //			octave--;
-    //		}
-    //	}
-
-
-    //}
 }

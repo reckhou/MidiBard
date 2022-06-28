@@ -647,7 +647,7 @@ public static class FilePlayback
             CurrentPlayback = await Task.Run(() => GetFilePlayback(midiFile, PlaylistManager.FilePathList[index].displayName));
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
-            DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Now Playing: {0}", PlaylistManager.FilePathList[index].fileName));
+            DalamudApi.api.ChatGui.Print(String.Format("[MidiBard 2] Now Playing: {0}", PlaylistManager.FilePathList[index].fileName));
 
             var songName = PlaylistManager.FilePathList[index].fileName;
             if (switchInstrument)
