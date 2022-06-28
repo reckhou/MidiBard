@@ -1,13 +1,12 @@
 {
   "Author": "akira0245, modified by Ori",
   "Name": "MidiBard",
-  "Punchline": "Bard performance using midi files or keyboard.",
+  "Punchline": "[NO LONGER RECEIVING FUTURE UPDATES, PLEASE UPGRADE TO MIDIBARD 2!]\nBard performance using midi files or keyboard.",
   "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch",
-  "RepoUrl": "https://github.com/reckhou/MidiBard",
+  "RepoUrl": "https://midibard.crd.co/",
   "Tags": [
-    "bard",
-	"sound",
-    "utility"
+    "Jobs",
+    "Utility"
   ],
   "DalamudApiLevel": 6,
   "IconUrl": "https://i.imgur.com/drMuEor.png"
