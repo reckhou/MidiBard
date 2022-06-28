@@ -182,18 +182,7 @@ namespace MidiBard.Managers
                 return null;
         }
 
-        internal static async Task<MidiFile> LoadMidiFile(string filePath)
-        {
-            var midiFile = await _LoadMidiFile(filePath);
-            string songName = Path.GetFileNameWithoutExtension(filePath);
-
-            if (Configuration.config.useHscmOverride && HSC.Settings.CurrentSongSettings != null)
-                MidiProcessor.Process(midiFile, HSC.Settings.CurrentSongSettings);
-             
-            return midiFile;
-        }
-
-        private static async Task<MidiFile> _LoadMidiFile(string filePath)
+        private static async Task<MidiFile> LoadMidiFile(string filePath)
         {
             PluginLog.Debug($"[LoadMidiFile] -> {filePath} START");
             MidiFile loaded = null;

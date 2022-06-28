@@ -304,7 +304,8 @@ internal class BardPlayDevice : IOutputDevice
 
         octave = 0;
 
-        noteNumber += Configuration.config.TransposeGlobal +
+        if (!Configuration.config.useHscmOverride || !Configuration.config.useHscmTransposing)
+            noteNumber += Configuration.config.TransposeGlobal +
                      (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
 
         if (Configuration.config.AdaptNotesOOR)

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
+using Dalamud.Logging;
 
 namespace MidiBard.HSC
 {
@@ -39,9 +40,15 @@ namespace MidiBard.HSC
 
         private static void TrimFile(Dictionary<int, TrackChunk> tracks, MidiSequence settings, int maxNotes = 2, bool ignoreSettings = false)
         {
+            PluginLog.Information("trimming chords from HSCM playlist");
+
             var trackChunks = tracks.Select(t => t.Value);
 
+            PluginLog.Information($"Total notes before trimming {trackChunks.GetNotes().Count()}");
+
             var chords = GetChords(trackChunks.GetNotes());
+
+            PluginLog.Information($"total chords {chords.Count()}");
 
             trackChunks.RemoveNotes(n => chords.Any(c => c.Time == n.Time && ShouldRemoveNote(
                     c.Notes.ToArray(),
@@ -51,6 +58,8 @@ namespace MidiBard.HSC
                     settings, 
                     maxNotes,
                     ignoreSettings)));
+
+            PluginLog.Information($"Total notes after trimming {trackChunks.GetNotes().Count()}");
         }
 
         private static void TrimTrack(TrackChunk chunk, Track trackSettings, int maxNotes = 2, bool ignoreSettings = false)

@@ -2,6 +2,8 @@
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
+using MidiBard.Control;
+using MidiBard.Control.MidiControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,60 @@ using System.Threading.Tasks;
 namespace MidiBard.HSC
 {
     internal class PlaybackUtilities
-    {
+    {                        
+        public static TimedEventWithTrackChunkIndex[] GetTimedEvents (MidiFile midiFile)
+        {
+            var timedEvents = midiFile.GetTrackChunks()
+                      .SelectMany((chunk, index) => chunk.GetTimedEvents().Select(e =>
+                      {
+                          var compareValue = e.Event switch
+                          {
+                    //order chords so they always play from low to high
+                              NoteOnEvent noteOn => noteOn.NoteNumber,
+                    //order program change events so they always get processed before notes 
+                              ProgramChangeEvent => -2,
+                    //keep other unimportant events order
+                              _ => -1
+                          };
+                          return (compareValue, timedEvent: new TimedEventWithTrackChunkIndex(e.Event, e.Time, index));
+                      }))
+                      .OrderBy(e => e.timedEvent.Time)
+                      .ThenBy(i => i.compareValue)
+                      .Select(i => i.timedEvent).ToArray(); //this is crucial as have executed a parallel query
+
+            return timedEvents.Select(ev => ev.Copy()).ToArray();
+        }
+
+        public static Playback GetProcessedMidiPlayback(MidiFile midiFile, string songName)
+        {
+            var settings = HSC.Settings.PlaylistSettings.Settings[songName];
+
+            MidiProcessor.Process(midiFile, settings);
+
+            return FilePlayback.GetFilePlayback(midiFile, songName);
+        }
+
+        private static BardPlayback GetPlayback(TimedEventWithTrackChunkIndex[] timedEvs, TempoMap tempoMap)
+        {
+            var playbackInfo = FilePlayback.GetPlayback(timedEvs, tempoMap, HSC.Settings.AppSettings.CurrentSong);
+
+            return playbackInfo.playback;
+        }
+
+        public static BardPlayback GetProcessedPlayback(TimedEventWithTrackChunkIndex[] timedEvs, TempoMap tempoMap, string songName)
+        {
+
+            var settings = HSC.Settings.PlaylistSettings.Settings[songName];
+
+            PluginLog.Information($"HSCM processing song {songName}, {timedEvs.Count()} events before processing.");
+
+            timedEvs = MidiProcessor.Process(timedEvs, settings);
+
+            PluginLog.Information($"HSCM process finished {songName}, {timedEvs.Count()} events after processing.");
+
+            return GetPlayback(timedEvs, tempoMap);
+        }
+
         public static BardPlayback GetCachedPlayback(string songName)
         {
             if (HSC.SongCache.IsCached(songName))
@@ -25,15 +80,11 @@ namespace MidiBard.HSC
                     return null;
 
                 var item = cacheItem.Value as (TempoMap tempoMap, TimedEventWithTrackChunkIndex[] timedEvents)?;
-                PluginLog.Information($"cache {songName}, {item.Value.timedEvents.Count()} events");
-                //MidiProcessor.Process(item.Value.timedEvents.ToArray(), HSC.Settings.CurrentSongSettings);
+                var evs = item.Value.timedEvents.Select(ev => ev.Copy()).ToArray();
+                PluginLog.Information($"Loading song {songName} from cache, {evs.Count()} events");
 
-                return new BardPlayback(item.Value.timedEvents, item.Value.tempoMap, new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() })
-                {
-                    InterruptNotesOnStop = true,
-                    Speed = Configuration.config.playSpeed,
-                    TrackProgram = true,
-                };
+
+                return GetProcessedPlayback(evs, item.Value.tempoMap, songName);
             }
             return null;
         }

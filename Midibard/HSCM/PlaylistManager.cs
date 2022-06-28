@@ -220,26 +220,20 @@ namespace MidiBard.HSCM
                 HSC.Settings.PrevTime = null;
 
                 //we only want the settings to change for the current song playing. dont apply settings for any other songs selected
-                 if (wasPlaying && Managers.PlaylistManager.CurrentPlaying != Settings.AppSettings.CurrentSongIndex) return;
-                
+                if (wasPlaying && Managers.PlaylistManager.CurrentPlaying != Settings.AppSettings.CurrentSongIndex) return;
+
                 ApplySettings();
 
                 if (!loggedIn && Configuration.config.hscmShowUI)//open UI if required so user can see tracks changed
                     MidiBard.Ui.Open();
 
-                bool shouldRestart = wasPlaying && (Configuration.config.useHscmChordTrimming || ShouldShiftTracks()); //dont restart song if we dont have to
                 bool switchInstruments = !loggedIn && !wasPlaying && Configuration.config.switchInstrumentFromHscmPlaylist;
 
-                if (shouldRestart)
-                {
+                if (wasPlaying)
                     HSC.Settings.PrevTime = MidiBard.CurrentPlayback.GetCurrentTime(Melanchall.DryWetMidi.Interaction.TimeSpanType.Metric);
-                    SwitchSongByName(Settings.AppSettings.CurrentSong, true, false);
-                }
-                else
-                {
-                    if (switchInstruments) //if an instrument was chosen on a track switch to it if needed
-                        PerformHelpers.SwitchInstrumentFromSong();
-                }
+
+                SwitchSongByName(Settings.AppSettings.CurrentSong, wasPlaying, switchInstruments);
+
 
                 ImGuiUtil.AddNotification(NotificationType.Success, $"Reload HSCM playlist settings for '{Settings.AppSettings.CurrentSong}' complete.");
             }

@@ -24,7 +24,16 @@ namespace MidiBard.HSC
 
         public static bool IsCached(string songName) => songs.ContainsKey(songName);
 
-        public static (TempoMap, TimedEventWithTrackChunkIndex[])? Item(string songName) => songs.ContainsKey(songName) ? songs[songName] : null;
+        public static (TempoMap, TimedEventWithTrackChunkIndex[])? Item(string songName)
+        {
+
+            if (!songs.ContainsKey(songName))
+                return null;
+
+            var song = songs[songName];
+
+            return (song.tempoMap, song.timeEvents.ToArray());
+        }
 
         public static void AddOrUpdate(string songName, (TempoMap, TimedEventWithTrackChunkIndex[]) song)
         {
