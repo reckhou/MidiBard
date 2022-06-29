@@ -196,7 +196,7 @@ public class Configuration : IPluginConfiguration
                 });
 
                 PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-                if (reloadplaylist && config.autoPostPartyChatCommand)
+                if (!config.useHscmOverride && reloadplaylist && config.autoPostPartyChatCommand)
                 {
                     MidiBard.SendReloadPlaylistCMD = true;
                 }

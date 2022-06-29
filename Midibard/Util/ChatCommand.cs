@@ -35,55 +35,58 @@ namespace MidiBard
 			}
 
 			string cmd = strings[0].ToLower();
-			if (cmd == "switchto") // switchto + <song number in playlist>
+
+			if (!Configuration.config.useHscmOverride)
 			{
-				if (strings.Length < 2)
+				if (cmd == "switchto") // switchto + <song number in playlist>
 				{
-					return;
+					if (strings.Length < 2)
+					{
+						return;
+					}
+
+					// use this to avoid double switching on the client which sends the message by automation.
+					if (IgnoreSwitchSongFlag)
+					{
+						IgnoreSwitchSongFlag = false;
+						return;
+					}
+
+					int number = -1;
+					bool success = Int32.TryParse(strings[1], out number);
+					if (!success)
+					{
+						return;
+					}
+
+					MidiPlayerControl.SwitchSong(number - 1);
+					Ui.Open();
 				}
-
-				// use this to avoid double switching on the client which sends the message by automation.
-				if (IgnoreSwitchSongFlag)
-                {
-					IgnoreSwitchSongFlag = false;
-					return;
-                }
-
-				int number = -1;
-				bool success = Int32.TryParse(strings[1], out number);
-				if (!success)
+				else if (cmd == "reloadplaylist") // reload the playlist from saved config
 				{
-					return;
-				}
+					if (MidiBard.IsPlaying)
+					{
+						PluginLog.LogInformation("Reload playlist is not allowed while playing.");
+						return;
+					}
 
-				MidiPlayerControl.SwitchSong(number - 1);
-				Ui.Open();
-			}
-			else if (cmd == "reloadplaylist") // reload the playlist from saved config
-			{
-				if (MidiBard.IsPlaying)
+					if (IgnoreReloadPlaylist)
+					{
+						IgnoreReloadPlaylist = false;
+						return;
+					}
+
+					Configuration.Load();
+					Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
+				}
+				else if (cmd == "close") // switch off the instrument
 				{
-					PluginLog.LogInformation("Reload playlist is not allowed while playing.");
-					return;
+					MidiPlayerControl.Stop();
+					SwitchInstrument.SwitchTo(0);
 				}
-
-				if (IgnoreReloadPlaylist)
-                {
-					IgnoreReloadPlaylist = false;
-					return;
-                }
-
-				Configuration.Load();
-				Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
-			}
-			else if (cmd == "close") // switch off the instrument
-			{
-				MidiPlayerControl.Stop();
-				SwitchInstrument.SwitchTo(0);
 			}
 
-
-			else if (cmd == "hscmstart") 
+			if (cmd == "hscmstart") 
 			{
 				Task.Run(() => MidiBard.InitHSCMOverride());
 			}
