@@ -60,6 +60,9 @@ If you are new to `MidiBard 2`, please use those settings below. Those settings 
 ![image](https://i.imgur.com/mGXTy0O.png)
 
 # How to Use
+
+**For more detailed explanations, please check [MidiBard 2 Manual](https://raw.githubusercontent.com/reckhou/MidiBard2/v2-api6-stable/Manual/Midibard_Manual.pdf).**
+
 * **Where to Start?**  
 
 Type `/midibard` in the chatbox and the window will show up. Press the `+` icon to add MIDI files to the playlist(hold `Ctrl` or `Shift` key to choose multiple files).  Double click any songs on the playlist to switch. Select the tracks you wish to play, and choose the instrument you wish to use. 
