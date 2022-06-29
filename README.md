@@ -6,24 +6,36 @@
 
 **Buy me a coffee if you wish:**
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P6DAAKQ)
 
-`MidiBard 2` is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It was originally authored by [akira0245](https://github.com/akira0245/MidiBard), now developed by [Ori](https://github.com/reckhou/MidiBard) and other developers after he quit for real-life reasons.
+`MidiBard 2` is an FF14 Bard plugin based on the Dalamud framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard), developing by [Ori](https://github.com/reckhou/MidiBard) and [SpuriousSnail86](https://github.com/SpuriousSnail86/MidiBard).
 
 
 # Why MidiBard 2?
 
-* No need to set key bindings and hotbars on your every bards. 
-* Minimal delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
-* Based on in-game detection of bard ensemble mode, almost perfect sync between bards. Also supports manual sync if you wish to add a little bit of flavour to your song.
-*  Automatically switches instruments by track names following BMP rules, all songs from [BMP MIDI repository](https://bmp.trotlinebeercan.com/) are supported.
-* Switches songs and instruments across all bards in the same party, by commands. Those bards don't have to be on the same PC, which means it's possible to play with your friends, and they start to play automatically by following the ensemble mode, no need to countdown on Discord anymore!
-* Plays any number of track on the MIDI file, separately transpose any track, or override the electric guitar's tone, which greatly helps for testing.
-*  Therefore, if the switching tone is needed, it's much easier for composers to put "Clean" and "Overdriven" guitar on different tracks, and play those tracks only by one bard. No need to follow the low-efficient way of creating events by editing MIDI files anymore!
-* Supports almost all MIDI keyboards.
-* Auto-adapt notes outside of C3-C6 to help test unadapted songs.
-* Track visualization, helps for testing/debugging.
+❖ High-quality playback, clean sound on every instrument. Minimal delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
 
+❖ Based on in-game detection of bard ensemble mode, almost perfect sync between bards. Also supports manual sync if you wish to add a little bit of flavour to your song.
+
+❖ Automatically switches instruments by track names following BMP rules, all songs from [BMP MIDI Repository](https://bmp.trotlinebeercan.com/) are supported.
+
+❖ No need to set key bindings and hotbars on your every bard.
+
+❖ Switches songs and instruments across all bards in the same party, by commands. Those bards don't have to be on the same PC, which means it's possible to play with your friends, and everyone starts to play automatically by following the ensemble mode, no need to countdown on Discord anymore!
+
+❖ Plays any number of tracks on the MIDI file, transposes any track separately, or overrides the electric guitar's tone, which greatly helps for testing/performance. 
+
+For example, composers may have `Clean` and `Overdriven` guitars on two tracks, both could be played by a single bard, which makes switching guitar tones much easier than editing MIDI files by hand.
+
+❖ Able to talk to your crowds when playing, makes your show more lively!
+
+❖ Supports LRC file, posts lyrics in the game in sync, if you wish to sing along with your song.
+
+❖ Supports almost all MIDI keyboards.
+
+❖ Auto-adapt notes outside of C3-C6 to help test unadapted songs.
+
+❖ Track visualization, helps for testing/debugging.
 
 # How to Install
 To use you need to install and boot the game by using [FFXIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher).
@@ -35,24 +47,24 @@ You need to add my custom plugin repository to install MidiBard.
 
 Please open ``Dalamud Settings``, on ``Experimental`` page, add a ``Custom Plugin Repository`` as below:
 
-[![DD5JTJH.png](https://i.imgur.com/DD5JTJH.png)](https://i.imgur.com/DD5JTJH.png)
+![DD5JTJH.png](https://i.imgur.com/ryHkqnU.png)
 
 Back to `Plugin Installer`, search `Midibard 2` and install.
 
-![enter image description here](https://i.imgur.com/4BH682e.png)
+![enter image description here](https://i.imgur.com/LB6UMEk.png)
 
 # Recommend Settings
 
 If you are new to `MidiBard 2`, please use those settings below. Those settings are recommended for the band.
 
-![image](https://i.imgur.com/wFsYNDy.png)
+![image](https://i.imgur.com/mGXTy0O.png)
 
 # How to Use
 * **Where to Start?**  
 
 Type `/midibard` in the chatbox and the window will show up. Press the `+` icon to add MIDI files to the playlist(hold `Ctrl` or `Shift` key to choose multiple files).  Double click any songs on the playlist to switch. Select the tracks you wish to play, and choose the instrument you wish to use. 
 
-![enter image description here](https://i.imgur.com/pSBChDZ.png)
+![enter image description here](https://i.imgur.com/Iu9wVyQ.png)
 
 Press the triangle icon to start playing.
 
@@ -66,7 +78,7 @@ If you are a solo bard, this is all you need to know 😊
 4. Check every bard to make sure everyone's choosing the correct track they are playing. You only need to do it once after rebooting the game or reloading the playlist. They will always play the same track number even on different songs.
 5. After everything's been set, start the ensemble mode in-game and the song will start playing automatically.
 
-![enter image description here](https://i.imgur.com/cAEFMMW.png)
+![enter image description here](https://i.imgur.com/ZxsXKKp.png)
 
 
 
@@ -142,8 +154,6 @@ Below are all instruments supported in the game. The track name of the MIDI file
 >ElectricGuitarOverdriven
 >ElectricGuitarPowerChords 
 >ElectricGuitarSpecial
-
-`Program:ElectricGuitar` is not supported, since there are much easier and more direct ways to implement tone switch, by separating different tones to different tracks. Midibard switches tones automatically.
 
 For transposition, add `+X` or `-X` after the instrument name. For instance, `Trombone+1` means +1 octave on the trombone track. This is especially helpful in composing software like `MuseScore`, so you can have the correct range when editing.
 
