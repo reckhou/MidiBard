@@ -6,7 +6,7 @@
 
 **Buy me a coffee if you wish:**
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P6DAAKQ)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
 `MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard), developing by [Ori](https://github.com/reckhou/MidiBard) and [SpuriousSnail86](https://github.com/SpuriousSnail86/MidiBard).
 
