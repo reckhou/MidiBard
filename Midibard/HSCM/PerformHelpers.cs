@@ -62,66 +62,50 @@ namespace MidiBard.HSC
             ImGuiUtil.AddNotification(NotificationType.Success, $"Performance mode closed");
         }
 
-        public static bool SwitchInstrumentFromSong(bool force =false)
+        public static async Task<bool> SwitchInstrumentFromSong(bool force =false)
         {
-            try
+            return await Task.Run(() =>
             {
-                if (HSC.Settings.CharIndex == -1)
+                try
                 {
-                    ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'. Character config not loaded for '{HSC.Settings.CharName}'.");
+                    if (HSC.Settings.CharIndex == -1)
+                    {
+                        ImGuiUtil.AddNotification(NotificationType.Error, $"Cannot switch instruments from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'. Character config not loaded for '{HSC.Settings.CharName}'.");
+                        return false;
+                    }
+
+                    if (!Configuration.config.switchInstrumentFromHscmPlaylist && !force)
+                        return MidiBard.CurrentInstrument != 0;
+
+                    if (HSC.Settings.SwitchInstrumentFailed)
+                    {
+                        ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
+                        return false;
+                    }
+
+                    PluginLog.Information($"Instrument switching from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'");
+                    uint insId = GetInstrumentFromHscPlaylist();
+                    PluginLog.Information($"Switching to '{((Instrument)insId).ToString()}'");
+
+                    bool instrumentEquipped = SwitchTo(insId);
+
+                    if (!instrumentEquipped)
+                    {
+                        PluginLog.Error($"Failed to equip instrument for '{HSC.Settings.AppSettings.CurrentSong}'.");
+                        return false;
+                    }
+
+                    if (instrumentEquipped && Configuration.config.useHscmSendReadyCheck)
+                        SendReadyCheckForPartyLeader();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Error($"Error when switching instrument from HSC playlist. Message: {ex.Message}");
                     return false;
                 }
-
-                if (!Configuration.config.switchInstrumentFromHscmPlaylist && !force)
-                    return MidiBard.CurrentInstrument != 0;
-
-                if (HSC.Settings.SwitchInstrumentFailed)
-                {
-                    ImGuiUtil.AddNotification(NotificationType.Error, "Cannot switch instruments yet. Wait 3 seconds.");
-                    return false;
-                }
-
-                PluginLog.Information($"Instrument switching from HSCM playlist for '{HSC.Settings.AppSettings.CurrentSong}'");
-                uint insId = GetInstrumentFromHscPlaylist();
-                PluginLog.Information($"Switching to '{((Instrument)insId).ToString()}'");
-
-                bool instrumentEquipped = SwitchTo(insId);
-
-                if (!instrumentEquipped)
-                {
-                    PluginLog.Error($"Failed to equip instrument for '{HSC.Settings.AppSettings.CurrentSong}'.");
-                    return false;
-                }
-
-                if (instrumentEquipped && Configuration.config.useHscmSendReadyCheck)
-                    SendReadyCheckForPartyLeader();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error($"Error when switching instrument from HSC playlist. Message: {ex.Message}");
-                return false;
-            }
-        }
-
-
-        public static bool ShouldPlayNote(MidiEvent ev, int trackIndex)
-        {
-            if (!(ev is NoteEvent))
-                return true;
-
-            var noteEv = ev as NoteEvent;
-
-            if (HSC.Settings.PercussionNotes.IsNullOrEmpty())
-                return true; 
-
-            //not a percussion note so play anyway
-            if (!HSC.Settings.PercussionNotes.ContainsKey(trackIndex))
-                return true;
-
-            //percussion note - do percussion logic
-            return HSC.Settings.PercussionNotes[trackIndex].ContainsKey((int)noteEv.NoteNumber) && HSC.Settings.PercussionNotes[trackIndex][(int)noteEv.NoteNumber];
+            });
         }
 
         public static int GetGuitarTone(Track track) => (int)PerformanceHelpers.GetInstrumentFromName(track.EnsembleInstrument)-24;
@@ -179,11 +163,15 @@ namespace MidiBard.HSC
                 if (HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
                     return 0;
 
-                var firstTrack = HSC.Settings.CurrentSongSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
+                var firstTrack = HSC.Settings.CurrentSongSettings.Tracks.Values.FirstOrDefault(
+                    t => (HSC.Settings.AppSettings.TrackSettings.PopulateFromPlaylist ? t.EnsembleMember : t.AutofilledMember) == HSC.Settings.CharIndex);
+
                 if (firstTrack == null)
                     return 0;
 
-                uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(firstTrack.EnsembleInstrument).Value;
+                string insName = HSC.Settings.AppSettings.TrackSettings.PopulateFromPlaylist ? firstTrack.EnsembleInstrument : firstTrack.AutofilledInstrument;
+
+                uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(insName).Value;
 
                 return insId;
             }

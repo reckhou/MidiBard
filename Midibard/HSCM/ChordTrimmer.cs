@@ -7,46 +7,50 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MidiBard.Common;
+using Dalamud.Logging;
 
 namespace MidiBard.HSC
 {
     internal class ChordTrimmer
     {
         public static void Trim(
-            MidiFile midiFile, 
+            Dictionary<int, TrackChunk> tracks,
             MidiSequence settings, 
             int maxNotes = 2, 
             bool ignoreSettings = false, 
             bool perTrack = false)
         {
-
             if (perTrack)
             {
-                var tracks = midiFile.GetTrackChunks();
-
-                int index = 0;
-                foreach(var track in tracks)
+                Parallel.ForEach(tracks, t =>
                 {
-                    if (!settings.Tracks.ContainsKey(index))
-                        continue;
+                    if (settings.Tracks.ContainsKey(t.Key))
+                    {
+                        var trackSettings = settings.Tracks[t.Key];
 
-                    var trackSettings = settings.Tracks[index];
+                        TrimTrack(t.Value, trackSettings, maxNotes, ignoreSettings);
+                    }
+                });
 
-                    TrimTrack(track, trackSettings, maxNotes, ignoreSettings);
-                    index++;
-                }
-         
             }
             else
-                TrimFile(midiFile, settings, maxNotes, ignoreSettings);
+                TrimFile(tracks, settings, maxNotes, ignoreSettings);
         }
 
 
-        private static void TrimFile(MidiFile midiFile, MidiSequence settings, int maxNotes = 2, bool ignoreSettings = false)
+        private static void TrimFile(Dictionary<int, TrackChunk> tracks, MidiSequence settings, int maxNotes = 2, bool ignoreSettings = false)
         {
-            var chords = GetChords(midiFile.GetNotes());
+            PluginLog.Information("trimming chords from HSCM playlist");
 
-            midiFile.RemoveNotes(n => chords.Any(c => c.Time == n.Time && ShouldRemoveNote(
+            var trackChunks = tracks.Select(t => t.Value);
+
+            PluginLog.Information($"Total notes before trimming {trackChunks.GetNotes().Count()}");
+
+            var chords = GetChords(trackChunks.GetNotes());
+
+            PluginLog.Information($"total chords {chords.Count()}");
+
+            trackChunks.RemoveNotes(n => chords.Any(c => c.Time == n.Time && ShouldRemoveNote(
                     c.Notes.ToArray(),
                     c.LowestNote, 
                     c.HighestNote, 
@@ -54,6 +58,8 @@ namespace MidiBard.HSC
                     settings, 
                     maxNotes,
                     ignoreSettings)));
+
+            PluginLog.Information($"Total notes after trimming {trackChunks.GetNotes().Count()}");
         }
 
         private static void TrimTrack(TrackChunk chunk, Track trackSettings, int maxNotes = 2, bool ignoreSettings = false)
@@ -139,8 +145,6 @@ namespace MidiBard.HSC
 
             return notes.ToArray();
         }
-
-
 
         private static IEnumerable<Chord> GetChords(IEnumerable<Note> notes)
         {

@@ -146,7 +146,7 @@ public partial class MidiBard : IDalamudPlugin
         if (!Configuration.config.useHscmOverride)
         Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true));
 
-        CurrentOutputDevice =  (Configuration.config.useHscmOverride ? new HSCM.MidiControl.BardPlayDevice() : new BardPlayDevice());
+        CurrentOutputDevice = new BardPlayDevice();
         InputDeviceManager.ScanMidiDeviceThread.Start();
 
         Ui = new PluginUI();

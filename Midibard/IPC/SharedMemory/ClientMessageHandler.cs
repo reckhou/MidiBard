@@ -20,7 +20,12 @@ namespace MidiBard
         private static void StopClientMessageHandler()
         {
             hscmConnected = false;
+
             waitHandle.Set();
+            waitHandle?.Close();
+            hscmWaitHandle?.Set();
+            hscmWaitHandle?.Close();
+
             msgHandler.ChangeSongMessageReceived -= MsgHandler_ChangeSongMessageReceived;
             msgHandler.ReloadPlaylistMessageReceived -= MsgHandler_ReloadPlaylistMessageReceived;
             msgHandler.ReloadPlaylistSettingsMessageReceived -= MsgHandler_ReloadPlaylistSettingsMessageReceived;
@@ -48,12 +53,11 @@ namespace MidiBard
 
                 PluginLog.Information($"Started client message event handling.");
 
-                while (Configuration.config.useHscmOverride && hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
+                while (hscmConnected && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
                 {
+                    if (HSC.Settings.CharIndex == -1 || !Configuration.config.useHscmOverride) continue;//dont do anything until we have the char config loaded
 
-                    if (HSC.Settings.CharIndex == -1) continue;//dont do anything until we have the char config loaded
-
-                    if (!hscmConnected || !Configuration.config.useHscmOverride)
+                    if (!hscmConnected)
                     {
                         PluginLog.Information($"Stopping client message event handler.");
                         // Clean up here, then...
@@ -65,6 +69,17 @@ namespace MidiBard
 
 
                     bool success = waitHandle.WaitOne();
+
+                    if (HSC.Settings.CharIndex == -1 || !Configuration.config.useHscmOverride) continue;//dont do anything until we have the char config loaded
+
+                    if (!hscmConnected)
+                    {
+                        PluginLog.Information($"Stopping client message event handler.");
+                        // Clean up here, then...
+                        //cancelToken.ThrowIfCancellationRequested();
+                        break;
+                    }
+
                     PluginLog.Information($"Client message sent.");
 
                     if (success)
@@ -82,7 +97,7 @@ namespace MidiBard
                         break;
                     }
 
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                 }
 
             }

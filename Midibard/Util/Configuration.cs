@@ -81,6 +81,8 @@ public class Configuration : IPluginConfiguration
     public int hscmOverrideDelay { get; set; } = 5000;
     public bool hscmOfflineTesting { get; set; } = false;
     public bool hscmShowUI { get; set; } = false;
+
+    public bool useHscmSongCache { get; set; } = true;
     public string hscmMidiFile { get; set; }
 
     public int prevSelected { get; set; }

@@ -22,6 +22,7 @@ namespace MidiBard
 
         private static bool hscmConnected;
         private static bool hscmOverrideStarted;
+        private static bool disconnected;
 
         private static void StartHscmScanner()
         {
@@ -64,10 +65,6 @@ namespace MidiBard
                 hscmOverrideStarted = false;
 
                 StopClientMessageHandler();
-
-                waitHandle?.Close();
-                hscmWaitHandle?.Set();
-                hscmWaitHandle?.Close();
 
                 Common.IPC.SharedMemory.Clear();
                 Common.IPC.SharedMemory.Close();
@@ -139,7 +136,7 @@ namespace MidiBard
             }
             catch (Exception ex) 
             {
-                //PluginLog.Error($"An error occured opening wait event. Message: {ex.Message}");
+                PluginLog.Error($"An error occured opening wait event. Message: {ex.Message}");
                 return;
             }
 
@@ -194,6 +191,16 @@ namespace MidiBard
             PluginLog.Information($"hscmAutoPlaySong: {Configuration.config.hscmAutoPlaySong}");
             PluginLog.Information($"useHscmOverride: {Configuration.config.useHscmOverride}");
             PluginLog.Information($"hscmShowUI: {Configuration.config.hscmShowUI}");
+
+            //try
+            //{
+            //    waitHandle?.Set();
+            //}
+            //catch (Exception ex)
+            //{
+            //    PluginLog.Error($"An error occured populating config from HSCM settings. Message: {ex.Message}");
+            //    return;
+            //}
 
             Configuration.Save();
         }
