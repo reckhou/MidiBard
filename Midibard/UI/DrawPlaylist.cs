@@ -120,7 +120,7 @@ public partial class PluginUI
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 MidiPlayerControl.SwitchSong(i);               
-                if (Configuration.config.autoPostPartyChatCommand)
+                if (!Configuration.config.useHscmOverride && Configuration.config.autoPostPartyChatCommand)
                 {
                     ChatCommand.IgnoreSwitchSongFlag = true;
                     string msg = $"/p switchto {i + 1}";

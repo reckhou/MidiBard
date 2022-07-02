@@ -64,7 +64,7 @@ namespace MidiBard
             ImGui.SameLine();
             if (ImGui.Button(FontAwesomeIcon.Stop.ToIconString()))
             {
-                if (Configuration.config.autoPostPartyChatCommand)
+                if (!Configuration.config.useHscmOverride && Configuration.config.autoPostPartyChatCommand)
                 {
                     MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
                 }

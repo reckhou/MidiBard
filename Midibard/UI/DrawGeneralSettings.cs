@@ -148,9 +148,6 @@ namespace MidiBard
                     Configuration.Save();
                 }
                 ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
-            } else
-            {
-                Configuration.config.autoPostPartyChatCommand = false;
             }
 
             //ImGui.Checkbox("Override guitar tones".Localize(), ref Configuration.config.OverrideGuitarTones);
