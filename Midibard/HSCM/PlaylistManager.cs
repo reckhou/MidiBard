@@ -56,6 +56,8 @@ namespace MidiBard.HSCM
             MidiBard.DoLockedWriteAction(() => Configuration.Save());
         }
 
+        private static bool TrackCharIndexChanged(Track track) => (HSC.Settings.AppSettings.TrackSettings.PopulateFromPlaylist ? track.EnsembleMember : track.AutofilledMember) == HSC.Settings.CharIndex;
+
         private static void UpdateTracks(MidiSequence seq)
         {
             if (ConfigurationPrivate.config.EnabledTracks.IsNullOrEmpty() || seq.Tracks.IsNullOrEmpty())
@@ -83,7 +85,7 @@ namespace MidiBard.HSCM
                 if (Configuration.config.OverrideGuitarTones && PerformHelpers.HasGuitar(track.Value))
                     Configuration.config.TonesPerTrack[index] = PerformHelpers.GetGuitarTone(track.Value);
 
-                if (!track.Value.Muted && track.Value.EnsembleMember == HSC.Settings.CharIndex)
+                if (!track.Value.Muted && TrackCharIndexChanged(track.Value))
                 {
                     if (track.Value.PercussionNote.HasValue && track.Value.ParentIndex.HasValue)
                     {

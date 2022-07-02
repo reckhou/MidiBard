@@ -570,6 +570,9 @@ public static class FilePlayback
         {
             if (!HSC.SongCache.IsCached(songName))//song not cached? load midi file and store events
             {
+
+                PluginLog.Information($"Song '{songName}' not in HSCM cache. adding");
+
                 var midiFile = await PlaylistManager.LoadMidiFile(index);
                 var tempoMap = midiFile.GetTempoMap();
 
@@ -580,13 +583,13 @@ public static class FilePlayback
                     //PluginLog.Debug($"[LoadPlayback] removing {PlaylistManager.FilePathList[index].path}");
                     Managers.PlaylistManager.FilePathList.RemoveAt(index);
                     return false;
-                }
+                } 
 
                 //fetch timed events 
                 var timedEvs = await Task.Run(() => HSC.PlaybackUtilities.GetTimedEvents(midiFile));
 
                 //store in cache
-                SongCache.AddOrUpdate(HSC.Settings.AppSettings.CurrentSong,(tempoMap, timedEvs));
+                SongCache.AddOrUpdate(songName, (tempoMap, timedEvs));
 
                 CurrentPlayback = await Task.Run(() => HSC.PlaybackUtilities.GetProcessedPlayback(timedEvs, tempoMap, songName));
             }//song cached? fetch from cache and prepare playback

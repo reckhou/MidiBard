@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using MidiBard.Common;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using Dalamud.Logging;
+using System.Diagnostics;
 
 namespace MidiBard.HSC
 {
@@ -17,7 +18,10 @@ namespace MidiBard.HSC
     {
         public static TimedEventWithTrackChunkIndex[] Process(TimedEventWithTrackChunkIndex[] timedObjs, MidiSequence settings)
         {
-            PluginLog.Information($"Processing song '{Settings.AppSettings.CurrentSong}'");
+            PluginLog.Information($"HSCM processing song '{Settings.AppSettings.CurrentSong}', {timedObjs.Count()} events before processing.");
+
+            var stopwatch = Stopwatch.StartNew();
+
 
             var tracks = timedObjs.GroupBy(to => (int)to.Metadata)
                 .Select(to => new { index = to.Key, track = TimedObjectUtilities.ToTrackChunk(to.ToArray()) })
@@ -29,13 +33,21 @@ namespace MidiBard.HSC
 
             ProcessTracks(tracks, settings);
 
-            return tracks.Values
+            var newEvs = tracks.Values
           .SelectMany((chunk, index) => chunk.GetTimedEvents().Select(e => new TimedEventWithTrackChunkIndex(e.Event, e.Time, index))).ToArray();
+
+            PluginLog.Information($"HSCM process of '{Settings.AppSettings.CurrentSong}' finished in {stopwatch.Elapsed.TotalMilliseconds}, {newEvs.Count()} events after processing.");
+
+            return newEvs;
 
         }
 
         public static void Process(MidiFile midiFile, MidiSequence settings)
-        { 
+        {
+            PluginLog.Information($"HSCM processing song '{Settings.AppSettings.CurrentSong}', {midiFile.GetTimedEvents().Count()} events before processing.");
+
+            var stopwatch = Stopwatch.StartNew();
+
             var tracks = midiFile.GetTrackChunks()
                .Select((t, i) => new { track = t, index = i })
               .AsParallel().Where(c => c.track.GetNotes().Any())
@@ -47,6 +59,8 @@ namespace MidiBard.HSC
             PluginLog.Information($"Total notes in MIDI after trimming {midiFile.GetNotes().Count()}");
 
             ProcessTracks(tracks, settings);
+
+            PluginLog.Information($"HSCM process of '{Settings.AppSettings.CurrentSong}' finished in {stopwatch.Elapsed.TotalMilliseconds}, {tracks.Select(t => t.Value).GetTimedEvents().Count()} events after processing.");
         }
 
         private static void ProcessTracks(Dictionary<int, TrackChunk> tracks, MidiSequence settings)
@@ -65,7 +79,7 @@ namespace MidiBard.HSC
 
         private static void ProcessNote(Note note, Track trackSettings, int trackIndex, MidiSequence settings)
         {
-            if (trackSettings.TimeOffset != 0)
+            if (trackSettings.TimeOffset != 0 && note.Time >= Math.Abs(trackSettings.TimeOffset))
                 ShiftTime(note, trackSettings.TimeOffset);
 
             try
@@ -80,23 +94,22 @@ namespace MidiBard.HSC
 
         private static void Transpose(Note note, int trackindex, MidiSequence settings)
         {
-            int newVal = GetTransposedValue(trackindex, settings);
-            PluginLog.Information($"new value: {newVal}");
-            if (newVal == 0)
-                return;
+            int newNote = 0;
+            int oldNote = (int)note.NoteNumber;
 
-            if (newVal < 0)
-                note.NoteNumber = new SevenBitNumber((byte)((byte)note.NoteNumber-newVal));
-            else
-                note.NoteNumber = new SevenBitNumber((byte)((byte)note.NoteNumber+newVal));
+            newNote = GetTransposedValue(oldNote, trackindex, settings);
+
+            //PluginLog.Information($"old value: {oldNote}, new value: {newNote}");
+
+            note.NoteNumber = new SevenBitNumber((byte)newNote);
 
         }
 
-        private static int GetTransposedValue(int trackIndex, MidiSequence settings)
+        private static int GetTransposedValue(int note, int trackIndex, MidiSequence settings)
         {
-            //PluginLog.Information("Transposing from HSCM playlist");
+            int transposeVal = 0;
 
-            int noteNum = 0;
+            //PluginLog.Information("Transposing from HSCM playlist");
 
             var trackInfo = GetHSCTrackInfo(trackIndex);
 
@@ -104,14 +117,14 @@ namespace MidiBard.HSC
                 return 0;
     
             if (trackInfo.OctaveOffset != 0)
-                noteNum += 12 * trackInfo.OctaveOffset;
+                transposeVal += 12 * trackInfo.OctaveOffset;
 
             if (trackInfo.KeyOffset != 0)
-                noteNum += trackInfo.KeyOffset;
+                transposeVal += trackInfo.KeyOffset;
 
-            //int newVal = 12 * settings.OctaveOffset + settings.KeyOffset + noteNum;
+            //int newVal = (12 * settings.OctaveOffset) + settings.KeyOffset + transposeVal;
 
-            return noteNum;
+            return note+ transposeVal;
         }
 
         private static Settings.TrackTransposeInfo GetHSCTrackInfo(int trackIndex)

@@ -297,7 +297,7 @@ internal class BardPlayDevice : IOutputDevice
             }
 
             while (noteNumber > 36)
-            {
+            {                                                                 
                 noteNumber -= 12;
                 octave--;
             }

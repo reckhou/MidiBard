@@ -163,11 +163,15 @@ namespace MidiBard.HSC
                 if (HSC.Settings.CurrentSongSettings.Tracks.IsNullOrEmpty())
                     return 0;
 
-                var firstTrack = HSC.Settings.CurrentSongSettings.Tracks.Values.FirstOrDefault(t => t.EnsembleMember == HSC.Settings.CharIndex);
+                var firstTrack = HSC.Settings.CurrentSongSettings.Tracks.Values.FirstOrDefault(
+                    t => (HSC.Settings.AppSettings.TrackSettings.PopulateFromPlaylist ? t.EnsembleMember : t.AutofilledMember) == HSC.Settings.CharIndex);
+
                 if (firstTrack == null)
                     return 0;
 
-                uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(firstTrack.EnsembleInstrument).Value;
+                string insName = HSC.Settings.AppSettings.TrackSettings.PopulateFromPlaylist ? firstTrack.EnsembleInstrument : firstTrack.AutofilledInstrument;
+
+                uint insId = (uint)PerformanceHelpers.GetInstrumentFromName(insName).Value;
 
                 return insId;
             }

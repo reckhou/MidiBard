@@ -16,9 +16,13 @@ namespace MidiBard.HSC.Models.Settings
         public AppSettings()
         {
             this.GeneralSettings = new GeneralSettings();
+
+            this.TrackSettings = new TrackSettings();
         }
 
         public GeneralSettings GeneralSettings { get; set; }
+
+        public TrackSettings TrackSettings { get; set; }
 
         public string CurrentSong { get; set; }
 

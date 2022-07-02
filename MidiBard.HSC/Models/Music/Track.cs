@@ -103,11 +103,16 @@ namespace MidiBard.HSC.Music
         public bool HasChanged { get; set; }
 
         [JsonProperty]
+        public int? AutofilledMember { get; set; }
+
+        [JsonProperty]
         public int? EnsembleMember { get; set; }
 
         [JsonProperty]
         public string EnsembleInstrument { get; set; }
 
+        [JsonProperty]
+        public string AutofilledInstrument { get; set; }
 
         [JsonProperty]
         public bool HoldLongNotes { get; set; }

@@ -48,31 +48,27 @@ namespace MidiBard.HSC
             return FilePlayback.GetFilePlayback(midiFile, songName);
         }
 
-        private static BardPlayback GetPlayback(TimedEventWithTrackChunkIndex[] timedEvs, TempoMap tempoMap)
+        private static BardPlayback GetPlayback(TimedEventWithTrackChunkIndex[] timedEvs, TempoMap tempoMap, string songName)
         {
-            var playbackInfo = FilePlayback.GetPlayback(timedEvs, tempoMap, HSC.Settings.AppSettings.CurrentSong);
+            var playbackInfo = FilePlayback.GetPlayback(timedEvs, tempoMap, songName);
 
             return playbackInfo.playback;
         }
 
         public static BardPlayback GetProcessedPlayback(TimedEventWithTrackChunkIndex[] timedEvs, TempoMap tempoMap, string songName)
         {
-
             var settings = HSC.Settings.PlaylistSettings.Settings[songName];
-
-            PluginLog.Information($"HSCM processing song {songName}, {timedEvs.Count()} events before processing.");
-
+ 
             timedEvs = MidiProcessor.Process(timedEvs, settings);
 
-            PluginLog.Information($"HSCM process finished {songName}, {timedEvs.Count()} events after processing.");
-
-            return GetPlayback(timedEvs, tempoMap);
+            return GetPlayback(timedEvs, tempoMap, songName);
         }
 
         public static BardPlayback GetCachedPlayback(string songName)
         {
             if (HSC.SongCache.IsCached(songName))
             {
+                PluginLog.Information($"Fetching '{songName}' from HSCM cache");
 
                 var cacheItem = SongCache.Item(songName);
 
