@@ -1,11 +1,16 @@
 # **MidiBard 2**
 
-**如果需要支持，请加入我们的 ✅[Discord 服务器](https://discord.gg/sMUACqqKzF)!**
-**如果不方便使用Discord，请加入QQ群：260985966（由原作者akira0245创建）**
-
 MidiBard是基于[卫月框架](https://bbs.tggfl.com/topic/32/dalamud-%E5%8D%AB%E6%9C%88%E6%A1%86%E6%9E%B6)的强大且易用的诗人midi演奏插件。目前版本兼容国服及国际服。
 
-原作者[akira0245](https://github.com/akira0245/MidiBard)贡献了绝大部分代码。游戏6.1更新以后目前由[Ori](https://github.com/reckhou/MidiBard) 以及其他开发者提供更新和维护。
+*对于大型乐队，或不同玩家在多台电脑上进行合奏的需求，我们开发了**MidiBard 2**，目前支持国际服和国服。*
+
+*请查阅 [MidiBard 2网站](https://midibard.org/) 和 [Github](https://github.com/reckhou/MidiBard2) 主页。*
+
+如果您身处海外或不方便使用QQ，请加入我们的 ✅[Discord服务器](https://discord.gg/sMUACqqKzF) !
+___
+**海外用户捐助渠道/Buy me a coffee if you wish:**
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
 
 
