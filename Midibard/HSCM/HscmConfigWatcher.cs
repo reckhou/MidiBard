@@ -48,10 +48,10 @@ namespace MidiBard
 
             PluginLog.Information($"File '{path}' changed.");
 
-            if (Path.GetFileName(path).Equals(CharConfigHelpers.CharConfigFileName))
+            if (Path.GetFileName(path).Equals(CharConfig.CharConfigFileName))
             {
                 ImGuiUtil.AddNotification(NotificationType.Info, $"Reloading HSCM character config file.");
-                HSC.Settings.CharIndex = CharConfigHelpers.GetCharIndex(HSC.Settings.CharName);
+                CharConfig.UpdateCharIndex(HSC.Settings.CharName);
                 PluginLog.Information($"Character index for '{HSC.Settings.CharName}': {HSC.Settings.CharIndex}.");
             }
             else if (Path.GetFileName(path).Equals(Settings.HscmSettingsFileName))

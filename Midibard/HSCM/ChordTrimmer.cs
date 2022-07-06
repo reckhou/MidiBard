@@ -28,7 +28,7 @@ namespace MidiBard.HSC
                     {
                         var trackSettings = settings.Tracks[t.Key];
 
-                        TrimTrack(t.Value, trackSettings, maxNotes, ignoreSettings);
+                        TrimTrack(t.Value, t.Key, trackSettings, maxNotes, ignoreSettings);
                     }
                 });
 
@@ -40,7 +40,7 @@ namespace MidiBard.HSC
 
         private static void TrimFile(Dictionary<int, TrackChunk> tracks, MidiSequence settings, int maxNotes = 2, bool ignoreSettings = false)
         {
-            PluginLog.Information("trimming chords from HSCM playlist");
+            PluginLog.Information("Trimming chords from HSCM playlist");
 
             var trackChunks = tracks.Select(t => t.Value);
 
@@ -48,7 +48,7 @@ namespace MidiBard.HSC
 
             var chords = GetChords(trackChunks.GetNotes());
 
-            PluginLog.Information($"total chords {chords.Count()}");
+            PluginLog.Information($"Total chords: {chords.Count()}");
 
             trackChunks.RemoveNotes(n => chords.Any(c => c.Time == n.Time && ShouldRemoveNote(
                     c.Notes.ToArray(),
@@ -59,12 +59,19 @@ namespace MidiBard.HSC
                     maxNotes,
                     ignoreSettings)));
 
-            PluginLog.Information($"Total notes after trimming {trackChunks.GetNotes().Count()}");
+            PluginLog.Information($"Total notes after trimming: {trackChunks.GetNotes().Count()}");
         }
 
-        private static void TrimTrack(TrackChunk chunk, Track trackSettings, int maxNotes = 2, bool ignoreSettings = false)
+        private static void TrimTrack(TrackChunk chunk, int index, Track trackSettings, int maxNotes = 2, bool ignoreSettings = false)
         {
+
+            PluginLog.Information($"Trimming chords in track {index}");
+
+            PluginLog.Information($"Track {index} total notes before trimming: {chunk.GetNotes().Count()}");
+
             var chords = GetChords(chunk.GetNotes());
+
+            PluginLog.Information($"Track {index} total chords: {chords.Count()}");
 
             chunk.RemoveNotes(n => chords.Any(c => c.Time == n.Time && ShouldRemoveNote(
                     c.Notes.ToArray(),
@@ -74,6 +81,8 @@ namespace MidiBard.HSC
                     trackSettings,
                     maxNotes,
                     ignoreSettings)));
+
+            PluginLog.Information($"Track {index} total notes after trimming: {chunk.GetNotes().Count()}");
         }
 
         private static bool ShouldRemoveNote(

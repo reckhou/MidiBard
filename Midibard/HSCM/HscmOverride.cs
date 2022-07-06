@@ -40,6 +40,12 @@ namespace MidiBard
 
                 if (!hscmFound)
                 {
+                    if (!hscmOverrideStarted)
+                    {
+                        PluginLog.Information($"Stopping HSCM scanner.");
+                        break;
+                    }
+
                     if (hscmConnected)
                     {
                         PluginLog.Information("HSCM exited. stopping client message handler.");
@@ -49,6 +55,12 @@ namespace MidiBard
 
                 if (hscmFound)
                 {
+                    if (!hscmOverrideStarted)
+                    {
+                        PluginLog.Information($"Stopping HSCM scanner.");
+                        break;
+                    }
+
                     if (!hscmConnected)
                         TryConnectHscm();
                 }
@@ -66,11 +78,7 @@ namespace MidiBard
 
                 StopClientMessageHandler();
 
-                Common.IPC.SharedMemory.Clear();
                 Common.IPC.SharedMemory.Close();
-
-                DalamudApi.api.ClientState.Login -= ClientState_Login;
-                DalamudApi.api.ClientState.Logout -= ClientState_Logout;
 
                 DisposeHSCMConfigFileWatcher();
 
@@ -215,7 +223,7 @@ namespace MidiBard
             else
             {
                 HSC.Settings.CharName = DalamudApi.api.ClientState.LocalPlayer?.Name.TextValue;
-                HSC.Settings.CharIndex = CharConfigHelpers.GetCharIndex(HSC.Settings.CharName);
+                HSC.Settings.CharIndex = CharConfig.GetCharIndex(HSC.Settings.CharName);
             }
 
             PluginLog.Information($"Client logged in. HSCM client info - index: {HSC.Settings.CharIndex}, character name: '{HSC.Settings.CharName}'.");

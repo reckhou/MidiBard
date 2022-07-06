@@ -11,21 +11,26 @@ using Dalamud.Logging;
 
 namespace MidiBard
 {
-    public class CharConfigHelpers
+    public class CharConfig
     {
         public const string CharConfigFileName = "characters.config";
 
-        public static int GetCharIndex(string charName)
+        public static void Load()
         {
             string filePath = Path.Join(HSC.Settings.CurrentAppPath, CharConfigFileName);
-            var charConfig = Common.FileHelpers.Load<CharacterConfig>(filePath);
+            HSC.Settings.CharConfig = Common.FileHelpers.Load<CharacterConfig>(filePath);
+        }
 
-            if (charConfig == null || string.IsNullOrEmpty(charName))
-                return -1;
+        public static void UpdateCharIndex(string charName)
+        {
+            Load();
 
-            var chars = charConfig.ToDictionary();
+            if (HSC.Settings.CharConfig == null || string.IsNullOrEmpty(charName))
+                return;
 
-            return chars.IsNullOrEmpty() || !chars.ContainsKey(charName) ? -1 : chars[charName];
+            var chars = HSC.Settings.CharConfig.ToDictionary();
+
+            HSC.Settings.CharIndex = chars.IsNullOrEmpty() || !chars.ContainsKey(charName) ? -1 : chars[charName];
         }
     }
 }

@@ -22,11 +22,10 @@ namespace MidiBard.HSC
 
             var stopwatch = Stopwatch.StartNew();
 
-
             var tracks = timedObjs.GroupBy(to => (int)to.Metadata)
                 .Select(to => new { index = to.Key, track = TimedObjectUtilities.ToTrackChunk(to.ToArray()) })
-                 .AsParallel().Where(c => c.track.GetNotes().Any())
-              .OrderBy(t => t.index).ToDictionary(t => t.index, t => t.track);
+                .AsParallel().Where(t => t.track.GetNotes().Any())
+                .OrderBy(t => t.index).Select((t, i) => new { track = t.track, index = i }).ToDictionary(t => t.index, t => t.track);
 
             if (Configuration.config.useHscmChordTrimming)
                 ChordTrimmer.Trim(tracks, settings, 2, false, Configuration.config.useHscmTrimByTrack);
@@ -50,13 +49,11 @@ namespace MidiBard.HSC
 
             var tracks = midiFile.GetTrackChunks()
                .Select((t, i) => new { track = t, index = i })
-              .AsParallel().Where(c => c.track.GetNotes().Any())
-              .OrderBy(t => t.index).ToDictionary(t => t.index, t => t.track);
+               .AsParallel().Where(t => t.track.GetNotes().Any())
+            .OrderBy(t => t.index).Select((t, i) => new { track = t.track, index = i }).ToDictionary(t => t.index, t => t.track);
 
             if (Configuration.config.useHscmChordTrimming)
                 ChordTrimmer.Trim(tracks, settings, 2, false, Configuration.config.useHscmTrimByTrack);
-
-            PluginLog.Information($"Total notes in MIDI after trimming {midiFile.GetNotes().Count()}");
 
             ProcessTracks(tracks, settings);
 
@@ -71,33 +68,33 @@ namespace MidiBard.HSC
                 {
                     var trackSettings = settings.Tracks[t.Key];
 
-                    t.Value.ProcessNotes(n => ProcessNote(n, trackSettings, t.Key, settings));
+                    t.Value.ProcessNotes(n => ProcessNote(n, trackSettings, t.Key));
                     t.Value.RemoveNotes(n => !ShouldPlayDrumNote(n.NoteNumber, t.Key)); //remove the drum notes this person should not play
                 }
             });
         }
 
-        private static void ProcessNote(Note note, Track trackSettings, int trackIndex, MidiSequence settings)
+        private static void ProcessNote(Note note, Track trackSettings, int trackIndex)
         {
-            if (trackSettings.TimeOffset != 0 && note.Time >= Math.Abs(trackSettings.TimeOffset))
-                ShiftTime(note, trackSettings.TimeOffset);
-
             try
             {
+                if (trackSettings.TimeOffset != 0 && note.Time >= Math.Abs(trackSettings.TimeOffset))
+                    ShiftTime(note, trackSettings.TimeOffset);
+
                 if (Configuration.config.useHscmTransposing)
-                Transpose(note, trackIndex,  settings);
+                    Transpose(note, trackIndex);
             }
             catch { }
         }
 
         private static void ShiftTime(Note note, int offset) => note.Time += offset;
 
-        private static void Transpose(Note note, int trackindex, MidiSequence settings)
+        private static void Transpose(Note note, int trackindex)
         {
             int newNote = 0;
             int oldNote = (int)note.NoteNumber;
 
-            newNote = GetTransposedValue(oldNote, trackindex, settings);
+            newNote = GetTransposedValue(oldNote, trackindex);
 
             //PluginLog.Information($"old value: {oldNote}, new value: {newNote}");
 
@@ -105,26 +102,22 @@ namespace MidiBard.HSC
 
         }
 
-        private static int GetTransposedValue(int note, int trackIndex, MidiSequence settings)
+        private static int GetTransposedValue(int note, int trackIndex)
         {
-            int transposeVal = 0;
-
-            //PluginLog.Information("Transposing from HSCM playlist");
+            int noteNum = 0;
 
             var trackInfo = GetHSCTrackInfo(trackIndex);
 
             if (trackInfo == null)
                 return 0;
-    
+
             if (trackInfo.OctaveOffset != 0)
-                transposeVal += 12 * trackInfo.OctaveOffset;
+                noteNum += (12 * trackInfo.OctaveOffset);
 
             if (trackInfo.KeyOffset != 0)
-                transposeVal += trackInfo.KeyOffset;
+                noteNum += trackInfo.KeyOffset;
 
-            //int newVal = (12 * settings.OctaveOffset) + settings.KeyOffset + transposeVal;
-
-            return note+ transposeVal;
+            return note + (12 * HSC.Settings.OctaveOffset) + HSC.Settings.KeyOffset + noteNum;
         }
 
         private static Settings.TrackTransposeInfo GetHSCTrackInfo(int trackIndex)

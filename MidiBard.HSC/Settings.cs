@@ -15,6 +15,7 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Interaction;
 using Newtonsoft.Json;
 using Dalamud.Logging;
+using MidiBard.HSC.Models;
 
 namespace MidiBard.HSC
 {
@@ -40,6 +41,8 @@ namespace MidiBard.HSC
             Playlist = new MidiBard.HSC.Models.Playlist.Playlist();
 
             AppSettings = new AppSettings();
+
+            CharConfig = new CharacterConfig();
         }
 
         public static void Cleanup()
@@ -62,7 +65,9 @@ namespace MidiBard.HSC
         public static MidiBard.HSC.Models.Playlist.Playlist Playlist { get; set; }
 
         public static SongSettings PlaylistSettings { get; set; }
-        
+
+        public static CharacterConfig CharConfig { get; set; }
+
         public static string CharName { get; set; }
 
         public static int CharIndex { get; set; }
@@ -86,8 +91,6 @@ namespace MidiBard.HSC
         public static ITimeSpan? PrevTime { get; set; }
         public static bool SavedConfig { get; set; }
         public static bool HSCMConfigExists { get; set; }
-
-
 
         public static void Load()
         {

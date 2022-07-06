@@ -277,56 +277,29 @@ internal class BardPlayDevice : IOutputDevice
         return noteNumber;
     }
 
-    public virtual int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
+    public static int GetTranslatedNoteNum(int noteNumber, int? trackIndex, out int octave, bool plotting = false)
     {
 
         noteNumber = noteNumber - 48;
 
         octave = 0;
 
-        if (!Configuration.config.useHscmOverride || !Configuration.config.useHscmTransposing)
+        if (!Configuration.config.useHscmOverride)
             noteNumber += Configuration.config.TransposeGlobal +
-                     (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
+                         (Configuration.config.EnableTransposePerTrack && trackIndex is { } index ? Configuration.config.TransposePerTrack[index] : 0);
 
         if (Configuration.config.AdaptNotesOOR)
         {
-            while (noteNumber < 0)
+            if (noteNumber < 0)
             {
-                noteNumber += 12;
-                octave++;
+                noteNumber = (noteNumber + 1) % 12 + 11;
             }
-
-            while (noteNumber > 36)
-            {                                                                 
-                noteNumber -= 12;
-                octave--;
+            else if (noteNumber > 36)
+            {
+                noteNumber = (noteNumber - 1) % 12 + 25;
             }
         }
 
         return noteNumber;
     }
-
-    //bool GetKey( ,int midiNoteNumber, int trackIndex, out int key, out int octave)
-    //{
-    //	octave = 0;
-
-    //	key = midiNoteNumber - 48 +
-    //	          Configuration.config.TransposeGlobal +
-    //	          (Configuration.config.EnableTransposePerTrack ? Configuration.config.TransposePerTrack[trackIndex] : 0);
-    //	if (Configuration.config.AdaptNotesOOR)
-    //	{
-    //		while (key < 0)
-    //		{
-    //			key += 12;
-    //			octave++;
-    //		}
-    //		while (key > 36)
-    //		{
-    //			key -= 12;
-    //			octave--;
-    //		}
-    //	}
-
-
-    //}
 }
