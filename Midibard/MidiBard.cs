@@ -157,10 +157,10 @@ public partial class MidiBard : IDalamudPlugin
 
         //if (PluginInterface.IsDev) Ui.Open();
 
+        DalamudApi.api.ClientState.Login -= ClientState_Login;
+        DalamudApi.api.ClientState.Logout -= ClientState_Logout;
         DalamudApi.api.ClientState.Login += ClientState_Login;
         DalamudApi.api.ClientState.Logout += ClientState_Logout;
-
-
 
         if (Configuration.config.useHscmOverride && (DalamudApi.api.ClientState.IsLoggedIn || Configuration.config.hscmOfflineTesting))
             Task.Run(() => InitHSCMOverride());
@@ -168,16 +168,14 @@ public partial class MidiBard : IDalamudPlugin
 
     private static void ClientState_Logout(object sender, EventArgs e)
     {
-        if (Configuration.config.useHscmOverride)
-        {
-            HSCMCleanup();
-        }
+        if (Configuration.config.useHscmOverride && hscmOverrideStarted)
+           HSCMCleanup();
     }
 
     private static void ClientState_Login(object sender, EventArgs e)
     {
         Configuration.LoadPrivate();
-        if (Configuration.config.useHscmOverride)
+        if (Configuration.config.useHscmOverride && !hscmOverrideStarted)
             Task.Run(() => InitHSCMOverride(true));
     }
 

@@ -86,6 +86,47 @@ namespace MidiBard
 				}
 			}
 
+			if (cmd == "speed")
+            {
+				Task.Run(() => MidiPlayerControl.SetSpeed(float.Parse(strings[1])));
+			}
+
+			if (cmd == "seek")
+			{
+				var dt = DateTime.Parse(strings[1]);
+				Task.Run(() => MidiPlayerControl.ChangeTime(dt.Hour, dt.Minute, dt.Second));
+			}
+
+			if (cmd == "rewind")
+			{
+				double timeInSeconds = -5;
+				try
+				{
+					timeInSeconds = -double.Parse(strings[1]);
+				}
+				catch (Exception e)
+				{
+				}
+
+				MidiPlayerControl.MoveTime(timeInSeconds);
+			}
+
+			if (cmd == "fastforward")
+			{
+
+				double timeInSeconds = 5;
+				try
+				{
+					timeInSeconds = double.Parse(strings[1]);
+				}
+				catch (Exception e)
+				{
+				}
+
+				MidiPlayerControl.MoveTime(timeInSeconds);
+			}
+
+
 			if (cmd == "hscmstart") 
 			{
 				Task.Run(() => MidiBard.InitHSCMOverride());

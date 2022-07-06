@@ -52,13 +52,12 @@ public static class FilePlayback
 
                 timedEvs.GroupBy(to => (int)to.Metadata)
                     .Select(to => new { index = to.Key, track = TimedObjectUtilities.ToTrackChunk(to.ToArray()) })
-                     .AsParallel().Where(c => c.track.GetNotes().Any())
-                  .OrderBy(t => t.index).ToDictionary(t => t.index, t => t.track)
-                .OrderBy(t => t.Key)
-                .Select(t =>
+                     .Where(c => c.track.GetNotes().Any())
+                    .OrderBy(t => t.index)
+                .Select((t, index) =>
                 {
-                    var notes = t.Value.GetNotes().ToArray();
-                    return (t.Value, GetTrackInfos(notes, t.Value, t.Key));
+                    var notes = t.track.GetNotes().ToArray();
+                    return (t.track, GetTrackInfos(notes, t.track, index));
                 }).ToList();
         }
         catch (Exception exception1)
@@ -71,15 +70,14 @@ public static class FilePlayback
                 MidiBard.CurrentTracks =
                 timedEvs.GroupBy(to => (int)to.Metadata)
                     .Select(to => new { index = to.Key, track = TimedObjectUtilities.ToTrackChunk(to.ToArray()) })
-                     .AsParallel().Where(c => c.track.GetNotes().Any())
-                  .OrderBy(t => t.index).ToDictionary(t => t.index, t => t.track)
-                .OrderBy(t => t.Key)
-                .Select(t =>
+                     .Where(c => c.track.GetNotes().Any())
+                    .OrderBy(t => t.index)
+                .Select((t, index) =>
                 {
-                    var noteEvents = t.Value.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
+                    var noteEvents = t.track.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
                     var notes = noteEvents.GetNotes().ToArray();
                     var trackChunk = new TrackChunk(noteEvents);
-                    return (trackChunk, GetTrackInfos(notes, trackChunk, t.Key));
+                    return (trackChunk, GetTrackInfos(notes, trackChunk, index));
                 }).ToList();
             }
             catch (Exception exception2)
@@ -157,13 +155,13 @@ public static class FilePlayback
         try
         {
             CurrentTracks = midifile.GetTrackChunks()
-                .Select((t, i) => new { track = t, index = i}).AsParallel()
+                .Select((t, i) => new { track = t, index = i})
                 .Where(t => t.track.Events.Any(ev => ev is NoteOnEvent))
                 .OrderBy(t => t.index)
-                .Select(t =>
+                .Select((t, index) =>
                 {
                     var notes = t.track.GetNotes().ToArray();
-                    return (t.track, GetTrackInfos(notes, t.track, t.index));
+                    return (t.track, GetTrackInfos(notes, t.track, index));
                 }).ToList();
         }
         catch (Exception exception1)
@@ -181,15 +179,15 @@ public static class FilePlayback
 
 
                 CurrentTracks = midifile.GetTrackChunks()
-                    .Select((t, i) => new { track = t, index = i }).AsParallel()
+                    .Select((t, i) => new { track = t, index = i })
                     .Where(t => t.track.Events.Any(ev => ev is NoteOnEvent))
                     .OrderBy(t => t.index)
-                    .Select(t =>
+                    .Select((t, index) =>
                     {
                         var noteEvents = t.track.Events.Where(i => i is NoteEvent or ProgramChangeEvent or TextEvent);
                         var notes = noteEvents.GetNotes().ToArray();
                         var trackChunk = new TrackChunk(noteEvents);
-                        return (trackChunk, GetTrackInfos(notes, trackChunk, t.index));
+                        return (trackChunk, GetTrackInfos(notes, trackChunk, index));
                     }).ToList();
             }
             catch (Exception exception2)

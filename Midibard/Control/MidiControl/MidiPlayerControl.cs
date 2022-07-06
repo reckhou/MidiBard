@@ -410,6 +410,21 @@ namespace MidiBard.Control.MidiControl
         }
 
 
+        internal static void ChangeTime(int hours, int mins, int secs)
+        {
+            if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+            {
+                playDeltaTime = 0;
+                LRCDeltaTime = 0;
+                return;
+            }
+
+            MetricTimeSpan newTime = new MetricTimeSpan(hours, mins, secs);
+            //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
+            CurrentPlayback.MoveToTime(newTime);
+
+            playDeltaTime = newTime.Seconds;
+        }
 
         internal static void ChangeDeltaTime(int delta)
         {
