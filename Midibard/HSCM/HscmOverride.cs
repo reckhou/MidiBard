@@ -223,7 +223,7 @@ namespace MidiBard
             else
             {
                 HSC.Settings.CharName = DalamudApi.api.ClientState.LocalPlayer?.Name.TextValue;
-                HSC.Settings.CharIndex = CharConfig.GetCharIndex(HSC.Settings.CharName);
+                CharConfig.UpdateCharIndex(HSC.Settings.CharName);
             }
 
             PluginLog.Information($"Client logged in. HSCM client info - index: {HSC.Settings.CharIndex}, character name: '{HSC.Settings.CharName}'.");
