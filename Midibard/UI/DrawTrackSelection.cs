@@ -20,7 +20,7 @@ public partial class PluginUI
             //ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(-10, -10));
             //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(-10, -10));
             if (ImGui.BeginChild("TrackTrunkSelection",
-                    new Vector2(ImGui.GetWindowContentRegionWidth() - 1,
+                    new Vector2(ImGuiUtil.GetWindowContentRegionWidth() - 1,
                         Math.Min(MidiBard.CurrentTracks.Count, 4.7f) * ImGui.GetFrameHeightWithSpacing() -
                         ImGui.GetStyle().ItemSpacing.Y),
                     false, ImGuiWindowFlags.NoDecoration))
@@ -33,7 +33,7 @@ public partial class PluginUI
                 {
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0,
-                        ImGui.GetWindowContentRegionWidth() - 4 * ImGui.GetCursorPosX() -
+                        ImGuiUtil.GetWindowContentRegionWidth() - 4 * ImGui.GetCursorPosX() -
                         ImGui.GetFontSize() * 5.5f);
                 }
 
@@ -121,7 +121,7 @@ public partial class PluginUI
                         if (MidiBard.PlayingGuitar && Configuration.config.OverrideGuitarTones)
                         {
                             ImGui.NextColumn();
-                            var width = ImGui.GetWindowContentRegionWidth();
+                            var width = ImGuiUtil.GetWindowContentRegionWidth();
                             //var spacing = ImGui.GetStyle().ItemSpacing.X;
                             var buttonSize = new Vector2(ImGui.GetFontSize() * 1.1f, ImGui.GetFrameHeight());
                             const uint colorRed = 0xee_6666bb;

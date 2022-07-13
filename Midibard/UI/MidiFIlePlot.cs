@@ -62,13 +62,13 @@ public partial class PluginUI
             //
         }
 
-        ImPlot.SetNextPlotTicksY(0, 127, 128, noteNames, false);
-        ImPlot.SetNextPlotLimitsY(36, 97, ImGuiCond.Appearing);
+        //ImPlot.SetNextPlotTicksY(0, 127, 128, noteNames, false);
+        //ImPlot.SetNextPlotLimitsY(36, 97, ImGuiCond.Appearing);
         if (setNextLimit)
         {
             try
             {
-                ImPlot.SetNextPlotLimitsX(0, data.Select(i => i.info.DurationMetric.GetTotalSeconds()).Max(), ImGuiCond.Always);
+                //ImPlot.SetNextPlotLimitsX(0, data.Select(i => i.info.DurationMetric.GetTotalSeconds()).Max(), ImGuiCond.Always);
                 setNextLimit = false;
             }
             catch (Exception e)
@@ -77,10 +77,10 @@ public partial class PluginUI
             }
         }
 
-        if (Configuration.config.LockPlot)
-        {
-            ImPlot.SetNextPlotLimitsX(timelinePos - timeWindow, timelinePos + timeWindow, ImGuiCond.Always);
-        }
+        //if (Configuration.config.LockPlot)
+        //{
+        //    ImPlot.SetNextPlotLimitsX(timelinePos - timeWindow, timelinePos + timeWindow, ImGuiCond.Always);
+        //}
 
         string songName = "";
         try
@@ -92,8 +92,7 @@ public partial class PluginUI
             //
         }
         if (ImPlot.BeginPlot(songName + "###midiTrackPlot",
-                null, null,
-                ImGui.GetWindowSize() - ImGuiHelpers.ScaledVector2(0, ImGui.GetCursorPosY()), ImPlotFlags.NoMousePos|ImPlotFlags.NoTitle | ImPlotFlags.NoChild))
+                ImGui.GetWindowSize() - ImGuiHelpers.ScaledVector2(0, ImGui.GetCursorPosY()), ImPlotFlags.NoMouseText|ImPlotFlags.NoTitle | ImPlotFlags.NoChild))
         {
             var drawList = ImPlot.GetPlotDrawList();
             var xMin = ImPlot.GetPlotLimits().X.Min;
@@ -137,7 +136,7 @@ public partial class PluginUI
                 {
                     ImPlot.SetNextLineStyle(color);
                     var f = double.NegativeInfinity;
-                    ImPlot.PlotVLines(trackName, ref f, 1);
+                    ImPlot.PlotInfLines(trackName, ref f, 1);
                 }
             }
 

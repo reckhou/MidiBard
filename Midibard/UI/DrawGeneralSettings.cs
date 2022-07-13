@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Numerics;
+using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 
 namespace MidiBard
@@ -70,9 +72,9 @@ namespace MidiBard
             //ImGui.Checkbox("Auto listening new device".Localize(), ref Configuration.config.autoStartNewListening);
             //ImGuiUtil.ToolTip("Auto start listening new midi input device when idle.".Localize());
 
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
-            ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth() / 3.36f);
+            ImGui.SetNextItemWidth(ImGuiUtil.GetWindowContentRegionWidth() / 3.36f);
             if (ImGuiUtil.EnumCombo("Tone mode".Localize(), ref Configuration.config.GuitarToneMode, _toolTips))
             {
                 Configuration.config.Save();
@@ -86,13 +88,14 @@ namespace MidiBard
             }
 
             ImGuiUtil.ToolTip("Draw midi tracks in a new window\nshowing the on/off and actual transposition of each track".Localize());
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
             if (ImGui.Checkbox("Follow playback".Localize() + $" ({timeWindow:F2}s)###followPlayBack", ref Configuration.config.LockPlot))
             {
                 Configuration.config.Save();
             }
 
+            ImGui.Checkbox("Follow playback".Localize() + $" ({timeWindow:F2}s)###followPlayBack", ref Configuration.config.LockPlot);
             if (ImGui.IsItemHovered())
             {
                 timeWindow *= Math.Pow(Math.E, ImGui.GetIO().MouseWheel * -0.1);
@@ -111,7 +114,7 @@ namespace MidiBard
             //ImGui.Checkbox("Auto Confirm Ensemble Ready Check".Localize(), ref Configuration.config.AutoConfirmEnsembleReadyCheck);
             //if (localizer.Language == UILang.CN) HelpMarker("在收到合奏准备确认时自动选择确认。");
 
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
             if (ImGui.Checkbox("Monitor ensemble".Localize(), ref Configuration.config.MonitorOnEnsemble))
             {
@@ -126,6 +129,13 @@ namespace MidiBard
             }
             ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
 
+            //ImGui.Checkbox("Auto set background frame limit".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
+            //ImGuiUtil.ToolTip("Auto disable background frame limit when entering performance mode and re-enable it when quit performance".Localize());
+
+            //ImGui.Checkbox("Override guitar tones".Localize(), ref MidiBard.config.OverrideGuitarTones);
+            //ImGuiUtil.ToolTip("Assign different guitar tones for each midi tracks".Localize());
+
+
             if (ImGui.Checkbox("Auto transpose".Localize(), ref Configuration.config.autoTransposeBySongName))
             {
                 Configuration.config.Save();
@@ -133,7 +143,7 @@ namespace MidiBard
 
             ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
 
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
+            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
             if (ImGui.Checkbox("Auto post command".Localize(), ref Configuration.config.autoPostPartyChatCommand))
             {
                 Configuration.config.Save();
@@ -160,8 +170,8 @@ namespace MidiBard
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - ImGui.GetStyle().ItemInnerSpacing.X);
             ImGui.TextUnformatted("Theme color".Localize());
 
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() / 2);
-            ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth() / 3.36f);
+            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
+            ImGui.SetNextItemWidth(ImGuiUtil.GetWindowContentRegionWidth() / 3.36f);
             if (ImGui.Combo("UI Language".Localize(), ref Configuration.config.uiLang, uilangStrings, 2))
             {
                 MidiBard.Localizer = new Localizer((UILang)Configuration.config.uiLang);

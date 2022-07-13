@@ -136,7 +136,7 @@ public partial class PluginUI
 
                         if (MidiBard.Localizer.Language == UILang.CN)
                         {
-                            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() -
+                            ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() -
                                            ImGui.CalcTextSize(FontAwesomeIcon.QuestionCircle.ToIconString()).X -
                                            ImGui.GetStyle().FramePadding.X * 2 - ImGui.GetCursorPosX() - 2);
 
