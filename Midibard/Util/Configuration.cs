@@ -159,4 +159,5 @@ public class Configuration : IPluginConfiguration
         ConfigurationPrivate.Load();
     }
 
+    public bool AutoSetOffAFKSwitchingTime = true;
 }
