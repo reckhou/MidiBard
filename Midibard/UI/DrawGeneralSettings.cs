@@ -63,8 +63,8 @@ public partial class PluginUI
 
         ImGuiUtil.ToolTip("Choose external midi input device. right click to reset.".Localize());
 
-        ImGui.Checkbox("Low latency mode".Localize(), ref MidiBard.config.LowLatencyMode);
-        ImGuiUtil.ToolTip("Use alternative note input method, May slightly reduce input latency but will affect guitar tone switching accuracy. \nOnly recommended while using Midi keyboard.".Localize());
+        //ImGui.Checkbox("Low latency mode".Localize(), ref MidiBard.config.LowLatencyMode);
+        //ImGuiUtil.ToolTip("Use alternative note input method, May slightly reduce input latency but will affect guitar tone switching accuracy. \nOnly recommended while using Midi keyboard.".Localize());
 
         //ImGui.Checkbox("Auto restart listening".Localize(), ref MidiBard.config.autoRestoreListening);
         //ImGuiUtil.ToolTip("Try auto restart listening last used midi device".Localize());
@@ -72,9 +72,9 @@ public partial class PluginUI
         //ImGui.Checkbox("Auto listening new device".Localize(), ref MidiBard.config.autoStartNewListening);
         //ImGuiUtil.ToolTip("Auto start listening new midi input device when idle.".Localize());
 
-        ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
+        //ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
-        ImGui.SetNextItemWidth(ImGuiUtil.GetWindowContentRegionWidth() / 3.36f);
+        //ImGui.SetNextItemWidth(ImGuiUtil.GetWindowContentRegionWidth() / 3.36f);
         ImGuiUtil.EnumCombo("Tone mode".Localize(), ref MidiBard.config.GuitarToneMode, _toolTips);
         ImGuiUtil.ToolTip("Choose how MidiBard will handle MIDI channels and ProgramChange events(current only affects guitar tone changing)".Localize());
 

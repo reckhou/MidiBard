@@ -111,8 +111,8 @@ public class MidiBard : IDalamudPlugin
         playlib.init();
         OffsetManager.Setup(api.SigScanner);
         GuitarTonePatch.InitAndApply();
+        PlayNoteHook = new PlayNoteHook();
         Cbase = new XivCommonBase();
-
 
         AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.MetronomeAgent));
         AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.PerformanceAgent));
