@@ -90,14 +90,14 @@ public static class FilePlayback
                 if (MidiBard.SlaveMode)
                     return;
 
-                PerformWaiting(Configuration.config.secondsBetweenTracks);
+                PerformWaiting(MidiBard.config.secondsBetweenTracks);
                 if (needToCancel)
                 {
                     needToCancel = false;
                     return;
                 }
 
-                switch ((PlayMode)Configuration.config.PlayMode)
+                switch ((PlayMode)MidiBard.config.PlayMode)
                 {
                     case PlayMode.Single:
                         break;

@@ -35,7 +35,7 @@ namespace MidiBard.Control.CharacterControl
 
         public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
         {
-            if (Configuration.config.bmpTrackNames)
+            if (MidiBard.config.bmpTrackNames)
             {
                 UpdateGuitarToneByConfig();
             }
@@ -66,23 +66,23 @@ namespace MidiBard.Control.CharacterControl
                     await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
                 }
 
-            PerformActions.DoPerformAction(instrumentId);
-            await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
-            await Task.Delay(200);
-            PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
-            //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
+                PerformActions.DoPerformAction(instrumentId);
+                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+                await Task.Delay(200);
+                PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
+                //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
+            }
+            finally
+            {
+                SwitchingInstrument = false;
+            }
         }
-        catch (Exception e)
-        {
-            PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
-        }
-        finally
-        {
-            SwitchingInstrument = false;
-        }
-    }
 
-    private static readonly Regex regex = new Regex(@"^#(?<ins>.*?)(?<trans>[-|+][0-9]+)?#(?<name>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex regex = new Regex(@"^#(?<ins>.*?)(?<trans>[-|+][0-9]+)?#(?<name>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static string ParseSongName(string inputString, out uint? instrumentId, out int? transpose)
         {
@@ -129,43 +129,43 @@ namespace MidiBard.Control.CharacterControl
 
         internal static async Task WaitSwitchInstrumentForSong(string songName)
         {
-            var config = Configuration.config;
+            var config = MidiBard.config;
 
-        if (config.bmpTrackNames)
-        {
-            if (config.EnableTransposePerTrack)
+            if (config.bmpTrackNames)
             {
-                var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
-                foreach (var trackInfo in currentTracks)
+                if (config.EnableTransposePerTrack)
                 {
-                    var transposePerTrack = trackInfo.TransposeFromTrackName;
-                    if (transposePerTrack != 0)
+                    var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
+                    foreach (var trackInfo in currentTracks)
                     {
-                        PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
+                        var transposePerTrack = trackInfo.TransposeFromTrackName;
+                        if (transposePerTrack != 0)
+                        {
+                            PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
+                        }
+                        config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
                     }
-                    config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
+
+                    config.TransposeGlobal = 0;
                 }
-
-                config.TransposeGlobal = 0;
+                else
+                {
+                    var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
+                    var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
+                    config.TransposeGlobal = transpose;
+                }
             }
-            else
+
+            if (config.bmpTrackNames)
             {
+                //MidiBard.config.OverrideGuitarTones = true;
+
                 var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
-                var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
-                config.TransposeGlobal = transpose;
-            }
-        }
-
-        if (config.bmpTrackNames)
-        {
-            //MidiBard.config.OverrideGuitarTones = true;
-
-            var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
-            var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
-            if (idFromTrackName != null)
-            {
-                await SwitchTo((uint)idFromTrackName);
-            }
+                var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
+                if (idFromTrackName != null)
+                {
+                    await SwitchTo((uint)idFromTrackName);
+                }
 
                 return;
             }
@@ -193,22 +193,23 @@ namespace MidiBard.Control.CharacterControl
             }
         }
 
-    private static void UpdateGuitarToneByConfig()
-    {
-        if (MidiBard.CurrentPlayback.TrackInfos == null)
+        private static void UpdateGuitarToneByConfig()
         {
-            return;
-        }
-
-        for (int track = 0; track < MidiBard.CurrentPlayback.TrackInfos.Length; track++)
-        {
-            if (MidiBard.config.TrackStatus[track].Enabled && MidiBard.CurrentPlayback?.TrackInfos[track] != null)
+            if (MidiBard.CurrentPlayback.TrackInfos == null)
             {
-                var curInstrument = MidiBard.CurrentPlayback?.TrackInfos[track]?.InstrumentIDFromTrackName;
-                if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))
+                return;
+            }
+
+            for (int track = 0; track < MidiBard.CurrentPlayback.TrackInfos.Length; track++)
+            {
+                if (MidiBard.config.TrackStatus[track].Enabled && MidiBard.CurrentPlayback?.TrackInfos[track] != null)
                 {
-                    var toneID = curInstrument - MidiBard.guitarGroup[0];
-                    MidiBard.config.TrackStatus[track].Tone = (int)toneID;
+                    var curInstrument = MidiBard.CurrentPlayback?.TrackInfos[track]?.InstrumentIDFromTrackName;
+                    if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))
+                    {
+                        var toneID = curInstrument - MidiBard.guitarGroup[0];
+                        MidiBard.config.TrackStatus[track].Tone = (int)toneID;
+                    }
                 }
             }
         }

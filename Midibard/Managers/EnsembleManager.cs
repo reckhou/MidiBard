@@ -39,7 +39,7 @@ namespace MidiBard.Managers
             try
             {
                 var original = UpdateMetronomeHook.Original(agentMetronome, currentBeat);
-                if (Configuration.config.MonitorOnEnsemble)
+                if (MidiBard.config.MonitorOnEnsemble)
                 {
                     byte Ensemble;
                     byte beatsPerBar;
@@ -130,11 +130,11 @@ namespace MidiBard.Managers
                                     {
                                         // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
                                         // the instrument should have been switched already when loading the song in this occasion.
-                                        await FilePlayback.LoadPlayback(0, false, !Configuration.config.bmpTrackNames);
+                                        await FilePlayback.LoadPlayback(0, false, !MidiBard.config.bmpTrackNames);
                                     }
                                     else
                                     {
-                                        await FilePlayback.LoadPlayback(playing, false, !Configuration.config.bmpTrackNames);
+                                        await FilePlayback.LoadPlayback(playing, false, !MidiBard.config.bmpTrackNames);
                                     }
 
                                     MidiBard.CurrentPlayback.Stop();

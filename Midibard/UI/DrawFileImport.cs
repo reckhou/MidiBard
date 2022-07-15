@@ -72,7 +72,6 @@ public partial class PluginUI
                     {
                         await Coroutine.WaitUntil(() => array != null, 5000);
                         await PlaylistManager.AddAsync(array);
-                        Configuration.config.Save(true);
                     });
                 }
                 catch (Exception e)
@@ -149,7 +148,6 @@ public partial class PluginUI
                     try
                     {
                         await PlaylistManager.AddAsync(filePath);
-                        Configuration.config.Save(true);
                     }
                     finally
                     {
@@ -181,7 +179,6 @@ public partial class PluginUI
                     try
                     {
                         await PlaylistManager.AddAsync(strings.ToArray());
-                        Configuration.config.Save(true);
                     }
                     finally
                     {
@@ -209,7 +206,6 @@ public partial class PluginUI
                     {
                         var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
                         await PlaylistManager.AddAsync(files);
-                        Configuration.config.Save(true);
                     }
                     finally
                     {
@@ -238,7 +234,6 @@ public partial class PluginUI
                         {
                             var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
                             await PlaylistManager.AddAsync(files);
-                            Configuration.config.Save(true);
                         }
                         finally
                         {

@@ -1,6 +1,8 @@
 ﻿using System;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace playlibnamespace
 {
@@ -137,5 +139,21 @@ namespace playlibnamespace
 		public static unsafe bool BeginReadyCheck() => SendAction("PerformanceMetronome", 3, 2, 2, 0);
         public static unsafe bool ConfirmBeginReadyCheck() => SendAction("PerformanceReadyCheck", 3, 2);
         public static unsafe bool ConfirmReceiveReadyCheck() => SendAction("PerformanceReadyCheckReceive", 3, 2);
-    }
+
+		public static string MainModuleRva(IntPtr ptr)
+		{
+			var modules = Process.GetCurrentProcess().Modules;
+			List<ProcessModule> mh = new();
+			for (int i = 0; i < modules.Count; i++)
+				mh.Add(modules[i]);
+
+			mh.Sort((x, y) => (long)x.BaseAddress > (long)y.BaseAddress ? -1 : 1);
+			foreach (var module in mh)
+			{
+				if ((long)module.BaseAddress <= (long)ptr)
+					return $"[{module.ModuleName}+0x{(long)ptr - (long)module.BaseAddress:X}]";
+			}
+			return $"[0x{(long)ptr:X}]";
+		}
+	}
 }

@@ -19,29 +19,29 @@ class PerformanceEvents
 
     private void EnteringPerformance()
     {
-        if (Configuration.config.AutoOpenPlayerWhenPerforming)
+        if (MidiBard.config.AutoOpenPlayerWhenPerforming)
             if (!SwitchInstrument.SwitchingInstrument)
 	            MidiBard.Ui.Open();
 
-        if (Configuration.config.AutoSetBackgroundFrameLimit)
+        if (MidiBard.config.AutoSetBackgroundFrameLimit)
         {
 	        MidiBard.AgentConfigSystem.BackgroundFrameLimit = false;
 	        MidiBard.AgentConfigSystem.ApplyGraphicSettings();
         }
 
-        if (Configuration.config.AutoSetOffAFKSwitchingTime)
+        if (MidiBard.config.AutoSetOffAFKSwitchingTime)
         {
-	        MidiBard.AgentConfigSystem.SetOptionValue(ConfigOption.AutoAfkSwitchingTime, 0);
+	        AgentConfigSystem.SetOptionValue(ConfigOption.AutoAfkSwitchingTime, 0);
         }
     }
 
     private void ExitingPerformance()
     {
-        if (Configuration.config.AutoOpenPlayerWhenPerforming)
+        if (MidiBard.config.AutoOpenPlayerWhenPerforming)
             if (!SwitchInstrument.SwitchingInstrument)
 	            MidiBard.Ui.Close();
 
-        if (Configuration.config.AutoSetBackgroundFrameLimit)
+        if (MidiBard.config.AutoSetBackgroundFrameLimit)
         {
 	        MidiBard.AgentConfigSystem.BackgroundFrameLimit = true;
 	        MidiBard.AgentConfigSystem.ApplyGraphicSettings();

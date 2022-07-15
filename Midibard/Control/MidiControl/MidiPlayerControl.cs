@@ -174,7 +174,7 @@ namespace MidiBard.Control.MidiControl
                     CurrentPlayback = null;
                     int next = PlaylistManager.CurrentPlaying;
 
-                    switch ((PlayMode)Configuration.config.PlayMode)
+                    switch ((PlayMode)MidiBard.config.PlayMode)
                     {
                         case PlayMode.Single:
                         case PlayMode.SingleRepeat:
@@ -223,7 +223,7 @@ namespace MidiBard.Control.MidiControl
                     CurrentPlayback = null;
                     int prev = PlaylistManager.CurrentPlaying;
 
-                    switch ((PlayMode)Configuration.config.PlayMode)
+                    switch ((PlayMode)MidiBard.config.PlayMode)
                     {
                         case PlayMode.Single:
                         case PlayMode.SingleRepeat:

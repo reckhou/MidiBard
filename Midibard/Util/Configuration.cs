@@ -61,8 +61,6 @@ public class TrackStatus
 
 public class Configuration : IPluginConfiguration
 {
-    public static Configuration config;
-
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
@@ -151,48 +149,6 @@ public class Configuration : IPluginConfiguration
     //public bool SyncTrackStatus = false;
 
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
-
-    //public void Save()
-    //{
-    //    var startNew = Stopwatch.StartNew();
-    //    DalamudApi.api.PluginInterface.SavePluginConfig(this);
-    //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
-    //}
-
-    public static void Init()
-    {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
-        ConfigurationPrivate.Init();
-    }
-
-    public void Save(bool reloadplaylist = false)
-    {
-        Task.Run(() =>
-        {
-            try
-            {
-                var startNew = Stopwatch.StartNew();
-                DalamudApi.api.PluginInterface.SavePluginConfig(this);
-                ConfigurationPrivate.config.Save();
-                PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-                if (reloadplaylist && config.autoPostPartyChatCommand)
-                {
-                    MidiBard.SendReloadPlaylistCMD = true;
-                }
-            }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, "Error when saving config");
-                ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving config");
-            }
-        });
-    }
-
-    public static void Load()
-    {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
-        ConfigurationPrivate.Load();
-    }
-
     public bool AutoSetOffAFKSwitchingTime = true;
+    //[JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 }

@@ -41,6 +41,7 @@ namespace MidiBard;
 
 public class MidiBard : IDalamudPlugin
 {
+    public static Configuration config { get; private set; }
     internal static PluginUI Ui { get; set; }
     internal static BardPlayback CurrentPlayback { get; set; }
     internal static Localizer Localizer { get; set; }
@@ -50,6 +51,7 @@ public class MidiBard : IDalamudPlugin
     internal static EnsembleManager EnsembleManager { get; set; }
     internal static IPCManager IpcManager { get; set; }
 
+    private int configSaverTick;
     private static bool wasEnsembleModeRunning = false;
 
     internal static ExcelSheet<Perform> InstrumentSheet;
@@ -101,7 +103,7 @@ public class MidiBard : IDalamudPlugin
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        Configuration.Init();
+        //Configuration.Init();
         Localizer = new Localizer((UILang)config.uiLang);
         IpcManager = new IPCManager();
         PartyWatcher = new PartyWatcher();
@@ -124,7 +126,7 @@ public class MidiBard : IDalamudPlugin
         _chatGui = chatGui;
         _chatGui.ChatMessage += ChatCommand.OnChatMessage;
 
-        Task.Run(() => PlaylistManager.AddAsync(Configuration.config.Playlist.ToArray(), true, true));
+        Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true, true));
 
         _ = BardPlayDevice.Instance;
         InputDeviceManager.ScanMidiDeviceThread.Start();
@@ -160,13 +162,22 @@ public class MidiBard : IDalamudPlugin
     {
         PerformanceEvents.Instance.InPerformanceMode = AgentPerformance.InPerformanceMode;
 
-        if (SendReloadPlaylistCMD)
+        if (Ui.MainWindowOpened)
         {
-            SendReloadPlaylistCMD = false;
-            MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadplaylist");
+            if (configSaverTick++ == 3600)
+            {
+                configSaverTick = 0;
+                SaveConfig();
+            }
         }
 
-        if (!Configuration.config.MonitorOnEnsemble) return;
+        //if (SendReloadPlaylistCMD)
+        //{
+        //    SendReloadPlaylistCMD = false;
+        //    MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadplaylist");
+        //}
+
+        if (!MidiBard.config.MonitorOnEnsemble) return;
 
         if (AgentPerformance.InPerformanceMode)
         {
@@ -174,7 +185,7 @@ public class MidiBard : IDalamudPlugin
 
             if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
             {
-                //if (Configuration.config.StopPlayingWhenEnsembleEnds)
+                //if (MidiBard.config.StopPlayingWhenEnsembleEnds)
                 //{
                     MidiPlayerControl.Stop();
                 //}
@@ -194,7 +205,7 @@ public class MidiBard : IDalamudPlugin
                  "/mbard cancel → quit performance mode\n" +
                  "/mbard visual [on|off|toggle] → midi tracks visualization\n" +
                  "/mbard transpose [set] <semitones> → Set or change transpose semitones value\n" +
-                 "/mbard [play|pause|playpause|stop|next|prev|rewind <seconds>|fastforward <seconds>] → playback control")]
+                 "/mbard [play|pause|playpause|stop|next|prev|rewind <seconds>|fastforward <seconds>] → playback control\n" + 
                  "Party commands: Type commands below on party chat to control all bards in the party.\n" +
                  "switchto <track number> → Switch to <track number> on the play list. e.g. switchto 3 = Switch to the 3rd song.\n" +
                  "close → Stop playing and exit perform mode.\n" +
@@ -255,16 +266,16 @@ public class MidiBard : IDalamudPlugin
                 case "visual":
                     try
                     {
-                        Configuration.config.PlotTracks = argStrings[1] switch
+                        MidiBard.config.PlotTracks = argStrings[1] switch
                         {
                             "on" => true,
                             "off" => false,
-                            _ => !Configuration.config.PlotTracks
+                            _ => !MidiBard.config.PlotTracks
                         };
                     }
                     catch (Exception e)
                     {
-                        Configuration.config.PlotTracks ^= true;
+                        MidiBard.config.PlotTracks ^= true;
                     }
                     break;
                 case "rewind":
@@ -322,6 +333,22 @@ public class MidiBard : IDalamudPlugin
         }
     }
 
+    internal static void SaveConfig()
+    {
+        try
+        {
+            var startNew = Stopwatch.StartNew();
+            api.PluginInterface.SavePluginConfig(config);
+            PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
+        }
+        catch (Exception e)
+        {
+            PluginLog.Error(e, "Error when saving config");
+            ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
+        }
+    }
+
+
     #region IDisposable Support
 
     void FreeUnmanagedResources()
@@ -367,8 +394,18 @@ public class MidiBard : IDalamudPlugin
 
     public void Dispose()
     {
+        try
+        {
+            SaveConfig();
+        }
+        catch (Exception e)
+        {
+            PluginLog.Error(e, "error when saving config file");
+        }
+
         _chatGui.ChatMessage -= ChatCommand.OnChatMessage;
         Cbase.Dispose();
+
         FreeUnmanagedResources();
         GC.SuppressFinalize(this);
     }
