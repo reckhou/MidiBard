@@ -9,6 +9,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
+using MidiBard.Control;
 using MidiBard.DalamudApi;
 
 namespace MidiBard;
@@ -39,13 +40,12 @@ static class InputDeviceManager
                         }
                         else if (CurrentInputDevice is null)
                         {
-                            if (Configuration.config.autoRestoreListening)
+                            //if (Configuration.config.autoRestoreListening)
                             {
                                 if (devicesNames.Contains(Configuration.config.lastUsedMidiDeviceName))
                                 {
-                                    PluginLog.Warning($"try restoring midi device: \"{Configuration.config.lastUsedMidiDeviceName}\"");
-                                    var newDevice = Devices?.FirstOrDefault(i =>
-                                        i.Name == Configuration.config.lastUsedMidiDeviceName);
+                                    PluginLog.Information($"try restoring midi device: \"{Configuration.config.lastUsedMidiDeviceName}\"");
+                                    var newDevice = Devices?.FirstOrDefault(i => i.Name == Configuration.config.lastUsedMidiDeviceName);
                                     if (newDevice != null)
                                     {
                                         SetDevice(newDevice);
@@ -146,7 +146,7 @@ static class InputDeviceManager
 
     private static void InputDevice_EventReceived(object sender, MidiEventReceivedEventArgs e)
     {
-        //PluginLog.Verbose($"[{sender}]{e.Event}");
-        MidiBard.CurrentOutputDevice.SendEvent(e.Event);
+        PluginLog.Verbose($"[{sender}]{e.Event}");
+        BardPlayDevice.Instance.SendEventWithMetadata(e.Event, new BardPlayDevice.MidiDeviceMetaData());
     }
 }

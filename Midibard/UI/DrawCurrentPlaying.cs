@@ -90,7 +90,7 @@ public partial class PluginUI
         ImGui.TextUnformatted(durationText);
         try
         {
-            var currentInstrument = MidiBard.PlayingGuitar && !Configuration.config.OverrideGuitarTones
+            var currentInstrument = MidiBard.PlayingGuitar && !(Configuration.config.GuitarToneMode is GuitarToneMode.OverrideByTrack)
                 ? (uint)(24 + MidiBard.AgentPerformance.CurrentGroupTone)
                 : MidiBard.CurrentInstrument;
 
@@ -98,7 +98,7 @@ public partial class PluginUI
             if (currentInstrument != 0)
             {
                 currentInstrumentText = MidiBard.InstrumentSheet.GetRow(currentInstrument).Instrument;
-                if (MidiBard.PlayingGuitar && Configuration.config.OverrideGuitarTones)
+                if (MidiBard.PlayingGuitar && !(Configuration.config.GuitarToneMode is GuitarToneMode.OverrideByTrack))
                 {
                     currentInstrumentText = currentInstrumentText.Split(':', '：').First() + ": Auto";
                 }
