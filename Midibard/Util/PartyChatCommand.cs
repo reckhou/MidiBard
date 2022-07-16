@@ -13,10 +13,10 @@ using static MidiBard.MidiBard;
 
 namespace MidiBard
 {
-	public class ChatCommand
+	public class PartyChatCommand
 	{
 		public static bool IgnoreSwitchSongFlag;
-		public static bool IgnoreReloadPlaylist;
+		public static bool IgnoreReloadConfig;
 		public static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
 			if (isHandled)
@@ -58,24 +58,24 @@ namespace MidiBard
 				MidiPlayerControl.SwitchSong(number - 1);
 				Ui.Open();
 			}
-			//else if (cmd == "reloadplaylist") // reload the playlist from saved config
-			//{
-			//	if (MidiBard.IsPlaying)
-			//	{
-			//		PluginLog.LogInformation("Reload playlist is not allowed while playing.");
-			//		return;
-			//	}
+            else if (cmd == "reloadconfig") // reload the config
+            {
+                if (MidiBard.IsPlaying)
+                {
+                    PluginLog.LogInformation("Reload config is not allowed while playing.");
+                    return;
+                }
 
-			//	if (IgnoreReloadPlaylist)
-   //             {
-			//		IgnoreReloadPlaylist = false;
-			//		return;
-   //             }
+                if (IgnoreReloadConfig)
+                {
+                    IgnoreReloadConfig = false;
+                    return;
+                }
 
-			//	Configuration.Load();
-			//	Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true));
-			//}
-			else if (cmd == "close") // switch off the instrument
+				TryLoadConfig();
+                Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true));
+            }
+            else if (cmd == "close") // switch off the instrument
 			{
 				MidiPlayerControl.Stop();
 				SwitchInstrument.SwitchTo(0);

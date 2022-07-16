@@ -76,7 +76,7 @@ public class MidiBard : IDalamudPlugin
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
-    public static bool SendReloadPlaylistCMD;
+    public static bool SendReloadConfigPartyCMD;
 
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
@@ -138,24 +138,6 @@ public class MidiBard : IDalamudPlugin
         api.Framework.Update += MidiPlayerControl.Tick;
 
     if (api.PluginInterface.IsDev) Ui.Open();
-
-        void TryLoadConfig(int trycount = 10)
-        {
-	        for (int i = 0; ; i++)
-	        {
-		        try
-		        {
-			        config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();
-                    return;
-		        }
-		        catch (Exception e)
-		        {
-			        if (i == trycount) throw;
-                    Thread.Sleep(50);
-			        PluginLog.Warning(e, $"error when loading config, trying again... {i}");
-		        }
-	        }
-        }
     }
 
     private void OnFrameworkUpdate(Dalamud.Game.Framework framework)
@@ -171,11 +153,11 @@ public class MidiBard : IDalamudPlugin
             }
         }
 
-        //if (SendReloadPlaylistCMD)
-        //{
-        //    SendReloadPlaylistCMD = false;
-        //    MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadplaylist");
-        //}
+        if (SendReloadConfigPartyCMD)
+        {
+            SendReloadConfigPartyCMD = false;
+            MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadconfig");
+        }
 
         if (!MidiBard.config.MonitorOnEnsemble) return;
 
@@ -209,7 +191,7 @@ public class MidiBard : IDalamudPlugin
                  "Party commands: Type commands below on party chat to control all bards in the party.\n" +
                  "switchto <track number> → Switch to <track number> on the play list. e.g. switchto 3 = Switch to the 3rd song.\n" +
                  "close → Stop playing and exit perform mode.\n" +
-                 "reloadplaylist → Reload playlist on all clients from the same PC, use after making any changes on the playlist.")]
+                 "reloadconfig → Reload config on all clients from the same PC, use after making any changes on the playlist or settings.")]
     public void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
@@ -345,6 +327,24 @@ public class MidiBard : IDalamudPlugin
         {
             PluginLog.Error(e, "Error when saving config");
             ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
+        }
+    }
+
+    internal static void TryLoadConfig(int trycount = 10)
+    {
+        for (int i = 0; ; i++)
+        {
+            try
+            {
+                config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();
+                return;
+            }
+            catch (Exception e)
+            {
+                if (i == trycount) throw;
+                Thread.Sleep(50);
+                PluginLog.Warning(e, $"error when loading config, trying again... {i}");
+            }
         }
     }
 
