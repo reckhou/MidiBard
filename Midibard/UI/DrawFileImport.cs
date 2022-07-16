@@ -169,7 +169,7 @@ public partial class PluginUI
 
     private void RunImportFileTaskImGui()
     {
-        fileDialogManager.OpenFileDialog("Open", ".mid", (b, strings) =>
+        fileDialogManager.OpenFileDialog("Open", ".mid,.mmsong", (b, strings) =>
         {
             PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", strings)}");
             if (b)
@@ -206,6 +206,8 @@ public partial class PluginUI
                     {
                         var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
                         await PlaylistManager.AddAsync(files);
+                        files = Directory.GetFiles(filePath, "*.mmsong", SearchOption.AllDirectories);
+                        await PlaylistManager.AddAsync(files);
                     }
                     finally
                     {
@@ -233,6 +235,8 @@ public partial class PluginUI
                         try
                         {
                             var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
+                            await PlaylistManager.AddAsync(files);
+                            files = Directory.GetFiles(filePath, "*.mmsong", SearchOption.AllDirectories);
                             await PlaylistManager.AddAsync(files);
                         }
                         finally
