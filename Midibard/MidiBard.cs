@@ -124,7 +124,7 @@ public class MidiBard : IDalamudPlugin
 			_ = Testhooks.Instance;
 #endif
         _chatGui = chatGui;
-        _chatGui.ChatMessage += ChatCommand.OnChatMessage;
+        _chatGui.ChatMessage += PartyChatCommand.OnChatMessage;
 
         Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true, true));
 
@@ -403,7 +403,7 @@ public class MidiBard : IDalamudPlugin
             PluginLog.Error(e, "error when saving config file");
         }
 
-        _chatGui.ChatMessage -= ChatCommand.OnChatMessage;
+        _chatGui.ChatMessage -= PartyChatCommand.OnChatMessage;
         Cbase.Dispose();
 
         FreeUnmanagedResources();

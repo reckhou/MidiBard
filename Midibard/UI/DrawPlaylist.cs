@@ -212,7 +212,7 @@ public partial class PluginUI
 				MidiPlayerControl.SwitchSong(i);
 				if (MidiBard.config.autoPostPartyChatCommand)
 				{
-					ChatCommand.IgnoreSwitchSongFlag = true;
+					PartyChatCommand.IgnoreSwitchSongFlag = true;
 					string msg = $"/p switchto {i + 1}";
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				}
