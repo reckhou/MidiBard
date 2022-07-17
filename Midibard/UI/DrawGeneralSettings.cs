@@ -98,21 +98,20 @@ public partial class PluginUI
 
         ImGui.Checkbox("Follow playback".Localize(), ref MidiBard.config.LockPlot);
         ImGuiUtil.ToolTip("Auto following current playback progress".Localize());
-
-        ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.autoSwitchInstrumentBySongName);
-        ImGuiUtil.ToolTip("Auto switch instrument on demand. If you need this, \nplease add #instrument name# before file name.\nE.g. #harp#demo.mid".Localize());
+        
+        ImGui.Checkbox("Auto transpose".Localize(), ref MidiBard.config.autoTransposeBySongName);
+        ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
 
         ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
-        ImGui.Checkbox("Auto transpose".Localize(), ref MidiBard.config.autoTransposeBySongName);
-        ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
+        ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices);
+        ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.".Localize());
 
         //ImGui.Checkbox("Auto set background frame limit".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
         //ImGuiUtil.ToolTip("Auto disable background frame limit when entering performance mode and re-enable it when quit performance".Localize());
 
         //ImGui.Checkbox("Override guitar tones".Localize(), ref MidiBard.config.OverrideGuitarTones);
         //ImGuiUtil.ToolTip("Assign different guitar tones for each midi tracks".Localize());
-
 
         ImGuiUtil.ColorPickerWithPalette(1000, "Theme color".Localize(), ref MidiBard.config.themeColor, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
         //if (ImGui.ColorEdit4("Theme color".Localize(), ref MidiBard.config.themeColor,
@@ -139,8 +138,5 @@ public partial class PluginUI
         ImGui.Checkbox("Auto switch instrument by track name(BMP Rules)".Localize(), ref MidiBard.config.bmpTrackNames);
         ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
         //#endif
-
-        ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices);
-        ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.".Localize());
     }
 }
