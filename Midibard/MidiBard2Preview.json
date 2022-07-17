@@ -1,9 +1,9 @@
 {
-  "Author": "akira0245, Ori, SpuriousSnail86",
-  "Name": "MidiBard 2",
+  "Author": "akira0245, Ori",
+  "Name": "MidiBard 2 - Preview",
   "Punchline": "Bard performance using midi files or keyboard.\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
-  "RepoUrl": "https://midibard.crd.co/",
+  "RepoUrl": "https://midibard.org",
   "CategoryTags": [
     "utility",
     "other"
