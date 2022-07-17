@@ -140,7 +140,7 @@ public partial class PluginUI
         ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
         //#endif
 
-        ImGui.Checkbox("Auto post command".Localize(), ref MidiBard.config.autoPostPartyChatCommand);
-        ImGuiUtil.ToolTip("Post chat command on party channel automatically.".Localize());
+        ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices);
+        ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.".Localize());
     }
 }

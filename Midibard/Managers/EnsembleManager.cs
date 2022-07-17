@@ -1,172 +1,171 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Hooking;
+using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
+using playlibnamespace;
 using static MidiBard.MidiBard;
 
-namespace MidiBard.Managers
+namespace MidiBard.Managers;
+
+internal class EnsembleManager : IDisposable
 {
+    //public SyncHelper(out List<(byte[] notes, byte[] tones)> sendNotes, out List<(byte[] notes, byte[] tones)> recvNotes)
+    //{
+    //	sendNotes = new List<(byte[] notes, byte[] tones)>();
+    //	recvNotes = new List<(byte[] notes, byte[] tones)>();
+    //}
 
-    internal class EnsembleManager : IDisposable
+    private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
+
+    private Hook<sub_140C87B40> UpdateMetronomeHook;
+
+    internal EnsembleManager()
     {
-        //public SyncHelper(out List<(byte[] notes, byte[] tones)> sendNotes, out List<(byte[] notes, byte[] tones)> recvNotes)
-        //{
-        //	sendNotes = new List<(byte[] notes, byte[] tones)>();
-        //	recvNotes = new List<(byte[] notes, byte[] tones)>();
-        //}
-        Stopwatch stopWatch;
+        UpdateMetronomeHook = new Hook<sub_140C87B40>(Offsets.UpdateMetronome, HandleUpdateMetronome);
+        UpdateMetronomeHook.Enable();
+    }
 
-        private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
-
-        private Hook<sub_140C87B40> UpdateMetronomeHook;
-
-        internal EnsembleManager()
+    private IntPtr HandleUpdateMetronome(IntPtr agentMetronome, byte currentBeat)
+    {
+        try
         {
-            UpdateMetronomeHook = new Hook<sub_140C87B40>(Offsets.UpdateMetronome, HandleUpdateMetronome);
-            UpdateMetronomeHook.Enable();
-        }
-
-        private IntPtr HandleUpdateMetronome(IntPtr agentMetronome, byte currentBeat)
-        {
-            try
+            var original = UpdateMetronomeHook.Original(agentMetronome, currentBeat);
+            if (MidiBard.config.MonitorOnEnsemble)
             {
-                var original = UpdateMetronomeHook.Original(agentMetronome, currentBeat);
-                if (MidiBard.config.MonitorOnEnsemble)
+                byte Ensemble;
+                byte beatsPerBar;
+                int barElapsed;
+                unsafe
                 {
-                    byte Ensemble;
-                    byte beatsPerBar;
-                    int barElapsed;
+                    var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
+                    beatsPerBar = metronome->MetronomeBeatsPerBar;
+                    barElapsed = metronome->MetronomeBeatsElapsed;
+                    Ensemble = metronome->EnsembleModeRunning;
+                }
 
-                    unsafe
-                    {
-                        var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
-                        beatsPerBar = metronome->MetronomeBeatsPerBar;
-                        barElapsed = metronome->MetronomeBeatsElapsed;
-                        Ensemble = metronome->EnsembleModeRunning;
-                    }
 
-                    if (barElapsed == 0 && currentBeat == 0)
+
+                if (barElapsed == -2 && currentBeat == 0)
+                {
+                    PluginLog.Warning($"Prepare: ensemble: {Ensemble}");
+                    if (Ensemble != 0)
                     {
-                        if (Ensemble != 0)
+                        EnsemblePrepare?.Invoke();
+
+                        //if playback is null, cancel ensemble mode.
+                        if (CurrentPlayback == null)
                         {
-                            // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
-                            // 而提前开始又不可能， 所以把所有乐器的延迟时间减去延迟最大的鲁特琴（让所有乐器等待鲁特琴）
-                            // 也就是105减去每种乐器各自的延迟
-                            var compensation = 105 - MidiBard.CurrentInstrument switch
-                            {
-                                0 => 104,
-                                1 => 85,
-                                2 or 4 => 90,
-                                3 => 104,
-                                >= 5 and <= 8 => 95,
-                                9 or 10 => 90,
-                                11 or 12 => 80,
-                                13 => 85,
-                                >= 14 => 30
-                            };
+	                        playlibnamespace.playlib.BeginReadyCheck();
+	                        playlibnamespace.playlib.SendAction("SelectYesno", 3, 0);
+	                        ImGuiUtil.AddNotification(NotificationType.Error, "Please load a song before starting ensemble!");
+                        }
+                        else
+                        {
+	                        MidiBard.CurrentPlayback.Stop();
+	                        MidiBard.CurrentPlayback.MoveToStart();
+                        }
 
-                            try
-                            {
-                                var midiClock = new MidiClock(false, new HighPrecisionTickGenerator(), TimeSpan.FromMilliseconds(compensation));
-                                midiClock.Restart();
-                                PluginLog.Warning($"setup midiclock compensation: {compensation}");
-                                midiClock.Ticked += OnMidiClockOnTicked;
-                                stopWatch.Stop();
-                                Lrc._lrc.Offset += stopWatch.ElapsedMilliseconds - compensation;
+                        // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
+                        // 而提前开始又不可能， 所以把所有乐器的延迟时间减去延迟最大的鲁特琴（让所有乐器等待鲁特琴）
+                        // 也就是105减去每种乐器各自的延迟
+                        var compensation = 105 - MidiBard.CurrentInstrument switch
+                        {
+	                        0 or 3 => 105,
+	                        1 => 85,
+	                        2 or 4 => 90,
+	                        >= 5 and <= 8 => 95,
+	                        9 or 10 => 90,
+	                        11 or 12 => 80,
+	                        13 => 85,
+	                        >= 14 => 30
+                        };
+
+                        try
+                        {
+	                        if (compensation != 0)
+	                        {
+		                        var midiClock = new MidiClock(false, new HighPrecisionTickGenerator(),
+			                        TimeSpan.FromMilliseconds(compensation));
+		                        midiClock.Restart();
+		                        PluginLog.Warning($"setup midiclock compensation: {compensation}");
+		                        midiClock.Ticked += OnMidiClockOnTicked;
+                                Lrc._lrc.Offset -= compensation;
                                 PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
 
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
-                                {
-                                    try
-                                    {
-                                        MidiPlayerControl.DoPlay();
-                                        EnsembleStart?.Invoke();
-                                        PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        PluginLog.Error(e, "error OnMidiClockOnTicked");
-                                    }
-                                    finally
-                                    {
-                                        midiClock.Ticked -= OnMidiClockOnTicked;
-                                    }
-                                }
+		                        {
+			                        try
+			                        {
+				                        MidiBard.CurrentPlayback.Start();
+				                        EnsembleStart?.Invoke();
+				                        PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
+			                        }
+			                        catch (Exception e)
+			                        {
+				                        PluginLog.Error(e, "error OnMidiClockOnTicked");
+			                        }
+			                        finally
+			                        {
+				                        midiClock.Ticked -= OnMidiClockOnTicked;
+			                        }
+		                        }
 
-                                Task.Delay(1000).ContinueWith(_ =>
-                                {
-                                    midiClock.Dispose();
-                                    PluginLog.Information($"midi clock disposed.");
-                                });
-                            }
-                            catch (Exception e)
-                            {
-                                PluginLog.Error(e, "error when starting ensemble playback");
-                            }
+		                        Task.Delay(1000).ContinueWith(_ =>
+		                        {
+			                        midiClock.Dispose();
+			                        PluginLog.Information($"midi clock disposed.");
+		                        });
+	                        }
+	                        else
+	                        {
+		                        try
+		                        {
+			                        MidiBard.CurrentPlayback.Start();
+			                        EnsembleStart?.Invoke();
+			                        PluginLog.Warning($"Start ensemble: compensation: 0");
+		                        }
+		                        catch (Exception e)
+		                        {
+			                        PluginLog.Error(e, "error OnMidiClockOnTicked");
+		                        }
+	                        }
+
+
+
                         }
-                    }
-
-                    if (barElapsed == -2 && currentBeat == 0)
-                    {
-                        PluginLog.Warning($"Prepare: ensemble: {Ensemble}");
-                        if (Ensemble != 0)
+                        catch (Exception e)
                         {
-                            EnsemblePrepare?.Invoke();
-                            stopWatch = Stopwatch.StartNew();
-                            Task.Run(async () =>
-                            {
-                                try
-                                {
-                                    var playing = PlaylistManager.CurrentPlaying;
-                                    if (playing == -1)
-                                    {
-                                        // if using BMP track name to switch and in ensemble mode already, do nothing here since switching instrument would interrupt the ensemble mode
-                                        // the instrument should have been switched already when loading the song in this occasion.
-                                        await FilePlayback.LoadPlayback(0, false, !MidiBard.config.bmpTrackNames);
-                                    }
-                                    else
-                                    {
-                                        await FilePlayback.LoadPlayback(playing, false, !MidiBard.config.bmpTrackNames);
-                                    }
-
-                                    MidiBard.CurrentPlayback.Stop();
-                                    MidiBard.CurrentPlayback.MoveToStart();
-                                }
-                                catch (Exception e)
-                                {
-                                    PluginLog.Error(e, "error when loading playback for ensemble");
-                                }
-                            });
+	                        PluginLog.Error(e, "error when starting ensemble playback");
                         }
                     }
-
-                    //PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
                 }
 
-                return original;
+                PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
             }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, $"error in {nameof(UpdateMetronomeHook)}");
-                return IntPtr.Zero;
-            }
+
+            return original;
         }
-
-        public event Action EnsembleStart;
-
-        public event Action EnsemblePrepare;
-
-        public void Dispose()
+        catch (Exception e)
         {
-            UpdateMetronomeHook?.Dispose();
+            PluginLog.Error(e, $"error in {nameof(UpdateMetronomeHook)}");
+            return IntPtr.Zero;
         }
+    }
+
+    public event Action EnsembleStart;
+
+    public event Action EnsemblePrepare;
+
+    public void Dispose()
+    {
+        UpdateMetronomeHook?.Dispose();
     }
 }

@@ -58,7 +58,7 @@ public partial class PluginUI
         ImGui.SameLine();
         if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
         {
-            if (MidiBard.config.autoPostPartyChatCommand)
+            if (MidiBard.config.playOnMultipleDevices)
             {
                 MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
             }

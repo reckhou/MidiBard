@@ -41,7 +41,7 @@ namespace MidiBard;
 
 public class MidiBard : IDalamudPlugin
 {
-    public static Configuration config { get; private set; }
+    public static Configuration config { get; internal set; }
     internal static PluginUI Ui { get; set; }
     internal static BardPlayback CurrentPlayback { get; set; }
     internal static Localizer Localizer { get; set; }
@@ -62,7 +62,6 @@ public class MidiBard : IDalamudPlugin
     internal static IDictionary<SevenBitNumber, uint> ProgramInstruments;
     internal static PartyWatcher PartyWatcher;
     internal static PlayNoteHook PlayNoteHook;
-
 
     internal static bool SlaveMode = false;
     internal static bool BroadcastNotes = false;

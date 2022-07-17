@@ -70,7 +70,6 @@ public class Configuration : IPluginConfiguration
     public bool DebugMisc;
     public bool DebugEnsemble;
 
-    public Dictionary<long, HashSet<int>> CidToTrack = new ();
     public TrackStatus[] TrackStatus = Enumerable.Repeat(new TrackStatus(), 100).ToArray();
     //public ChannelStatus[] ChannelStatus = Enumerable.Repeat(new ChannelStatus(), 16).ToArray();
 
@@ -88,6 +87,7 @@ public class Configuration : IPluginConfiguration
 
     public bool MonitorOnEnsemble = true;
     public bool AutoOpenPlayerWhenPerforming = true;
+
     public int? SoloedTrack = null;
     public int? SoloedChannel = null;
     public bool EnableTransposePerTrack = false;
@@ -101,7 +101,7 @@ public class Configuration : IPluginConfiguration
     public bool autoTransposeBySongName = true;
 
     public bool bmpTrackNames = false;
-    public bool autoPostPartyChatCommand = false;
+    public bool playOnMultipleDevices = false;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;

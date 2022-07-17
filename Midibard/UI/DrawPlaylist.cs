@@ -210,7 +210,7 @@ public partial class PluginUI
 			if (IsMouseDoubleClicked(ImGuiMouseButton.Left))
 			{
 				MidiPlayerControl.SwitchSong(i);
-				if (MidiBard.config.autoPostPartyChatCommand)
+				if (MidiBard.config.playOnMultipleDevices)
 				{
 					PartyChatCommand.IgnoreSwitchSongFlag = true;
 					string msg = $"/p switchto {i + 1}";

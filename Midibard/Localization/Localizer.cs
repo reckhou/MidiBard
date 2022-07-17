@@ -134,7 +134,6 @@ class Localizer
         zh.Add("Override by track: Assign guitar tone manually for each track and ignore ProgramChange events.", "分音轨重写：为每个音轨手动指定电吉他音色，无视其音色转换事件。");
         zh.Add("Auto switch instrument by track name(BMP Rules)", "根据音轨名自动切换乐器(BMP规则)");
         zh.Add("Transpose/switch instrument based on first enabled midi track name.", "根据首个被启用的音轨的音轨名自动切换乐器和移调。");
-        zh.Add("Auto post command", "自动发送小队命令");
-        zh.Add("Post chat command on party channel automatically.", "在队伍频道自动发送小队命令");
+        zh.Add("Play on Multiple Devices", "在多台机器上运行");
     }
 }
