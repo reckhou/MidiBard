@@ -75,8 +75,6 @@ public class MidiBard : IDalamudPlugin
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
-    public static bool SendReloadConfigPartyCMD;
-
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
@@ -152,12 +150,6 @@ public class MidiBard : IDalamudPlugin
             }
         }
 
-        if (SendReloadConfigPartyCMD)
-        {
-            SendReloadConfigPartyCMD = false;
-            MidiBard.Cbase.Functions.Chat.SendMessage("/p reloadconfig");
-        }
-
         if (!MidiBard.config.MonitorOnEnsemble) return;
 
         if (AgentPerformance.InPerformanceMode)
@@ -190,7 +182,7 @@ public class MidiBard : IDalamudPlugin
                  "Party commands: Type commands below on party chat to control all bards in the party.\n" +
                  "switchto <track number> → Switch to <track number> on the play list. e.g. switchto 3 = Switch to the 3rd song.\n" +
                  "close → Stop playing and exit perform mode.\n" +
-                 "reloadconfig → Reload config on all clients from the same PC, use after making any changes on the playlist or settings.")]
+                 "reloadconfig → Reload config on all clients, use after making any changes on the playlist or settings.")]
     public void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();

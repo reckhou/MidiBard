@@ -8,6 +8,7 @@ using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
+using MidiBard.IPC;
 using System.Threading.Tasks;
 using static MidiBard.MidiBard;
 
@@ -60,21 +61,8 @@ namespace MidiBard
 			}
             else if (cmd == "reloadconfig") // reload the config
             {
-                if (MidiBard.IsPlaying)
-                {
-                    PluginLog.LogInformation("Reload config is not allowed while playing.");
-                    return;
-                }
-
-                if (IgnoreReloadConfig)
-                {
-                    IgnoreReloadConfig = false;
-                    return;
-                }
-
-				TryLoadConfig();
-                Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true));
-            }
+				IPCHandles.SyncAllSettings();
+			}
             else if (cmd == "close") // switch off the instrument
 			{
 				MidiPlayerControl.Stop();
