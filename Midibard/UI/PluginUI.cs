@@ -377,6 +377,7 @@ public partial class PluginUI
 			SameLine();
 			if (Button("Sync Client Settings"))
 			{
+				MidiBard.SaveConfig();
 				IPCHandles.SyncAllSettings();
 			}
 
