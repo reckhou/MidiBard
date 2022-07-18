@@ -217,14 +217,14 @@ public partial class PluginUI
 
     private static void LRCDeltaTime()
     {
-        if (ImGui.Button("-100ms"))
+        if (ImGui.Button("-50ms"))
         {
-            MidiPlayerControl.ChangeLRCDeltaTime(-100);
+            MidiPlayerControl.ChangeLRCDeltaTime(-50);
         }
         ImGui.SameLine();
-        if (ImGui.Button("+100ms"))
+        if (ImGui.Button("+50ms"))
         {
-            MidiPlayerControl.ChangeLRCDeltaTime(100);
+            MidiPlayerControl.ChangeLRCDeltaTime(50);
         }
         ImGui.SameLine();
         ImGui.TextUnformatted("LRC Sync: " + $"{MidiPlayerControl.LRCDeltaTime} ms");

@@ -12,6 +12,7 @@ using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
 using playlibnamespace;
 using static MidiBard.MidiBard;
+using System.Diagnostics;
 
 namespace MidiBard.Managers;
 
@@ -24,7 +25,7 @@ internal class EnsembleManager : IDisposable
     //}
 
     private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
-
+    Stopwatch LRCStopWatch;
     private Hook<sub_140C87B40> UpdateMetronomeHook;
 
     internal EnsembleManager()
@@ -43,6 +44,7 @@ internal class EnsembleManager : IDisposable
                 byte Ensemble;
                 byte beatsPerBar;
                 int barElapsed;
+                int compensation = 0;
                 unsafe
                 {
                     var metronome = ((AgentMetronome.AgentMetronomeStruct*)agentMetronome);
@@ -76,7 +78,7 @@ internal class EnsembleManager : IDisposable
                         // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
                         // 而提前开始又不可能， 所以把所有乐器的延迟时间减去延迟最大的鲁特琴（让所有乐器等待鲁特琴）
                         // 也就是105减去每种乐器各自的延迟
-                        var compensation = 105 - MidiBard.CurrentInstrument switch
+                        compensation = 105 - MidiBard.CurrentInstrument switch
                         {
 	                        0 or 3 => 105,
 	                        1 => 85,
@@ -97,14 +99,14 @@ internal class EnsembleManager : IDisposable
 		                        midiClock.Restart();
 		                        PluginLog.Warning($"setup midiclock compensation: {compensation}");
 		                        midiClock.Ticked += OnMidiClockOnTicked;
-                                Lrc._lrc.Offset -= compensation;
+                                LRCStopWatch = Stopwatch.StartNew();
                                 PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
 
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
 		                        {
 			                        try
 			                        {
-				                        MidiBard.CurrentPlayback.Start();
+                                        MidiPlayerControl.DoPlay();
 				                        EnsembleStart?.Invoke();
 				                        PluginLog.Warning($"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks");
 			                        }
@@ -128,8 +130,8 @@ internal class EnsembleManager : IDisposable
 	                        {
 		                        try
 		                        {
-			                        MidiBard.CurrentPlayback.Start();
-			                        EnsembleStart?.Invoke();
+                                    MidiPlayerControl.DoPlay();
+                                    EnsembleStart?.Invoke();
 			                        PluginLog.Warning($"Start ensemble: compensation: 0");
 		                        }
 		                        catch (Exception e)
@@ -147,8 +149,14 @@ internal class EnsembleManager : IDisposable
                         }
                     }
                 }
-
+                else if (barElapsed == 0 && currentBeat == 0)
+                {
+                    LRCStopWatch.Stop();
+                    Lrc._lrc.Offset += LRCStopWatch.ElapsedMilliseconds - compensation;
+                }
+#if DEBUG
                 PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
+#endif
             }
 
             return original;

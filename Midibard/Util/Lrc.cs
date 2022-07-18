@@ -46,6 +46,7 @@ namespace MidiBard
         public static Lrc InitLrc(string LrcPath)
         {
             _lrc = new Lrc();
+            bool loadSuccessfull = true;
             Dictionary<double, string> dicword = new Dictionary<double, string>();
             try
             {
@@ -104,8 +105,14 @@ namespace MidiBard
                 _lrc.LrcWord = dicword.OrderBy(t => t.Key).ToDictionary(t => t.Key, p => p.Value);
             } catch (Exception ex)
             {
-                PluginLog.LogVerbose($"LRC: {ex.Message}");
+                loadSuccessfull = false;
             }
+
+            if (loadSuccessfull)
+            {
+                PluginLog.Log($"Load LRC: {LrcPath}");
+            }
+
             return _lrc;
         }
 

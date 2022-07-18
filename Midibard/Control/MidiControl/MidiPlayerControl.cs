@@ -19,7 +19,7 @@ namespace MidiBard.Control.MidiControl
         internal static void Play()
         {
             playDeltaTime = 0;
-            LRCDeltaTime = 0;
+            LRCDeltaTime = 100; // Assume usual delay between sending and other clients receiving the message would be ~100ms
 
             if (CurrentPlayback == null)
             {
@@ -288,7 +288,7 @@ namespace MidiBard.Control.MidiControl
             LrcIdx = -1;
             _stat = e_stat.Stopped;
             playDeltaTime = 0;
-            LRCDeltaTime = 0;
+            LRCDeltaTime = 100;
             if (index < 0 || index >= PlaylistManager.FilePathList.Count)
             {
                 PluginLog.Error($"SwitchSong: invalid playlist index {index}");
@@ -303,7 +303,7 @@ namespace MidiBard.Control.MidiControl
         }
 
         internal static int playDeltaTime = 0;
-        internal static int LRCDeltaTime = 0;
+        internal static int LRCDeltaTime = 50;
         public enum e_stat
         {
             Stopped,
@@ -319,7 +319,7 @@ namespace MidiBard.Control.MidiControl
 			      if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
 			      {
 				        playDeltaTime = 0;
-                LRCDeltaTime = 0;
+                        LRCDeltaTime = 100;
 				        return;
 			      }
 
@@ -342,7 +342,7 @@ namespace MidiBard.Control.MidiControl
             if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
             {
                 playDeltaTime = 0;
-                LRCDeltaTime = 0;
+                LRCDeltaTime = 100;
                 return;
             }
 
