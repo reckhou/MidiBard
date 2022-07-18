@@ -209,7 +209,7 @@ public static class ImGuiUtil
 	public static void AddNotification(NotificationType type, string content, string title = null)
 	{
 		PluginLog.Debug($"[Notification] {type}:{title}:{content}");
-		DalamudApi.api.PluginInterface.UiBuilder.AddNotification(content, string.IsNullOrWhiteSpace(title) ? "Midibard" : "Midibard: " + title, type, 5000);
+		DalamudApi.api.PluginInterface.UiBuilder.AddNotification(content, string.IsNullOrWhiteSpace(title) ? "Midibard 2" : "Midibard 2: " + title, type, 5000);
 	}
 
 	public static void PushStyleColors(bool pushNew, uint color, params ImGuiCol[] colors)
