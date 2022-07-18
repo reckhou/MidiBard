@@ -135,8 +135,11 @@ public partial class PluginUI
             MidiBard.Localizer = new Localizer((UILang)MidiBard.config.uiLang);
 
         //#if DEBUG
-        ImGui.Checkbox("Auto switch instrument by track name(BMP Rules)".Localize(), ref MidiBard.config.bmpTrackNames);
-        ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name.".Localize());
+        ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.bmpTrackNames);
+        ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.".Localize());
         //#endif
+
+        ImGui.Checkbox("[BETA] Auto set background frame limit".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
+        ImGuiUtil.ToolTip("Automatically set background frame limit, when unequipping the instument.".Localize());
     }
 }
