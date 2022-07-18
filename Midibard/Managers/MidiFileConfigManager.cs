@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dalamud.Logging;
+using Dalamud.Interface.Internal.Notifications;
 using MidiBard.DalamudApi;
 using Newtonsoft.Json;
 
@@ -46,6 +48,100 @@ namespace MidiBard.Managers
 				Speed = 1,
 			};
 		}
+
+		public static void Init()
+		{
+			LoadGlobalTrackMapping();
+		}
+
+		public static GlobalTrackMapping globalTrackMapping;
+
+		static GlobalTrackMapping LoadGlobalTrackMapping()
+		{
+			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json";
+			FileInfo fileInfo = new FileInfo(path);
+			if (!fileInfo.Exists)
+            {
+				PluginLog.LogWarning($"Global Track Mapping not exist, creating at {path}");
+				SaveGlobalTrackMapping();
+            }
+
+			globalTrackMapping = JsonConvert.DeserializeObject<GlobalTrackMapping>(File.ReadAllText(path), JsonSerializerSettings);
+			return globalTrackMapping;
+		}
+
+		static bool SaveGlobalTrackMapping()
+        {
+			if (globalTrackMapping == null)
+            {
+				globalTrackMapping = new GlobalTrackMapping();
+            }
+
+			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json";
+			try
+			{
+				var trackMappingFileInfo = GetGlobalTrackMappingFileInfo();
+				if (trackMappingFileInfo != null)
+				{
+					var serializedContents = JsonConvert.SerializeObject(globalTrackMapping, Formatting.Indented);
+					File.WriteAllText(trackMappingFileInfo.FullName, serializedContents);
+					PluginLog.LogWarning($"{path} Saved");
+				}
+			} catch (Exception e)
+            {
+				PluginLog.LogError(e.ToString());
+				return false;
+            }
+
+			return true;
+		}
+
+		static FileInfo GetGlobalTrackMappingFileInfo()
+		{
+			var pluginConfigDirectory = DalamudApi.api.PluginInterface.ConfigDirectory;
+			return new FileInfo(pluginConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json");
+		}
+
+		public static void ExportToGlobalTrackMapping()
+        {
+			if (MidiBard.CurrentPlayback?.MidiFileConfig == null)
+            {
+				ImGuiUtil.AddNotification(NotificationType.Error, "Please choose a song first!");
+				return;
+            }
+
+			var midiFileConfig = MidiBard.CurrentPlayback?.MidiFileConfig;
+			Dictionary<long, List<int>> trackDict = new Dictionary<long, List<int>>();
+			foreach(var cur in midiFileConfig.Tracks)
+            {
+				if (!trackDict.ContainsKey(cur.PlayerCid))
+                {
+					trackDict.Add(cur.PlayerCid, new List<int>());
+                }
+
+				trackDict[cur.PlayerCid].Add(cur.Index);
+			}
+
+			foreach(var pair in trackDict)
+            {
+				if (!globalTrackMapping.TrackMappingDict.ContainsKey(pair.Key))
+                {
+					globalTrackMapping.TrackMappingDict.Add(pair.Key, pair.Value);
+				} else
+                {
+					globalTrackMapping.TrackMappingDict[pair.Key] = pair.Value;
+                }
+            }
+
+			bool succeed = SaveGlobalTrackMapping();
+			if (succeed)
+			{
+				ImGuiUtil.AddNotification(NotificationType.Success, "Global Track Mapping Exported.");
+			} else
+            {
+				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Global Track Mapping!");
+			}
+		}
 	}
 
 
@@ -78,4 +174,9 @@ namespace MidiBard.Managers
 		public int Instrument;
 		public long PlayerCid;
 	}
+
+	internal class GlobalTrackMapping
+    {
+		public Dictionary<long, List<int>> TrackMappingDict = new Dictionary<long, List<int>>(); // PlayerCid - List of Track Indexes
+    }
 }

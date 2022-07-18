@@ -71,7 +71,7 @@ public class MidiBard : IDalamudPlugin
     internal static bool PlayingGuitar => InstrumentHelper.IsGuitar(CurrentInstrument);
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
 
-    public string Name => "MidiBard 2";
+    public string Name => "MidiBard 2 - Preview";
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
@@ -97,6 +97,7 @@ public class MidiBard : IDalamudPlugin
         //}
 
         TryLoadConfig();
+        MidiFileConfigManager.Init();
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

@@ -381,67 +381,73 @@ public partial class PluginUI
 				IPCHandles.SyncAllSettings();
 			}
 
-
-			//SameLine();
-			//if (Button("TEST"))
-			//{
-			//	try
-			//	{
-			//		var values = Enum.GetValues<ConfigOption>();
-			//		foreach (var value in values)
-			//		{
-			//			try
-			//			{
-			//				if (!value.ToString().ContainsIgnoreCase("sound"))
-			//				{
-			//					continue;
-			//				}
-
-			//				var optionValue = AgentConfigSystem.GetOptionValue(value);
-			//				var valueType = optionValue->Type;
-			//				PluginLog.Information($"{value} {valueType} {(valueType == ValueType.Int ? optionValue->Int.ToString() : "")}");
-			//			}
-			//			catch (Exception e)
-			//			{
-			//				//PluginLog.Information($"{value} ---");
-			//			}
-
-			//		}
-			//	}
-			//	catch (Exception e)
-			//	{
-			//		PluginLog.Error(e.ToString());
-			//	}
-			//}
-			//SameLine();
-			//if (Button("TEST2"))
-			//{
-			//	try
-			//	{
-			//		AgentConfigSystem.SetOptionValue(ConfigOption.GeneralQuality, 0);
-			//		MidiBard.AgentConfigSystem.ApplyGraphicSettings();
-			//	}
-			//	catch (Exception e)
-			//	{
-			//		PluginLog.Error(e.ToString());
-			//	}
-			//}
-			//SameLine();
-			//if (Button("TEST3"))
-			//{
-			//	try
-			//	{
-			//		AgentConfigSystem.SetOptionValue(ConfigOption.GeneralQuality, 4);
-			//		MidiBard.AgentConfigSystem.ApplyGraphicSettings();
-			//	}
-			//	catch (Exception e)
-			//	{
-			//		PluginLog.Error(e.ToString());
-			//	}
-			//}
+            SameLine();
+            if (Button("Export To Global Track Mapping"))
+            {
+                MidiFileConfigManager.ExportToGlobalTrackMapping();
+            }
 
 
-			Separator();
+            //SameLine();
+            //if (Button("TEST"))
+            //{
+            //	try
+            //	{
+            //		var values = Enum.GetValues<ConfigOption>();
+            //		foreach (var value in values)
+            //		{
+            //			try
+            //			{
+            //				if (!value.ToString().ContainsIgnoreCase("sound"))
+            //				{
+            //					continue;
+            //				}
+
+            //				var optionValue = AgentConfigSystem.GetOptionValue(value);
+            //				var valueType = optionValue->Type;
+            //				PluginLog.Information($"{value} {valueType} {(valueType == ValueType.Int ? optionValue->Int.ToString() : "")}");
+            //			}
+            //			catch (Exception e)
+            //			{
+            //				//PluginLog.Information($"{value} ---");
+            //			}
+
+            //		}
+            //	}
+            //	catch (Exception e)
+            //	{
+            //		PluginLog.Error(e.ToString());
+            //	}
+            //}
+            //SameLine();
+            //if (Button("TEST2"))
+            //{
+            //	try
+            //	{
+            //		AgentConfigSystem.SetOptionValue(ConfigOption.GeneralQuality, 0);
+            //		MidiBard.AgentConfigSystem.ApplyGraphicSettings();
+            //	}
+            //	catch (Exception e)
+            //	{
+            //		PluginLog.Error(e.ToString());
+            //	}
+            //}
+            //SameLine();
+            //if (Button("TEST3"))
+            //{
+            //	try
+            //	{
+            //		AgentConfigSystem.SetOptionValue(ConfigOption.GeneralQuality, 4);
+            //		MidiBard.AgentConfigSystem.ApplyGraphicSettings();
+            //	}
+            //	catch (Exception e)
+            //	{
+            //		PluginLog.Error(e.ToString());
+            //	}
+            //}
+
+
+            Separator();
 			if (CurrentPlayback == null)
 			{
 				if (ImGui.Button($"Select a song from playlist", new Vector2(-1, GetFrameHeight())))
