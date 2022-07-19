@@ -70,18 +70,18 @@ public partial class PluginUI
             if (MidiBard.config.playOnMultipleDevices)
             {
                 MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
-            } else if (MidiBard.AgentMetronome.EnsembleModeRunning)
-            {
-                StopEnsemble();
-            }
-
-            if (FilePlayback.isWaiting)
-            {
-                FilePlayback.CancelWaiting();
             }
             else
             {
-                MidiPlayerControl.Stop();
+                if (FilePlayback.isWaiting)
+                {
+                    FilePlayback.CancelWaiting();
+                }
+                else
+                { 
+                    MidiPlayerControl.Stop();
+                    IPCHandles.UpdateInstrument(false);
+                }
             }
         }
     }
