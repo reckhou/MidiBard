@@ -28,36 +28,7 @@ internal sealed class BardPlayback : Playback
 			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
 
 			// If can not find individual config, use the global track mapping instead.
-			ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Global Track Mapping.");
-			Cids = new long[100];
-			GlobalTrackMapping trackMapping = MidiFileConfigManager.globalTrackMapping;
-			var partyMembers = DalamudApi.api.PartyList.ToList();
-			foreach (var cur in partyMembers)
-			{
-				if (cur?.ContentId != 0 && trackMapping.TrackMappingDict.ContainsKey(cur.ContentId))
-				{
-					List<int> tracks = trackMapping.TrackMappingDict[cur.ContentId];
-					foreach (var trackIdx in trackMapping.TrackMappingDict[cur.ContentId])
-					{
-						Cids[trackIdx] = cur.ContentId;
-					}
-				}
-			}
-
-			for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
-			{
-				try
-				{
-					if (midiFileConfig.Tracks[i].PlayerCid == 0)
-					{
-						midiFileConfig.Tracks[i].PlayerCid = Cids[i];
-					}
-				}
-				catch (Exception e)
-				{
-					PluginLog.Warning($"{i} {e.Message}");
-				}
-			}
+			midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
 		}
 		else
 		{
@@ -213,5 +184,41 @@ internal sealed class BardPlayback : Playback
 			_ => -1
 		};
 		return new BardPlayDevice.MidiPlaybackMetaData(trackIndex, time, compareValue);
+	}
+
+	public static MidiFileConfig LoadGlobalTrackMapping(MidiFileConfig midiFileConfig)
+    {
+		ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Global Track Mapping.");
+		Cids = new long[100];
+		GlobalTrackMapping trackMapping = MidiFileConfigManager.globalTrackMapping;
+		var partyMembers = DalamudApi.api.PartyList.ToList();
+		foreach (var cur in partyMembers)
+		{
+			if (cur?.ContentId != 0 && trackMapping.TrackMappingDict.ContainsKey(cur.ContentId))
+			{
+				List<int> tracks = trackMapping.TrackMappingDict[cur.ContentId];
+				foreach (var trackIdx in trackMapping.TrackMappingDict[cur.ContentId])
+				{
+					Cids[trackIdx] = cur.ContentId;
+				}
+			}
+		}
+
+		for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
+		{
+			try
+			{
+				if (midiFileConfig.Tracks[i].PlayerCid == 0)
+				{
+					midiFileConfig.Tracks[i].PlayerCid = Cids[i];
+				}
+			}
+			catch (Exception e)
+			{
+				PluginLog.Warning($"{i} {e.Message}");
+			}
+		}
+
+		return midiFileConfig;
 	}
 }

@@ -34,6 +34,7 @@ using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
+using MidiBard.Control.MidiControl.PlaybackInstance;
 using MoreLinq;
 using Newtonsoft.Json;
 using static ImGuiNET.ImGui;
@@ -349,6 +350,7 @@ public partial class PluginUI
 				{
 					MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath).Delete();
 					CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(CurrentPlayback.TrackInfos);
+					CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(CurrentPlayback.MidiFileConfig);
 				}
 			}
 			ToolTip("Delete and reset current file config".Localize());
