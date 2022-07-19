@@ -382,7 +382,11 @@ namespace MidiBard.Control.MidiControl
                             string msg = "";
                             if (idx == 0)
                             {
-                                msg = $"♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ Lyric By: {Lrc._lrc.LrcBy} ♪";
+                                msg = $"♪ {Lrc._lrc.Title} ♪ ";
+                                msg += (Lrc._lrc.Artist != null && Lrc._lrc.Artist != "") ? $"Artist: {Lrc._lrc.Artist} ♪ " : "";
+                                msg += (Lrc._lrc.Album != null && Lrc._lrc.Album != "") ? $"Album: {Lrc._lrc.Album} ♪ " : "";
+                                msg += (Lrc._lrc.LrcBy != null && Lrc._lrc.LrcBy != "") ? $"Lyric By: {Lrc._lrc.LrcBy} ♪ " : "";
+                            
                                 if (!AgentMetronome.EnsembleModeRunning)
                                 {
                                     msg = "/p " + msg;

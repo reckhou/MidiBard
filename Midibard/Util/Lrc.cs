@@ -123,7 +123,7 @@ namespace MidiBard
         /// <returns>returns the basic info</returns>
         static string SplitInfo(string line)
         {
-            return line.Substring(line.IndexOf(":") + 1).TrimEnd(']');
+            return line.Substring(line.IndexOf(":") + 1).TrimEnd(']').TrimStart();
         }
 
         public static bool HasLyric()
