@@ -5,6 +5,7 @@ using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
+using MidiBard.IPC;
 using static MidiBard.MidiBard;
 using MidiBard.Managers;
 using System.Collections.Generic;
@@ -105,16 +106,12 @@ namespace MidiBard.Control.MidiControl
             _stat = e_stat.Paused;
         }
 
-
         internal static void PlayPause()
         {
             if (CurrentPlayback == null)
             {
                 return;
             }
-
-            var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-            PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
 
             if (FilePlayback.isWaiting)
             {
@@ -125,6 +122,8 @@ namespace MidiBard.Control.MidiControl
                 if (IsPlaying)
                 {
                     Pause();
+                    var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+                    PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
                 }
                 else
                 {
@@ -299,6 +298,7 @@ namespace MidiBard.Control.MidiControl
             Task.Run(async () =>
             {
                 await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying);
+                IPCHandles.UpdateInstrument(true);
             });
         }
 

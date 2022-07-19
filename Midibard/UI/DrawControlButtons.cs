@@ -4,7 +4,9 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
+using MidiBard.Control.CharacterControl;
 using static MidiBard.ImGuiUtil;
+using MidiBard.IPC;
 
 namespace MidiBard;
 
@@ -45,11 +47,18 @@ public partial class PluginUI
 
     private static unsafe void DrawButtonPlayPause()
     {
-        var PlayPauseIcon = MidiBard.IsPlaying ? FontAwesomeIcon.Pause : FontAwesomeIcon.Play;
+        var PlayPauseIcon = MidiBard.IsPlaying ? (MidiBard.AgentMetronome.EnsembleModeRunning ? FontAwesomeIcon.Stop : FontAwesomeIcon.Pause) : FontAwesomeIcon.Play;
         if (ImGuiUtil.IconButton(PlayPauseIcon,"playpause"))
         {
-            PluginLog.Debug($"PlayPause pressed. wasplaying: {MidiBard.IsPlaying}");
-            MidiPlayerControl.PlayPause();
+            if (MidiBard.AgentMetronome.EnsembleModeRunning)
+            {
+                // stops ensemble instead of pausing one client
+                // could be pausing all clients by IPC in the future, however the ensemble mode stops anyways without input
+                StopEnsemble();
+            } else
+            {
+                MidiPlayerControl.PlayPause();
+            }
         }
     }
 
@@ -61,6 +70,9 @@ public partial class PluginUI
             if (MidiBard.config.playOnMultipleDevices)
             {
                 MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+            } else if (MidiBard.AgentMetronome.EnsembleModeRunning)
+            {
+                StopEnsemble();
             }
 
             if (FilePlayback.isWaiting)
@@ -115,5 +127,14 @@ public partial class PluginUI
 
         ToolTip("Playmode: ".Localize() +
                 $"{(PlayMode)MidiBard.config.PlayMode}".Localize());
+    }
+
+    private static void StopEnsemble()
+    {
+        if (MidiBard.AgentMetronome.EnsembleModeRunning)
+        {
+            MidiPlayerControl.Stop();
+            IPCHandles.UpdateInstrument(false);
+        }
     }
 }

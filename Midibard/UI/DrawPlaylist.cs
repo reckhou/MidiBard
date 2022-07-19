@@ -10,6 +10,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static ImGuiNET.ImGui;
 using static MidiBard.ImGuiUtil;
+using MidiBard.IPC;
 
 namespace MidiBard;
 
@@ -208,13 +209,15 @@ public partial class PluginUI
 				ImGuiSelectableFlags.AllowItemOverlap))
 		{
 			if (IsMouseDoubleClicked(ImGuiMouseButton.Left))
-			{
-				MidiPlayerControl.SwitchSong(i);
+			{			
 				if (MidiBard.config.playOnMultipleDevices)
 				{
 					PartyChatCommand.IgnoreSwitchSongFlag = true;
 					string msg = $"/p switchto {i + 1}";
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+				} else
+                {
+					MidiPlayerControl.SwitchSong(i);
 				}
 			}
 			else
