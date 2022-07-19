@@ -98,9 +98,9 @@ public partial class PluginUI
 
         ImGui.Checkbox("Follow playback".Localize(), ref MidiBard.config.LockPlot);
         ImGuiUtil.ToolTip("Auto following current playback progress".Localize());
-        
-        ImGui.Checkbox("Auto transpose".Localize(), ref MidiBard.config.autoTransposeBySongName);
-        ImGuiUtil.ToolTip("Auto transpose notes on demand. If you need this, \nplease add #transpose number# before file name.\nE.g. #-12#demo.mid".Localize());
+
+        ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.bmpTrackNames);
+        ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.".Localize());
 
         ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
@@ -134,12 +134,7 @@ public partial class PluginUI
         if (ImGui.Combo("UI Language".Localize(), ref MidiBard.config.uiLang, uilangStrings, 2))
             MidiBard.Localizer = new Localizer((UILang)MidiBard.config.uiLang);
 
-        //#if DEBUG
-        ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.bmpTrackNames);
-        ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.".Localize());
-        //#endif
-
-        ImGui.Checkbox("[BETA] Auto set background frame limit".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
-        ImGuiUtil.ToolTip("Automatically set background frame limit, when unequipping the instument.".Localize());
+        ImGui.Checkbox("[BETA] Auto change frame limit and character quantity".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
+        ImGuiUtil.ToolTip("Automatically disablse/sets background frame limit and minimal character quantity, when equipping/unequipping the instuments.".Localize());
     }
 }

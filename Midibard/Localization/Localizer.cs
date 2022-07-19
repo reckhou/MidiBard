@@ -135,7 +135,7 @@ class Localizer
         zh.Add("Auto switch instrument", "根据音轨名自动切换乐器");
         zh.Add("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.", "根据首个被启用的音轨的音轨名自动切换乐器和移调。");
         zh.Add("Play on Multiple Devices", "在多台机器上运行");
-        zh.Add("[BETA] Auto set background frame limit", "[BETA] 自动设置限制后台运行帧率");
-        zh.Add("Automatically set background frame limit, when unequipping the instument.", "在未装备乐器时自动设置限制后台运行帧率");
+        zh.Add("[BETA] Auto change frame limit and character quantity", "[BETA] 自动设置限制后台运行帧率及角色数量");
+        zh.Add("Automatically disablse/sets background frame limit and minimal character quantity, when equipping/unequipping the instuments.", "在未装备乐器时自动设置限制后台运行帧率，角色数量设置为最小。");
     }
 }
