@@ -199,8 +199,6 @@ public static class FilePlayback
 
     internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
-	    IPCHandles.LoadPlayback(index);
-
         var wasPlaying = IsPlaying;
         MidiFile midiFile = await PlaylistManager.LoadMidiFile(index);
         if (midiFile == null)
@@ -217,7 +215,9 @@ public static class FilePlayback
                 {
                     CurrentPlayback?.Dispose();
                     CurrentPlayback = null;
-                    return GetPlaybackObject(midiFile, PlaylistManager.FilePathList[index].path);
+                    var playback = GetPlaybackObject(midiFile, PlaylistManager.FilePathList[index].path);
+                    IPCHandles.LoadPlayback(index);
+                    return playback;
                 });
             Ui.RefreshPlotData();
             PlaylistManager.CurrentPlaying = index;
