@@ -210,13 +210,13 @@ public partial class PluginUI
 		{
 			if (IsMouseDoubleClicked(ImGuiMouseButton.Left))
 			{
-				if (MidiBard.config.playOnMultipleDevices)
+				if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
 				{
 					string msg = $"/p switchto {i + 1}";
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				} else
                 {
-					MidiPlayerControl.SwitchSong(i, false, false);
+					MidiPlayerControl.SwitchSong(i, false, DalamudApi.api.PartyList.Length <= 1);
 				}
 			}
 			else

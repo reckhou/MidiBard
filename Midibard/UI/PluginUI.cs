@@ -774,7 +774,13 @@ public partial class PluginUI
 					DrawButtonFastForward();
 					DrawButtonPlayMode();
 					DrawButtonShowSettingsPanel();
-					DrawButtonShowEnsembleControl();
+					if (DalamudApi.api.PartyList.Length > 1)
+					{
+						DrawButtonShowEnsembleControl();
+					} else
+                    {
+						MidiBard.config.ShowEnsembleControlWindow = false;
+					}
 					DrawButtonMiniPlayer();
 				}
 				PopStyleVar(2);

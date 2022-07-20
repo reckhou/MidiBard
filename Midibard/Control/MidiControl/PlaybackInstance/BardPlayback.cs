@@ -21,23 +21,28 @@ internal sealed class BardPlayback : Playback
 	{
 		PreparePlaybackData(file, out var tempoMap, out var trackChunks, out var trackInfos, out var timedEventWithMetadata);
 
-		var midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
-
-		if (midiFileConfig is null || midiFileConfig.Tracks.Count != trackChunks.Length)
+		MidiFileConfig midiFileConfig = null;
+		// only use midiFileConfig(including global track mapping) when in the party
+		if (DalamudApi.api.PartyList.Length > 1)
 		{
-			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
+			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
 
-			// If can not find individual config, use the global track mapping instead.
-			midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
-		}
-		else
-		{
-			for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
+			if (midiFileConfig is null || midiFileConfig.Tracks.Count != trackChunks.Length)
 			{
-				var cid = midiFileConfig.Tracks[i].PlayerCid;
-				if (cid != 0)
+				midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
+
+				// If can not find individual config, use the global track mapping instead.
+				midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
+			}
+			else
+			{
+				for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
 				{
-					Cids[i] = cid;
+					var cid = midiFileConfig.Tracks[i].PlayerCid;
+					if (cid != 0)
+					{
+						Cids[i] = cid;
+					}
 				}
 			}
 		}

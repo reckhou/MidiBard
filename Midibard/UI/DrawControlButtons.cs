@@ -67,7 +67,7 @@ public partial class PluginUI
         ImGui.SameLine();
         if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
         {
-            if (MidiBard.config.playOnMultipleDevices)
+            if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
             {
                 MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
             }
