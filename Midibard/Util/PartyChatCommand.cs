@@ -16,8 +16,6 @@ namespace MidiBard
 {
 	public class PartyChatCommand
 	{
-		public static bool IgnoreSwitchSongFlag;
-		public static bool IgnoreReloadConfig;
 		public static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
 			if (isHandled)
@@ -41,13 +39,6 @@ namespace MidiBard
 				{
 					return;
 				}
-
-				// use this to avoid double switching on the client which sends the message by automation.
-				if (IgnoreSwitchSongFlag)
-                {
-					IgnoreSwitchSongFlag = false;
-					return;
-                }
 
 				int number = -1;
 				bool success = Int32.TryParse(strings[1], out number);

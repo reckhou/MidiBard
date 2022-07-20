@@ -209,10 +209,9 @@ public partial class PluginUI
 				ImGuiSelectableFlags.AllowItemOverlap))
 		{
 			if (IsMouseDoubleClicked(ImGuiMouseButton.Left))
-			{			
+			{
 				if (MidiBard.config.playOnMultipleDevices)
 				{
-					PartyChatCommand.IgnoreSwitchSongFlag = true;
 					string msg = $"/p switchto {i + 1}";
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				} else
