@@ -28,6 +28,7 @@ namespace MidiBard.Managers
 
 		public static void Save(this MidiFileConfig config, string path)
 		{
+			UsingGlobalTrackMapping = false;
 			var fullName = GetMidiConfigFileInfo(path).FullName;
 			File.WriteAllText(fullName, JsonConvert.SerializeObject(config, Formatting.Indented, JsonSerializerSettings));
 		}
@@ -55,6 +56,7 @@ namespace MidiBard.Managers
 		}
 
 		public static GlobalTrackMapping globalTrackMapping;
+		public static bool UsingGlobalTrackMapping;
 
 		static GlobalTrackMapping LoadGlobalTrackMapping()
 		{

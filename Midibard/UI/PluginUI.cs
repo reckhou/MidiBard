@@ -284,13 +284,13 @@ public partial class PluginUI
 				{
 					// MUST check the current playback, otherwise IPC thread will stuck waiting for playback
 					if (MidiBard.CurrentPlayback != null)
-				{
-					if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
 					{
-						IPCHandles.UpdateMidiFileConfig(config);
+						if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+						{
+							IPCHandles.UpdateMidiFileConfig(config);
+						}
+						IPCHandles.UpdateInstrument(true);
 					}
-					IPCHandles.UpdateInstrument(true);
-				}
 				}
 				if (IsItemClicked(ImGuiMouseButton.Right))
 				{
@@ -349,7 +349,7 @@ public partial class PluginUI
 			ToolTip("Open current midi config file".Localize());
 
 			SameLine();
-			if (IconButton(FontAwesomeIcon.Trash, "deleteConfig", width))
+			if (!MidiFileConfigManager.UsingGlobalTrackMapping && IconButton(FontAwesomeIcon.Trash, "deleteConfig", width))
 			{
 				if (CurrentPlayback != null)
 				{
@@ -390,11 +390,15 @@ public partial class PluginUI
 			}
 
             SameLine();
-            if (Button("Export To Global Track Mapping"))
-            {
-                MidiFileConfigManager.ExportToGlobalTrackMapping();
-            }
-
+			if (MidiFileConfigManager.UsingGlobalTrackMapping)
+			{
+				LabelText($"[Global Track Mapping]", "[Global Track Mapping]");
+			} else {
+				if (Button("Export To Global Track Mapping"))
+				{
+					MidiFileConfigManager.ExportToGlobalTrackMapping();
+				}
+			}
 
             //SameLine();
             //if (Button("TEST"))

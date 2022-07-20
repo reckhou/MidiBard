@@ -36,6 +36,7 @@ internal sealed class BardPlayback : Playback
 			}
 			else
 			{
+				MidiFileConfigManager.UsingGlobalTrackMapping = false;
 				for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
 				{
 					var cid = midiFileConfig.Tracks[i].PlayerCid;
@@ -193,6 +194,7 @@ internal sealed class BardPlayback : Playback
 
 	public static MidiFileConfig LoadGlobalTrackMapping(MidiFileConfig midiFileConfig)
     {
+		MidiFileConfigManager.UsingGlobalTrackMapping = true;
 		ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Global Track Mapping.");
 		Cids = new long[100];
 		GlobalTrackMapping trackMapping = MidiFileConfigManager.globalTrackMapping;
