@@ -392,7 +392,7 @@ public partial class PluginUI
             SameLine();
 			if (MidiFileConfigManager.UsingGlobalTrackMapping)
 			{
-				LabelText($"[Global Track Mapping]", "[Global Track Mapping]");
+				LabelText($"[Using Global Track Mapping]", "[Using Global Track Mapping]");
 			} else {
 				if (Button("Export To Global Track Mapping"))
 				{

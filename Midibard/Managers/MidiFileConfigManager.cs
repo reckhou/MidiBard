@@ -114,6 +114,7 @@ namespace MidiBard.Managers
 
 			var midiFileConfig = MidiBard.CurrentPlayback?.MidiFileConfig;
 			Dictionary<long, List<int>> trackDict = new Dictionary<long, List<int>>();
+			List<long> existingCidInConfig = new List<long>();
 			foreach(var cur in midiFileConfig.Tracks)
             {
 				if (!trackDict.ContainsKey(cur.PlayerCid))
@@ -122,6 +123,11 @@ namespace MidiBard.Managers
                 }
 
 				trackDict[cur.PlayerCid].Add(cur.Index);
+
+				if (!existingCidInConfig.Contains(cur.PlayerCid))
+                {
+					existingCidInConfig.Add(cur.PlayerCid);
+                }
 			}
 
 			foreach(var pair in trackDict)
@@ -132,6 +138,25 @@ namespace MidiBard.Managers
 				} else
                 {
 					globalTrackMapping.TrackMappingDict[pair.Key] = pair.Value;
+                }
+            }
+
+			// scan for those in the party but not in config anymore, remove them from global track mapping
+			var partyList = api.PartyList.ToArray();
+			List<long> toRemove = new List<long>();
+			foreach (var cur in partyList)
+            {
+				if (!existingCidInConfig.Contains(cur.ContentId))
+                {
+					toRemove.Add(cur.ContentId);
+                }
+            }
+
+            foreach (var cur in toRemove)
+            {
+				if (globalTrackMapping.TrackMappingDict.ContainsKey(cur))
+                {
+					globalTrackMapping.TrackMappingDict.Remove(cur);
                 }
             }
 
