@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Interface;
+using Dalamud.Logging;
 using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
@@ -35,7 +36,7 @@ public partial class PluginUI
         if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
             MidiBard.config.playSpeed = 1;
-            SetSpeed();
+            SetSpeed(); 
         }
 
 
@@ -49,9 +50,16 @@ public partial class PluginUI
         ToolTip("Delay time before play next track.".Localize());
 
         ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
-        ImGui.InputInt("Transpose".Localize(), ref MidiBard.config.TransposeGlobal, 12);
+        if (ImGui.InputInt("Transpose".Localize(), ref MidiBard.config.TransposeGlobal, 12))
+        {
+            IPC.IPCHandles.GlobalTranspose(MidiBard.config.TransposeGlobal);
+            MidiBard.config.SetTransposeGlobal(MidiBard.config.TransposeGlobal);
+        }
         if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        {
             MidiBard.config.TransposeGlobal = 0;
+            IPC.IPCHandles.GlobalTranspose(MidiBard.config.TransposeGlobal);
+        }
         ToolTip("Transpose, measured by semitone. \nRight click to reset.".Localize());
         ImGui.PopItemWidth();
 
@@ -86,6 +94,7 @@ public partial class PluginUI
             MidiBard.CurrentPlayback.Speed = MidiBard.config.playSpeed;
             MidiBard.CurrentPlayback?.MoveToTime(currenttime);
         }
+        IPC.IPCHandles.PlaybackSpeed(MidiBard.config.playSpeed);
     }
 
     private static string GetBpmString()
@@ -124,11 +133,13 @@ public partial class PluginUI
                     ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoRoundToFormat))
             {
                 MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(progress));
+                IPC.IPCHandles.MoveToTime(progress);
             }
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(0));
+                IPC.IPCHandles.MoveToTime(progress);
             }
         }
         else

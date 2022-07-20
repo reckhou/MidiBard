@@ -11,6 +11,7 @@ using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using MidiBard.Control.MidiControl.PlaybackInstance;
+using Melanchall.DryWetMidi.Interaction;
 
 namespace MidiBard.IPC;
 
@@ -200,5 +201,54 @@ static class IPCHandles
 		{
 			MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(MidiBard.CurrentPlayback.MidiFileConfig);
 		}
+	}
+
+	public static void PlayOnMultipleDevices(bool playOnMultipleDevices)
+	{
+		IPCEnvelope.Create(MessageTypeCode.PlayOnMultipleDevices, playOnMultipleDevices).BroadCast();
+	}
+
+	[IPCHandle(MessageTypeCode.PlayOnMultipleDevices)]
+	public static void HandlePlayOnMultipleDevices(IPCEnvelope message)
+	{
+		var playOnMultipleDevices = message.DataStruct<bool>();
+		MidiBard.config.playOnMultipleDevices = playOnMultipleDevices;
+	}
+
+	public static void PlaybackSpeed(float playbackSpeed)
+	{
+		IPCEnvelope.Create(MessageTypeCode.PlaybackSpeed, playbackSpeed).BroadCast();
+	}
+
+	[IPCHandle(MessageTypeCode.PlaybackSpeed)]
+	public static void HandlePlaybackSpeed(IPCEnvelope message)
+	{
+		var playbackSpeed = message.DataStruct<float>();
+		MidiBard.config.playSpeed = playbackSpeed;
+	}
+	
+	public static void GlobalTranspose(int transpose)
+	{
+		IPCEnvelope.Create(MessageTypeCode.GlobalTranspose, transpose).BroadCast();
+	}
+
+	[IPCHandle(MessageTypeCode.GlobalTranspose)]
+	public static void HandleGlobalTranspose(IPCEnvelope message)
+	{
+		var globalTranspose = message.DataStruct<int>();
+		MidiBard.config.SetTransposeGlobal(globalTranspose);
+	}
+	
+	public static void MoveToTime(float progress)
+	{
+		IPCEnvelope.Create(MessageTypeCode.MoveToTime, progress).BroadCast(true);
+	}
+
+	[IPCHandle(MessageTypeCode.MoveToTime)]
+	public static void HandleMoveToTime(IPCEnvelope message)
+	{
+		var progress = message.DataStruct<float>();
+
+		MidiBard.CurrentPlayback?.MoveToTime(MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress));
 	}
 }

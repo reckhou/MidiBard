@@ -28,9 +28,14 @@ public enum MessageTypeCode
 	SetInstrument,
 	EnsembleStartTime,
 	UpdateGlobalTrackMapping,
+	PlayOnMultipleDevices,
 
 	Macro = 50,
 	Chat,
+
+	PlaybackSpeed = 80,
+	GlobalTranspose,
+	MoveToTime,
 
 	SetOption = 100,
 	ShowWindow,

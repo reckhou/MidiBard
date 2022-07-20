@@ -59,6 +59,50 @@ namespace MidiBard
 			{
 				MidiPlayerControl.Stop();
 				SwitchInstrument.SwitchTo(0);
+			} else if (cmd == "speed")
+            {
+				if (strings.Length < 2)
+				{
+					return;
+				}
+
+				float number = -1;
+				bool success = float.TryParse(strings[1], out number);
+				if (!success)
+				{
+					return;
+				}
+
+				MidiBard.config.playSpeed = Math.Max(0.1f, number);
+			} else if (cmd == "transpose")
+            {
+				if (strings.Length < 2)
+				{
+					return;
+				}
+
+				int number = -1;
+				bool success = Int32.TryParse(strings[1], out number);
+				if (!success)
+				{
+					return;
+				}
+
+				MidiBard.config.SetTransposeGlobal(number);
+			} else if (cmd == "playonmultipledevices" || cmd == "pmd")
+            {
+				if(strings.Length < 2)
+				{
+					return;
+				}
+
+				if (strings[1].ToLower() == "on")
+                {
+					MidiBard.config.playOnMultipleDevices = true;
+                } else if (strings[1].ToLower() == "off")
+                {
+					MidiBard.config.playOnMultipleDevices = false;
+                }
 			}
 		}
 	}

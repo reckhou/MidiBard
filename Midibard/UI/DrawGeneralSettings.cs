@@ -104,7 +104,10 @@ public partial class PluginUI
 
         //ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
-        ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices);
+        if (ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices))
+        {
+            IPC.IPCHandles.PlayOnMultipleDevices(MidiBard.config.playOnMultipleDevices);
+        }
         ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.".Localize());
 
         //ImGui.Checkbox("Auto set background frame limit".Localize(), ref MidiBard.config.AutoSetBackgroundFrameLimit);
