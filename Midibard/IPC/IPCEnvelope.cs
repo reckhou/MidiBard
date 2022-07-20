@@ -27,6 +27,7 @@ public enum MessageTypeCode
 	MidiEvent,
 	SetInstrument,
 	EnsembleStartTime,
+	UpdateGlobalTrackMapping,
 
 	Macro = 50,
 	Chat,

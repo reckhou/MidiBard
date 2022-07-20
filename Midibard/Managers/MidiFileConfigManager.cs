@@ -137,6 +137,7 @@ namespace MidiBard.Managers
 			if (succeed)
 			{
 				ImGuiUtil.AddNotification(NotificationType.Success, "Global Track Mapping Exported.");
+				IPC.IPCHandles.UpdateGlobalTrackMapping();
 			} else
             {
 				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Global Track Mapping!");

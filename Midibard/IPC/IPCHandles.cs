@@ -10,6 +10,7 @@ using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
+using MidiBard.Control.MidiControl.PlaybackInstance;
 
 namespace MidiBard.IPC;
 
@@ -168,5 +169,22 @@ static class IPCHandles
 		//do not overwrite track settings
 		jsonDeserialize.TrackStatus = MidiBard.config.TrackStatus;
 		MidiBard.config = jsonDeserialize;
+	}
+
+	public static void UpdateGlobalTrackMapping()
+	{
+		IPCEnvelope.Create(MessageTypeCode.UpdateGlobalTrackMapping, MidiFileConfigManager.globalTrackMapping.JsonSerialize()).BroadCast();
+	}
+
+	[IPCHandle(MessageTypeCode.UpdateGlobalTrackMapping)]
+	public static void HandleUpdateGlobalTrackMapping(IPCEnvelope message)
+	{
+		var str = message.StringData[0];
+		var jsonDeserialize = str.JsonDeserialize<GlobalTrackMapping>();
+		MidiFileConfigManager.globalTrackMapping = jsonDeserialize;
+		if (MidiBard.CurrentPlayback != null)
+		{
+			MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(MidiBard.CurrentPlayback.MidiFileConfig);
+		}
 	}
 }
