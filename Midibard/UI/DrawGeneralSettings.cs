@@ -99,10 +99,10 @@ public partial class PluginUI
         ImGui.Checkbox("Follow playback".Localize(), ref MidiBard.config.LockPlot);
         ImGuiUtil.ToolTip("Auto following current playback progress".Localize());
 
-        ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.bmpTrackNames);
-        ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.".Localize());
+        //ImGui.Checkbox("Auto switch instrument".Localize(), ref MidiBard.config.bmpTrackNames);
+        //ImGuiUtil.ToolTip("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.".Localize());
 
-        ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
+        //ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
 
         ImGui.Checkbox("Play on Multiple Devices".Localize(), ref MidiBard.config.playOnMultipleDevices);
         ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.".Localize());

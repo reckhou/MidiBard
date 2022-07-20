@@ -33,23 +33,7 @@ internal static class SwitchInstrument
 
     public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
     {
-        if (MidiBard.config.bmpTrackNames)
-        {
-            UpdateGuitarToneByConfig();
-        }
-        else
-        {
-            if (MidiBard.guitarGroup.Contains(MidiBard.CurrentInstrument))
-            {
-                if (MidiBard.guitarGroup.Contains((byte)instrumentId))
-                {
-                    var tone = (int)instrumentId - MidiBard.guitarGroup[0];
-                    playlib.GuitarSwitchTone(tone);
-
-                    return;
-                }
-            }
-        }
+        UpdateGuitarToneByConfig();
 
         if (MidiBard.CurrentInstrument == instrumentId)
             return;
@@ -129,45 +113,6 @@ internal static class SwitchInstrument
     {
         var config = MidiBard.config;
 
-        if (config.bmpTrackNames)
-        {
-            if (config.EnableTransposePerTrack)
-            {
-                var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
-                foreach (var trackInfo in currentTracks)
-                {
-                    var transposePerTrack = trackInfo.TransposeFromTrackName;
-                    if (transposePerTrack != 0)
-                    {
-                        PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
-                    }
-                    config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
-                }
-
-                config.TransposeGlobal = 0;
-            }
-            else
-            {
-                var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
-                var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
-                config.TransposeGlobal = transpose;
-            }
-        }
-
-        if (config.bmpTrackNames)
-        {
-            //MidiBard.config.OverrideGuitarTones = true;
-
-            var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
-            var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
-            if (idFromTrackName != null)
-            {
-                await SwitchTo((uint)idFromTrackName);
-            }
-
-            return;
-        }
-
         ParseSongName(songName, out var idFromSongName, out var transposeGlobal);
 
         if (config.autoTransposeBySongName)
@@ -187,7 +132,40 @@ internal static class SwitchInstrument
             if (idFromSongName != null)
             {
                 await SwitchTo((uint)idFromSongName);
+                return;
             }
+        }
+
+        TrackInfo firstEnabledTrack = null;
+        if (config.EnableTransposePerTrack)
+        {
+            var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
+            foreach (var trackInfo in currentTracks)
+            {
+                var transposePerTrack = trackInfo.TransposeFromTrackName;
+                if (transposePerTrack != 0)
+                {
+                    PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
+                }
+                config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
+            }
+
+            config.TransposeGlobal = 0;
+        }
+        else
+        {
+            firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
+            var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
+            config.TransposeGlobal = transpose;
+        }
+
+        //MidiBard.config.OverrideGuitarTones = true;
+
+        firstEnabledTrack = MidiBard.config.SoloedTrack == null ? MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled) : MidiBard.CurrentPlayback.TrackInfos[(int)MidiBard.config.SoloedTrack];
+        var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
+        if (idFromTrackName != null)
+        {
+            await SwitchTo((uint)idFromTrackName);
         }
     }
 

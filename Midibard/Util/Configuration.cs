@@ -101,7 +101,7 @@ public class Configuration : IPluginConfiguration
     public bool autoSwitchInstrumentBySongName = true;
     public bool autoTransposeBySongName = true;
 
-    public bool bmpTrackNames = false;
+    //public bool bmpTrackNames = true;
     public bool playOnMultipleDevices = false;
 
     //public bool autoSwitchInstrumentByTrackName = false;

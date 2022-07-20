@@ -130,12 +130,15 @@ public partial class PluginUI
                         if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                         {
                             MidiBard.config.SoloedTrack = MidiBard.config.SoloedTrack == i ? null : i;
-                            if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying &&
+                            if (!MidiBard.IsPlaying &&
                                 MidiBard.config.SoloedTrack != null
                                 && MidiBard.config.TrackStatus[(int)MidiBard.config.SoloedTrack].Enabled
                                 && MidiBard.CurrentPlayback.TrackInfos[(int)MidiBard.config.SoloedTrack].InstrumentIDFromTrackName != null)
                             {
                                 SwitchInstrument.SwitchTo((uint)MidiBard.CurrentPlayback.TrackInfos[(int)MidiBard.config.SoloedTrack].InstrumentIDFromTrackName);
+                            } else if (!MidiBard.IsPlaying && MidiBard.config.SoloedTrack == null)
+                            {
+                                SwitchInstrument.SwitchTo((uint)MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled).InstrumentIDFromTrackName);
                             }
                         }
 
@@ -227,7 +230,7 @@ public partial class PluginUI
 
     private void JudgeSwitchInstrument(int idx)
     {
-        if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying)
+        if (!MidiBard.IsPlaying)
         {
             var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(trackInfo => trackInfo.IsEnabled);
             if (firstEnabledTrack?.InstrumentIDFromTrackName != null)

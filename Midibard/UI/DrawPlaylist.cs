@@ -216,7 +216,7 @@ public partial class PluginUI
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				} else
                 {
-					MidiPlayerControl.SwitchSong(i);
+					MidiPlayerControl.SwitchSong(i, false, false);
 				}
 			}
 			else
