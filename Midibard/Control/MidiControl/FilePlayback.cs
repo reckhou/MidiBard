@@ -231,7 +231,6 @@ public static class FilePlayback
                     CurrentPlayback?.Dispose();
                     CurrentPlayback = null;
                     var playback = GetPlaybackObject(midiFile, PlaylistManager.FilePathList[index].path);
-                    IPCHandles.LoadPlayback(index);
                     return playback;
                 });
             Ui.RefreshPlotData();

@@ -282,7 +282,7 @@ namespace MidiBard.Control.MidiControl
             }
         }
 
-        public static void SwitchSong(int index, bool startPlaying = false, bool switchInstrument = true)
+        public static void SwitchSong(int index, bool startPlaying = false, bool switchInstrument = true, bool syncByPartyCommand = false)
         {
             LrcIdx = -1;
             _stat = e_stat.Stopped;
@@ -296,8 +296,16 @@ namespace MidiBard.Control.MidiControl
 
             PlaylistManager.CurrentPlaying = index;
             Task.Run(async () =>
-            {
-                await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
+            {              
+                if (!syncByPartyCommand)
+                {
+                    await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
+                    IPCHandles.LoadPlayback(index);
+                } else
+                {
+                    await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, false);
+                }
+
                 if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
                 {
                     IPCHandles.UpdateInstrument(true, config);
@@ -305,7 +313,7 @@ namespace MidiBard.Control.MidiControl
                 else
                 {
                     IPCHandles.UpdateInstrument(true);
-                }             
+                } 
             });
         }
 

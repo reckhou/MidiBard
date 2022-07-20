@@ -9,6 +9,7 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using MidiBard.IPC;
+using MidiBard.Managers.Ipc;
 using System.Threading.Tasks;
 using static MidiBard.MidiBard;
 
@@ -47,7 +48,7 @@ namespace MidiBard
 					return;
 				}
 
-				MidiPlayerControl.SwitchSong(number - 1);
+				MidiPlayerControl.SwitchSong(number - 1, false, false, true);
 				Ui.Open();
 			}
             else if (cmd == "reloadconfig") // reload the config
