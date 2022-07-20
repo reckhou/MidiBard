@@ -512,11 +512,12 @@ public partial class PluginUI
 							changed |= InputIntWithReset($"##transpose", ref dbTrack.Transpose, 12, () => 0);
 							TableNextColumn(); //3
 							SetNextItemWidth(-1);
-							var current = api.PartyList.ToList().FindIndex(i => i?.ContentId != 0 && i?.ContentId == dbTrack.PlayerCid);
-							var strings = api.PartyList.Select(i => i.NameAndWorld()).ToArray();
-							if (Combo("##partymemberSelect", ref current, strings, strings.Length))
+							var current = api.PartyList.ToList().FindIndex(i => i?.ContentId != 0 && i?.ContentId == dbTrack.PlayerCid) + 1;
+							var strings = api.PartyList.Select(i => i.NameAndWorld()).ToList();
+							strings.Insert(0, "");
+							if (Combo("##partymemberSelect", ref current, strings.ToArray(), strings.Count))
 							{
-								dbTrack.PlayerCid = api.PartyList[current]?.ContentId ?? 0;
+								dbTrack.PlayerCid = current > 0 ? api.PartyList[current-1]?.ContentId ?? 0 : 0;
 								changed = true;
 							}
 
