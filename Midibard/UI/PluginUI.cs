@@ -282,11 +282,15 @@ public partial class PluginUI
 			{
 				if (IconButton(FontAwesomeIcon.Guitar, "UpdateInstrument", width))
 				{
+					// MUST check the current playback, otherwise IPC thread will stuck waiting for playback
+					if (MidiBard.CurrentPlayback != null)
+				{
 					if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
 					{
 						IPCHandles.UpdateMidiFileConfig(config);
 					}
 					IPCHandles.UpdateInstrument(true);
+				}
 				}
 				if (IsItemClicked(ImGuiMouseButton.Right))
 				{

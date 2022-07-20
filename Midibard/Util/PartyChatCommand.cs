@@ -48,7 +48,7 @@ namespace MidiBard
 					return;
 				}
 
-				MidiPlayerControl.SwitchSong(number - 1, false, false);
+				MidiPlayerControl.SwitchSong(number - 1, false, false, true);
 				Ui.Open();
 			}
             else if (cmd == "reloadconfig") // reload the config
