@@ -84,28 +84,6 @@ internal class IPCManager : IDisposable
 		}
 	}
 
-	public void BroadCast(List<byte[]> serialized, bool includeSelf = false)
-	{
-		if (initFailed) return;
-
-		try
-		{
-			int fullLength = 0;
-			MessageBus.PublishAsync(serialized);
-			foreach (var cur in serialized)
-            {
-				fullLength += cur.Length;
-				if (includeSelf) MessageBus_MessageReceived(null, new TinyMessageReceivedEventArgs(cur));
-			}
-
-			PluginLog.Debug($"message published. length: {Dalamud.Utility.Util.FormatBytes(fullLength)}");			
-		}
-		catch (Exception e)
-		{
-			PluginLog.Error(e, "error when public message, tiny ipc internal exception.");
-		}
-	}
-
 	private void ReleaseUnmanagedResources(bool disposing)
 	{
 		if (initFailed) return;

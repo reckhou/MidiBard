@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using MidiBard.Control.CharacterControl;
@@ -87,21 +86,11 @@ static class IPCHandles
 		FilePlayback.LoadPlayback(message.DataStruct<int>(), false, false);
 	}
 
-	public static void UpdateInstrument(bool takeout, MidiFileConfig config = null)
+	public static void UpdateInstrument(bool takeout)
 	{
 		if (!MidiBard.config.SyncClients) return;
 		if (!api.PartyList.IsPartyLeader()) return;
-		if (config != null)
-		{
-            List<byte[]> messages = new List<byte[]>();
-			messages.Add(IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, config.JsonSerialize()).Serialize());
-			messages.Add(IPCEnvelope.Create(MessageTypeCode.SetInstrument, takeout).Serialize());
-			IPCEnvelope.BroadCast(messages, true);
-		}
-		else
-		{
-			IPCEnvelope.Create(MessageTypeCode.SetInstrument, takeout).BroadCast(true);
-		}
+		IPCEnvelope.Create(MessageTypeCode.SetInstrument, takeout).BroadCast(true);
 	}
 	[IPCHandle(MessageTypeCode.SetInstrument)]
 	private static void HandleSetInstrument(IPCEnvelope message)

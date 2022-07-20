@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -65,10 +64,6 @@ internal sealed class IPCEnvelope
 		new(messageType, null, stringData);
 
 	public void BroadCast(bool includeself = false) => MidiBard.IpcManager.BroadCast(this.Serialize(), includeself);
-	public static void BroadCast(List<byte[]> messages, bool includeself = false)
-    {
-		MidiBard.IpcManager.BroadCast(messages, includeself);
-    }
 
 
 	//public static IPCEnvelope Deserialize(byte[] bytes) => DeserializeObject<IPCEnvelope>(bytes);
