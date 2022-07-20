@@ -216,7 +216,7 @@ public partial class PluginUI
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				} else
                 {
-					MidiPlayerControl.SwitchSong(i, false, DalamudApi.api.PartyList.Length <= 1);
+					MidiPlayerControl.SwitchSong(i);
 				}
 			}
 			else

@@ -355,8 +355,17 @@ public partial class PluginUI
 				{
 					MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath).Delete();
 					CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(CurrentPlayback.TrackInfos);
-					CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(CurrentPlayback.MidiFileConfig);
-					IPCHandles.LoadPlayback(-1, true);
+					if (!MidiBard.config.playOnMultipleDevices)
+					{
+						CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(CurrentPlayback.MidiFileConfig);
+						IPCHandles.LoadPlayback(-1, true);
+					} else
+                    {
+						if (DalamudApi.api.PartyList.Length > 1)
+						{
+							MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+						}
+					}
 				}
 			}
 			ToolTip("Delete and reset current file config".Localize());
@@ -390,13 +399,18 @@ public partial class PluginUI
 			}
 
             SameLine();
-			if (MidiFileConfigManager.UsingGlobalTrackMapping)
+			if (!config.playOnMultipleDevices)
 			{
-				LabelText($"[Using Global Track Mapping]", "[Using Global Track Mapping]");
-			} else {
-				if (Button("Export To Global Track Mapping"))
+				if (MidiFileConfigManager.UsingGlobalTrackMapping)
 				{
-					MidiFileConfigManager.ExportToGlobalTrackMapping();
+					LabelText($"[Using Global Track Mapping]", "[Using Global Track Mapping]");
+				}
+				else
+				{
+					if (Button("Export To Global Track Mapping"))
+					{
+						MidiFileConfigManager.ExportToGlobalTrackMapping();
+					}
 				}
 			}
 
@@ -460,7 +474,11 @@ public partial class PluginUI
 
 
             Separator();
-			if (CurrentPlayback == null)
+			if (config.playOnMultipleDevices)
+            {
+				ImGui.Button($"Playing On Multiple Devices\nTrack assign is disabled\nPlease choose the tracks on clients individually.", new Vector2(-1, 100));
+			}
+			else if (CurrentPlayback == null)
 			{
 				if (ImGui.Button($"Select a song from playlist", new Vector2(-1, GetFrameHeight())))
 				{

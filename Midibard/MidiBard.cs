@@ -328,7 +328,12 @@ public class MidiBard : IDalamudPlugin
         {
             try
             {
-                config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();
+                config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();                
+                foreach(var cur in config.TrackStatus)
+                {
+                    cur.Enabled = false;
+                }
+                config.TrackStatus[0].Enabled = true;
                 return;
             }
             catch (Exception e)

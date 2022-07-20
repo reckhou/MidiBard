@@ -23,7 +23,7 @@ internal sealed class BardPlayback : Playback
 
 		MidiFileConfig midiFileConfig = null;
 		// only use midiFileConfig(including global track mapping) when in the party
-		if (DalamudApi.api.PartyList.Length > 1)
+		if (DalamudApi.api.PartyList.Length > 1 || !MidiBard.config.playOnMultipleDevices)
 		{
 			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
 
@@ -32,7 +32,11 @@ internal sealed class BardPlayback : Playback
 				midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
 
 				// If can not find individual config, use the global track mapping instead.
-				midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
+				if (!MidiBard.config.playOnMultipleDevices)
+				{
+					// global track mapping isn't going to work across devices for now, need some kind of cloud services?
+					midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
+				}
 			}
 			else
 			{

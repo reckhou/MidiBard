@@ -41,7 +41,7 @@ public enum UILang
 
 public class TrackStatus
 {
-    public bool Enabled = true;
+    public bool Enabled = false;
     public int Tone = 0;
     public int Transpose = 0;
 }
@@ -70,7 +70,7 @@ public class Configuration : IPluginConfiguration
     public bool DebugKeyStroke;
     public bool DebugMisc;
     public bool DebugEnsemble;
-
+    [JsonIgnore]
     public TrackStatus[] TrackStatus = Enumerable.Repeat(new TrackStatus(), 100).ToArray().JsonSerialize().JsonDeserialize<TrackStatus[]>();
     //public ChannelStatus[] ChannelStatus = Enumerable.Repeat(new ChannelStatus(), 16).ToArray();
 

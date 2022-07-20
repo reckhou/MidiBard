@@ -303,13 +303,15 @@ namespace MidiBard.Control.MidiControl
                 }
                 await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
                 // MUST check the current playback, otherwise IPC thread will stuck waiting for playback
-                if (MidiBard.CurrentPlayback != null)
+                if (!syncByPartyCommand)
                 {
-                    if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+                    if (MidiBard.CurrentPlayback != null)
                     {
-                        IPCHandles.UpdateMidiFileConfig(config);
+                        if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+                        {
+                            IPCHandles.UpdateMidiFileConfig(config);
+                        }
                     }
-                    IPCHandles.UpdateInstrument(true);
                 }
             });
         }
