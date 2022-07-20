@@ -90,11 +90,11 @@ public class MidiBard : IDalamudPlugin
         Guitars = Instruments.Where(i => i.IsGuitar).ToArray();
         InstrumentStrings = Instruments.Select(i => i.InstrumentString).ToArray();
 
-        //ProgramInstruments = new Dictionary<SevenBitNumber, uint>();
-        //foreach (var (programNumber, instrument) in Instruments.Select((i, index) => (i.ProgramNumber, index)))
-        //{
-        //    ProgramInstruments[programNumber] = (uint)instrument;
-        //}
+        ProgramInstruments = new Dictionary<SevenBitNumber, uint>();
+        foreach (var (programNumber, instrument) in Instruments.Select((i, index) => (i.ProgramNumber, index)))
+        {
+            ProgramInstruments[programNumber] = (uint)instrument;
+        }
 
         TryLoadConfig();
         MidiFileConfigManager.Init();
@@ -135,7 +135,7 @@ public class MidiBard : IDalamudPlugin
         api.Framework.Update += OnFrameworkUpdate;
         api.Framework.Update += MidiPlayerControl.Tick;
 
-    if (api.PluginInterface.IsDev) Ui.Open();
+        if (api.PluginInterface.IsDev) Ui.Open();
     }
 
     private void OnFrameworkUpdate(Dalamud.Game.Framework framework)
