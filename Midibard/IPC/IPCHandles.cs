@@ -70,11 +70,11 @@ static class IPCHandles
 		MidiBard.config.EnableTransposePerTrack = true;
 	}
 
-	public static void LoadPlayback(int index)
+	public static void LoadPlayback(int index, bool includeSelf = false)
 	{
 		if (!MidiBard.config.SyncClients) return;
 		if (!api.PartyList.IsPartyLeader()) return;
-		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast();
+		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast(includeSelf);
 	}
 	[IPCHandle(MessageTypeCode.LoadPlaybackIndex)]
 	private static void HandleLoadPlayback(IPCEnvelope message)

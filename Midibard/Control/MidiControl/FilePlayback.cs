@@ -199,6 +199,21 @@ public static class FilePlayback
 
     internal static async Task<bool> LoadPlayback(int index, bool startPlaying = false, bool switchInstrument = true)
     {
+        if (index < 0)
+        {
+            try
+            {
+                await SwitchInstrument.SwitchTo(0);
+            }
+            catch (Exception e)
+            {
+                PluginLog.Warning(e.ToString());
+            }
+
+            CurrentPlayback = null;
+            return true;
+        }
+
         var wasPlaying = IsPlaying;
         MidiFile midiFile = await PlaylistManager.LoadMidiFile(index);
         if (midiFile == null)

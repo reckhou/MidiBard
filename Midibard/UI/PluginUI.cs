@@ -351,6 +351,7 @@ public partial class PluginUI
 					MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath).Delete();
 					CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(CurrentPlayback.TrackInfos);
 					CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(CurrentPlayback.MidiFileConfig);
+					IPCHandles.LoadPlayback(-1, true);
 				}
 			}
 			ToolTip("Delete and reset current file config".Localize());
