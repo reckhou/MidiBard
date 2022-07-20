@@ -43,6 +43,8 @@ static class IPCHandles
 
 	public static void UpdateMidiFileConfig(MidiFileConfig config)
 	{
+		if (!MidiBard.config.SyncClients) return;
+		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
 		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, config.JsonSerialize()).Serialize(), true);
 	}
 
@@ -77,19 +79,19 @@ static class IPCHandles
 	public static void LoadPlayback(int index, bool includeSelf = false)
 	{
 		if (!MidiBard.config.SyncClients) return;
-		if (!api.PartyList.IsPartyLeader()) return;
+		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
 		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast(includeSelf);
 	}
 	[IPCHandle(MessageTypeCode.LoadPlaybackIndex)]
 	private static void HandleLoadPlayback(IPCEnvelope message)
 	{
-		FilePlayback.LoadPlayback(message.DataStruct<int>(), false, false);
+		FilePlayback.LoadPlayback(message.DataStruct<int>());
 	}
 
 	public static void UpdateInstrument(bool takeout)
 	{
 		if (!MidiBard.config.SyncClients) return;
-		if (!api.PartyList.IsPartyLeader()) return;
+		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
 		IPCEnvelope.Create(MessageTypeCode.SetInstrument, takeout).BroadCast(true);
 	}
 	[IPCHandle(MessageTypeCode.SetInstrument)]
