@@ -298,6 +298,10 @@ namespace MidiBard.Control.MidiControl
             Task.Run(async () =>
             {
                 await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying);
+                if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+                {
+                    IPCHandles.UpdateMidiFileConfig(config);
+                }
                 IPCHandles.UpdateInstrument(true);
             });
         }
