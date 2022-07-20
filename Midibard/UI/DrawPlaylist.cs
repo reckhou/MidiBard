@@ -216,7 +216,8 @@ public partial class PluginUI
 					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
 				} else
                 {
-					MidiPlayerControl.SwitchSong(i);
+					// switches instrument when solo, otherwise wait for IPC to be handled
+					MidiPlayerControl.SwitchSong(i, false, DalamudApi.api.PartyList.Length <= 1);
 				}
 			}
 			else

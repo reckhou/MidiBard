@@ -86,7 +86,7 @@ static class IPCHandles
 	[IPCHandle(MessageTypeCode.LoadPlaybackIndex)]
 	private static void HandleLoadPlayback(IPCEnvelope message)
 	{
-		FilePlayback.LoadPlayback(message.DataStruct<int>());
+		FilePlayback.LoadPlayback(message.DataStruct<int>(), false, false);
 	}
 
 	public static void UpdateInstrument(bool takeout)

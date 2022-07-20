@@ -311,6 +311,7 @@ namespace MidiBard.Control.MidiControl
                         {
                             IPCHandles.UpdateMidiFileConfig(config);
                         }
+                        IPCHandles.UpdateInstrument(true);
                     }
                 }
             });
