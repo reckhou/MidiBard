@@ -51,6 +51,10 @@ static class IPCHandles
 	private static void HandleUpdateMidiFileConfig(IPCEnvelope message)
 	{
 		var midiFileConfig = message.StringData[0].JsonDeserialize<MidiFileConfig>();
+		while (MidiBard.CurrentPlayback == null)
+        {
+			System.Threading.Thread.Sleep(5);
+        }
 		MidiBard.CurrentPlayback.MidiFileConfig = midiFileConfig;
 		var dbTracks = midiFileConfig.Tracks;
 		var trackStatus = MidiBard.config.TrackStatus;
@@ -85,6 +89,8 @@ static class IPCHandles
 
 	public static void UpdateInstrument(bool takeout, MidiFileConfig config = null)
 	{
+		if (!MidiBard.config.SyncClients) return;
+		if (!api.PartyList.IsPartyLeader()) return;
 		if (config != null)
 		{
             List<byte[]> messages = new List<byte[]>();
@@ -106,6 +112,12 @@ static class IPCHandles
 			SwitchInstrument.SwitchToContinue(0);
 			return;
 		}
+
+		while (MidiBard.CurrentPlayback == null)
+		{
+			System.Threading.Thread.Sleep(500);
+		}
+
 		var instrument = MidiBard.CurrentPlayback.MidiFileConfig.Tracks
 			.FirstOrDefault(i => i.Enabled && i.PlayerCid == (long)api.ClientState.LocalContentId)?.Instrument;
 		if (instrument != null)

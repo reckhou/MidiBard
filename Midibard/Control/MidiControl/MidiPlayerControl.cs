@@ -296,11 +296,11 @@ namespace MidiBard.Control.MidiControl
 
             PlaylistManager.CurrentPlaying = index;
             Task.Run(async () =>
-            {              
+            {
                 if (!syncByPartyCommand)
                 {
-                    await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
                     IPCHandles.LoadPlayback(index);
+                    await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
                 } else
                 {
                     await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, false);

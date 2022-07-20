@@ -238,6 +238,7 @@ public partial class PluginUI
 	private static unsafe void DrawEnsembleControl()
 	{
 		if (!config.ShowEnsembleControlWindow) return;
+		if (!api.PartyList.IsPartyLeader()) return;
 
 		PushStyleColor(ImGuiCol.TitleBgActive, *GetStyleColorVec4(ImGuiCol.WindowBg));
 		PushStyleColor(ImGuiCol.TitleBg, *GetStyleColorVec4(ImGuiCol.WindowBg));
@@ -777,7 +778,7 @@ public partial class PluginUI
 					DrawButtonFastForward();
 					DrawButtonPlayMode();
 					DrawButtonShowSettingsPanel();
-					if (DalamudApi.api.PartyList.Length > 1)
+					if (api.PartyList.Length > 1 && api.PartyList.IsPartyLeader())
 					{
 						DrawButtonShowEnsembleControl();
 					} else
