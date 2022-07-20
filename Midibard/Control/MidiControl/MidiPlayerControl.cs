@@ -300,9 +300,12 @@ namespace MidiBard.Control.MidiControl
                 await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
                 if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
                 {
-                    IPCHandles.UpdateMidiFileConfig(config);
+                    IPCHandles.UpdateInstrument(true, config);
                 }
-                IPCHandles.UpdateInstrument(true);
+                else
+                {
+                    IPCHandles.UpdateInstrument(true);
+                }             
             });
         }
 
