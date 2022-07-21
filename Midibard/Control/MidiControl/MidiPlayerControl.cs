@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.IPC;
+using MidiBard.Lyrics;
 using static MidiBard.MidiBard;
 using MidiBard.Managers;
 using System.Collections.Generic;
@@ -22,7 +23,6 @@ namespace MidiBard.Control.MidiControl
         internal static void Play()
         {
             playDeltaTime = 0;
-            LRCDeltaTime = 100; // Assume usual delay between sending and other clients receiving the message would be ~100ms
 
             if (CurrentPlayback == null)
             {
@@ -66,40 +66,10 @@ namespace MidiBard.Control.MidiControl
                 return;
             }
 
-            IsLeader = false;
-
-            if (Lrc.HasLyric())
-            {
-                if (DalamudApi.api.PartyList.Length > 1)
-                {
-                    // it seems the PartyLeaderIndex always == 0 after joined and leave a party, 
-                    var partyMemberAddr = DalamudApi.api.PartyList.GetPartyMemberAddress((int)DalamudApi.api.PartyList.PartyLeaderIndex);
-                    if (partyMemberAddr != IntPtr.Zero)
-                    {
-                        var partymember = DalamudApi.api.PartyList.CreatePartyMemberReference(partyMemberAddr);
-                        IsLeader = String.Compare(partymember.Name.TextValue, DalamudApi.api.ClientState.LocalPlayer.Name.TextValue) == 0;
-                    }
-                }
-                else
-                {
-                    DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Not in a party, Lyrics will not be posted."));
-                }
-            }
-
             CurrentPlayback.Start();
-            try
-            {
-                LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
-                if (_stat != e_stat.Paused)
-                {
-                    LrcIdx = -1;
-                }
-            }
-            catch (Exception e)
-            {
-                PluginLog.LogError(e.Message);
-            }
             _stat = e_stat.Playing;
+
+            Lrc.Play();
         }
 
         internal static void Pause()
@@ -154,9 +124,8 @@ namespace MidiBard.Control.MidiControl
             }
             finally
             {
-                LrcIdx = -1;
+                Lrc.Stop();
                 _stat = e_stat.Stopped;
-                IsLeader = false;
                 CurrentPlayback?.Dispose();
                 CurrentPlayback = null;
             }
@@ -164,7 +133,7 @@ namespace MidiBard.Control.MidiControl
 
         internal static void Next()
         {
-            LrcIdx = -1;
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             if (CurrentPlayback != null)
             {
@@ -213,7 +182,7 @@ namespace MidiBard.Control.MidiControl
 
         internal static void Prev()
         {
-            LrcIdx = -1;
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             if (CurrentPlayback != null)
             {
@@ -291,10 +260,10 @@ namespace MidiBard.Control.MidiControl
                 return;
             }
 
-            LrcIdx = -1;
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             playDeltaTime = 0;
-            LRCDeltaTime = 100;
+
             if (index < 0 || index >= PlaylistManager.FilePathList.Count)
             {
                 PluginLog.Error($"SwitchSong: invalid playlist index {index}");
@@ -328,7 +297,7 @@ namespace MidiBard.Control.MidiControl
         }
 
         internal static int playDeltaTime = 0;
-        internal static int LRCDeltaTime = 50;
+        
         public enum e_stat
         {
             Stopped,
@@ -340,129 +309,25 @@ namespace MidiBard.Control.MidiControl
 
 
         internal static void ChangeDeltaTime(int delta)
-		    {
-			      if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
-			      {
-				        playDeltaTime = 0;
-                        LRCDeltaTime = 100;
-				        return;
-			      }
+		{
+			if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+			{
+				playDeltaTime = 0;
+				return;
+			}
 
-			      var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-			      long msTime = currentTime.TotalMicroseconds;
-			      //PluginLog.LogDebug("curTime:" + msTime);
+			var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+			long msTime = currentTime.TotalMicroseconds;
+			//PluginLog.LogDebug("curTime:" + msTime);
             if (msTime + delta * 1000 < 0)
             {
-		            return;
+		        return;
             }
             msTime += delta * 1000;
             MetricTimeSpan newTime = new MetricTimeSpan(msTime);
             //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
             CurrentPlayback.MoveToTime(newTime);
             playDeltaTime += delta;
-		    }
-
-        internal static void ChangeLRCDeltaTime(int delta)
-        {
-            if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
-            {
-                playDeltaTime = 0;
-                LRCDeltaTime = 100;
-                return;
-            }
-
-            LRCDeltaTime += delta;
-        }
-
-        public static int LrcIdx = -1;
-        public static bool IsLeader;
-
-        public static List<double> LrcTimeStamps = new List<double>();
-
-        public static bool LrcLoaded()
-        {
-            return IsLeader && LrcTimeStamps.Count > 0;
-        }
-
-        public static void Tick(Dalamud.Game.Framework framework)
-        {
-            try
-            {
-                if (_stat != e_stat.Playing)
-                {
-                    return;
-                }
-
-                if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
-                {
-                    int idx = FindLrcIdx(LrcTimeStamps);
-                    if (idx < 0 || idx == LrcIdx)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        if (IsLeader)
-                        {
-                            string msg = "";
-                            if (idx == 0)
-                            {
-                                msg = $"♪ {Lrc._lrc.Title} ♪ ";
-                                msg += (Lrc._lrc.Artist != null && Lrc._lrc.Artist != "") ? $"Artist: {Lrc._lrc.Artist} ♪ " : "";
-                                msg += (Lrc._lrc.Album != null && Lrc._lrc.Album != "") ? $"Album: {Lrc._lrc.Album} ♪ " : "";
-                                msg += (Lrc._lrc.LrcBy != null && Lrc._lrc.LrcBy != "") ? $"Lyric By: {Lrc._lrc.LrcBy} ♪ " : "";
-                            
-                                if (!AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = "/p " + msg;
-                                }
-                            }
-                            else
-                            {
-                                PluginLog.LogVerbose($"{Lrc._lrc.LrcWord[LrcTimeStamps[idx]]}");
-                                if (AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = $"/s ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
-                                else
-                                {
-                                    msg = $"/p ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
-                            }
-
-                            MidiBard.Cbase.Functions.Chat.SendMessage(msg);
-                        }
-                        LrcIdx = idx;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.LogError($"exception: {ex}");
-            }
-        }
-
-        static int FindLrcIdx(List<double> TimeStamps)
-        {
-            if (TimeStamps.Count == 0)
-                return -1;
-
-            int idx = -1;
-            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().TotalSeconds - Lrc._lrc.Offset / 1000.0f + LRCDeltaTime / 1000.0f;
-
-            foreach (double TimeStamp in TimeStamps)
-            {
-                if (timeSpan > TimeStamp)
-                {
-                    idx++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return idx >= TimeStamps.Count ? -1 : idx;
-        }
+		}
     }
 }

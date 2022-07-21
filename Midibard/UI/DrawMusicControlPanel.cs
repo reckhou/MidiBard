@@ -7,6 +7,7 @@ using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl;
+using MidiBard.Lyrics;
 using static MidiBard.ImGuiUtil;
 
 namespace MidiBard;
@@ -16,7 +17,7 @@ public partial class PluginUI
     private void DrawPanelMusicControl()
     {
         ManualDelay();
-        if (MidiPlayerControl.LrcLoaded())
+        if (Lrc.LrcLoaded())
         {
             LRCDeltaTime();
         }
@@ -230,18 +231,18 @@ public partial class PluginUI
     {
         if (ImGui.Button("-50ms"))
         {
-            MidiPlayerControl.ChangeLRCDeltaTime(-50);
+            Lrc.ChangeLRCDeltaTime(-50);
         }
         ImGui.SameLine();
         if (ImGui.Button("+50ms"))
         {
-            MidiPlayerControl.ChangeLRCDeltaTime(50);
+            Lrc.ChangeLRCDeltaTime(50);
         }
         ImGui.SameLine();
-        ImGui.TextUnformatted("LRC Sync: " + $"{MidiPlayerControl.LRCDeltaTime} ms");
+        ImGui.TextUnformatted("LRC Sync: " + $"{Lrc.LRCDeltaTime} ms");
         if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
-            MidiPlayerControl.ChangeLRCDeltaTime(-MidiPlayerControl.LRCDeltaTime);
+            Lrc.ChangeLRCDeltaTime(-Lrc.LRCDeltaTime);
         }
         ToolTip("Delay time(ms) add on top of lyrics.");
     }

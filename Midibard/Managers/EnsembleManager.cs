@@ -10,6 +10,7 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
+using MidiBard.Lyrics;
 using playlibnamespace;
 using static MidiBard.MidiBard;
 using System.Diagnostics;
@@ -25,7 +26,6 @@ internal class EnsembleManager : IDisposable
     //}
 
     private delegate IntPtr sub_140C87B40(IntPtr agentMetronome, byte beat);
-    Stopwatch LRCStopWatch;
     private Hook<sub_140C87B40> UpdateMetronomeHook;
 
     internal EnsembleManager()
@@ -75,6 +75,8 @@ internal class EnsembleManager : IDisposable
 	                        MidiBard.CurrentPlayback.MoveToStart();
                         }
 
+                        Lrc.EnsembleStart();
+
                         // 箭头后面是每种乐器的的延迟，所以要达成同步每种乐器需要提前于自己延迟的时间开始演奏
                         // 而提前开始又不可能， 所以把所有乐器的延迟时间减去延迟最大的鲁特琴（让所有乐器等待鲁特琴）
                         // 也就是105减去每种乐器各自的延迟
@@ -92,16 +94,14 @@ internal class EnsembleManager : IDisposable
 
                         try
                         {
-	                        if (compensation != 0)
+                            if (compensation != 0)
 	                        {
 		                        var midiClock = new MidiClock(false, new HighPrecisionTickGenerator(),
 			                        TimeSpan.FromMilliseconds(compensation));
 		                        midiClock.Restart();
 		                        PluginLog.Warning($"setup midiclock compensation: {compensation}");
 		                        midiClock.Ticked += OnMidiClockOnTicked;
-                                LRCStopWatch = Stopwatch.StartNew();
-                                PluginLog.Warning($"LRC Offset: {Lrc._lrc.Offset}");
-
+                                
                                 void OnMidiClockOnTicked(object o, EventArgs eventArgs)
 		                        {
 			                        try
@@ -151,8 +151,7 @@ internal class EnsembleManager : IDisposable
                 }
                 else if (barElapsed == 0 && currentBeat == 0)
                 {
-                    LRCStopWatch.Stop();
-                    Lrc._lrc.Offset += LRCStopWatch.ElapsedMilliseconds - compensation;
+                    Lrc.Ensemble2MeasuresElapsed(compensation);
                 }
 #if DEBUG
                 PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");

@@ -33,6 +33,7 @@ using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
+using MidiBard.Lyrics;
 using playlibnamespace;
 using Dalamud.Game.Gui;
 using XivCommon;
@@ -133,7 +134,7 @@ public class MidiBard : IDalamudPlugin
         api.PluginInterface.UiBuilder.Draw += Ui.Draw;
         api.PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
         api.Framework.Update += OnFrameworkUpdate;
-        api.Framework.Update += MidiPlayerControl.Tick;
+        api.Framework.Update += Lrc.Tick;
 
         if (api.PluginInterface.IsDev) Ui.Open();
     }
@@ -357,7 +358,7 @@ public class MidiBard : IDalamudPlugin
 #endif
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             api.Framework.Update -= OnFrameworkUpdate;
-            api.Framework.Update -= MidiPlayerControl.Tick;
+            api.Framework.Update -= Lrc.Tick;
             api.PluginInterface.UiBuilder.Draw -= Ui.Draw;
 
             EnsembleManager.Dispose();

@@ -21,6 +21,7 @@ using MidiBard.DalamudApi;
 using MidiBard.IPC;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
+using MidiBard.Lyrics;
 using static MidiBard.MidiBard;
 
 namespace MidiBard.Control.MidiControl;
@@ -251,19 +252,8 @@ public static class FilePlayback
                 }
             }
 
+            Lrc.InitLrc(PlaylistManager.FilePathList[index].path);
 
-            string[] pathArray = PlaylistManager.FilePathList[index].path.Split("\\");
-            string LrcPath = "";
-            string fileName = Path.GetFileNameWithoutExtension(PlaylistManager.FilePathList[index].path) + ".lrc";
-            for (int i = 0; i < pathArray.Length - 1; i++)
-            {
-                LrcPath += pathArray[i];
-                LrcPath += "\\";
-            }
- 
-            LrcPath += fileName;
-            Lrc lrc = Lrc.InitLrc(LrcPath);
-            MidiPlayerControl.LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
 #if DEBUG
             PluginLog.LogVerbose($"Title: {lrc.Title}, Artist: {lrc.Artist}, Album: {lrc.Album}, LrcBy: {lrc.LrcBy}, Offset: {lrc.Offset}");
             foreach(var pair in lrc.LrcWord)
