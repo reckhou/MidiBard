@@ -125,7 +125,7 @@ namespace MidiBard.Util.Lyrics
             catch (Exception ex)
             {
                 loadSuccessfull = false;
-                PluginLog.LogError(ex.ToString());
+                //PluginLog.LogError(ex.ToString());
             }
 
             if (loadSuccessfull)
