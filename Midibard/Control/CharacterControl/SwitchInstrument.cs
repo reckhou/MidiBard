@@ -33,7 +33,13 @@ internal static class SwitchInstrument
 
     public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
     {
-        UpdateGuitarToneByConfig();
+        if (MidiBard.config.playOnMultipleDevices)
+        {
+            UpdateGuitarToneByConfig();
+        } else
+        {
+            UpdateGuitarToneByMidiConfig();
+        }
 
         if (MidiBard.CurrentInstrument == instrumentId)
             return;
@@ -186,6 +192,24 @@ internal static class SwitchInstrument
                     var toneID = curInstrument - MidiBard.guitarGroup[0];
                     MidiBard.config.TrackStatus[track].Tone = (int)toneID;
                 }
+            }
+        }
+    }
+
+    public static void UpdateGuitarToneByMidiConfig()
+    {
+        if (MidiBard.CurrentPlayback?.TrackInfos == null)
+        {
+            return;
+        }
+
+        foreach(var track in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
+        {
+            if (track.Enabled && track.PlayerCid == (long)DalamudApi.api.ClientState.LocalContentId
+                && MidiBard.guitarGroup.Contains((byte)track.Instrument))
+            {
+                var toneID = track.Instrument - MidiBard.guitarGroup[0];
+                MidiBard.config.TrackStatus[track.Index].Tone = (int)toneID;
             }
         }
     }
