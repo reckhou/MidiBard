@@ -152,6 +152,7 @@ namespace MidiBard.Util.Lyrics
         internal static int LRCDeltaTime = 50;
         static Stopwatch LRCStopWatch;
         static bool EnsembleInFirst2Measures;
+        static bool SongTitlePosted = false;
 
         public static List<double> LrcTimeStamps = new List<double>();
 
@@ -172,7 +173,6 @@ namespace MidiBard.Util.Lyrics
                 }
             }
 
-
             try
             {
                 LrcTimeStamps = _lrc.LrcWord.Keys.ToList();
@@ -191,6 +191,7 @@ namespace MidiBard.Util.Lyrics
         {
             LrcIdx = -1;
             EnsembleInFirst2Measures = false;
+            SongTitlePosted = false;
         }
 
         internal static void ChangeLRCDeltaTime(int delta)
@@ -228,6 +229,23 @@ namespace MidiBard.Util.Lyrics
 
                 if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
                 {
+                    if (!SongTitlePosted && api.PartyList.IsPartyLeader())
+                    {
+                        string msg = "";
+                        msg = $"♪ {_lrc.Title} ♪ ";
+                        msg += _lrc.Artist != null && _lrc.Artist != "" ? $"Artist: {_lrc.Artist} ♪ " : "";
+                        msg += _lrc.Album != null && _lrc.Album != "" ? $"Album: {_lrc.Album} ♪ " : "";
+                        msg += _lrc.LrcBy != null && _lrc.LrcBy != "" ? $"Lyric By: {_lrc.LrcBy} ♪ " : "";
+
+                        if (!MidiBard.AgentMetronome.EnsembleModeRunning)
+                        {
+                            msg = "/p " + msg;
+                        }
+
+                        MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                        SongTitlePosted = true;
+                    }
+
                     int idx = FindLrcIdx(LrcTimeStamps);
                     if (idx < 0 || idx == LrcIdx)
                     {
@@ -238,31 +256,17 @@ namespace MidiBard.Util.Lyrics
                         if (api.PartyList.IsPartyLeader())
                         {
                             string msg = "";
-                            if (idx == 0)
+                            
+                            PluginLog.LogVerbose($"{_lrc.LrcWord[LrcTimeStamps[idx]]}");
+                            if (MidiBard.AgentMetronome.EnsembleModeRunning)
                             {
-                                msg = $"♪ {_lrc.Title} ♪ ";
-                                msg += _lrc.Artist != null && _lrc.Artist != "" ? $"Artist: {_lrc.Artist} ♪ " : "";
-                                msg += _lrc.Album != null && _lrc.Album != "" ? $"Album: {_lrc.Album} ♪ " : "";
-                                msg += _lrc.LrcBy != null && _lrc.LrcBy != "" ? $"Lyric By: {_lrc.LrcBy} ♪ " : "";
-
-                                if (!MidiBard.AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = "/p " + msg;
-                                }
+                                msg = $"/s ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
                             }
                             else
                             {
-                                PluginLog.LogVerbose($"{_lrc.LrcWord[LrcTimeStamps[idx]]}");
-                                if (MidiBard.AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = $"/s ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
-                                else
-                                {
-                                    msg = $"/p ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
+                                msg = $"/p ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
                             }
-
+                            
                             MidiBard.Cbase.Functions.Chat.SendMessage(msg);
                         }
                         LrcIdx = idx;
