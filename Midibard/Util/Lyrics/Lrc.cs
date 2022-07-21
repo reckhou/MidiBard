@@ -148,6 +148,23 @@ namespace MidiBard.Util.Lyrics
             return _lrc == null ? false : _lrc.LrcWord.Count > 0;
         }
 
+        static string ProcessLine(string line, ref string characterName)
+        {
+            string lyric = "";
+
+            var idx = line.IndexOf(":");
+            if (idx < 0)
+            {
+                return line;
+            } else
+            {
+                characterName = line.Substring(0, idx);
+                lyric = line.Substring(idx+1, line.Length-1-idx);
+            }
+
+            return lyric;
+        }
+
         public static int LrcIdx = -1;
         internal static int LRCDeltaTime = 50;
         static Stopwatch LRCStopWatch;
@@ -164,6 +181,7 @@ namespace MidiBard.Util.Lyrics
         public static void Play()
         {
             LRCDeltaTime = 100; // Assume usual delay between sending and other clients receiving the message would be ~100ms
+            var idx = 0;
 
             if (HasLyric())
             {
@@ -253,18 +271,34 @@ namespace MidiBard.Util.Lyrics
                     }
                     else
                     {
-                        if (api.PartyList.IsPartyLeader())
+                        bool postLyrics = false;
+                        string characterName = "";
+                        string lyric = ProcessLine(_lrc.LrcWord[LrcTimeStamps[idx]], ref characterName);
+                        PluginLog.LogDebug($"{characterName}, {lyric}");
+                        if (characterName == "" && api.PartyList.IsPartyLeader())
+                        {
+                            postLyrics = true;
+                        } else if (characterName != "")
+                        {
+                            if ((bool)api.ClientState.LocalPlayer?.Name.TextValue.ToLower().Contains(characterName.ToLower()))
+                            {
+                                postLyrics = true;
+                            }
+                        }
+
+
+                        if (postLyrics)
                         {
                             string msg = "";
                             
-                            PluginLog.LogVerbose($"{_lrc.LrcWord[LrcTimeStamps[idx]]}");
+                            PluginLog.LogVerbose($"{lyric}");
                             if (MidiBard.AgentMetronome.EnsembleModeRunning)
                             {
-                                msg = $"/s ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                msg = $"/s ♪ {lyric} ♪";
                             }
                             else
                             {
-                                msg = $"/p ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                msg = $"/p ♪ {lyric} ♪";
                             }
                             
                             MidiBard.Cbase.Functions.Chat.SendMessage(msg);
