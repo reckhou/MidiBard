@@ -121,7 +121,7 @@ static class IPCHandles
 			.FirstOrDefault(i => i.Enabled && i.PlayerCid == (long)api.ClientState.LocalContentId)?.Instrument;
 		if (instrument != null)
 			SwitchInstrument.SwitchToContinue((uint)instrument);
-	}
+		}
 
 	public static void DoMacro(string[] lines, bool includeSelf = false)
 	{
@@ -255,7 +255,19 @@ static class IPCHandles
 	public static void HandleMoveToTime(IPCEnvelope message)
 	{
 		var progress = message.DataStruct<float>();
-
-		MidiBard.CurrentPlayback?.MoveToTime(MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress));
+		var compensation = MidiBard.CurrentInstrument switch
+		{
+			0 or 3 => 105,
+			1 => 85,
+			2 or 4 => 90,
+			>= 5 and <= 8 => 95,
+			9 or 10 => 90,
+			11 or 12 => 80,
+			13 => 85,
+			>= 14 => 30
+		};
+		var timeSpan = MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress);
+		timeSpan.Add(new MetricTimeSpan(compensation * 1000), TimeSpanMode.LengthLength);
+		MidiBard.CurrentPlayback?.MoveToTime(timeSpan);
 	}
 }
