@@ -7,7 +7,7 @@ using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl;
-using MidiBard.Lyrics;
+using MidiBard.Util.Lyrics;
 using static MidiBard.ImGuiUtil;
 
 namespace MidiBard;

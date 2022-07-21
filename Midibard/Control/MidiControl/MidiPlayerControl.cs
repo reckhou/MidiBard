@@ -6,15 +6,15 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.IPC;
-using MidiBard.Lyrics;
 using static MidiBard.MidiBard;
 using MidiBard.Managers;
 using System.Collections.Generic;
 using System.Threading;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using MidiBard.Util.Lyrics;
 
 namespace MidiBard.Control.MidiControl
-{ 
+{
 
     internal static class MidiPlayerControl
     {

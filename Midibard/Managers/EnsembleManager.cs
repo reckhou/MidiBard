@@ -10,10 +10,10 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
-using MidiBard.Lyrics;
 using playlibnamespace;
 using static MidiBard.MidiBard;
 using System.Diagnostics;
+using MidiBard.Util.Lyrics;
 
 namespace MidiBard.Managers;
 

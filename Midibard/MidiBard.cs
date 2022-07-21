@@ -33,10 +33,10 @@ using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
-using MidiBard.Lyrics;
 using playlibnamespace;
 using Dalamud.Game.Gui;
 using XivCommon;
+using MidiBard.Util.Lyrics;
 
 namespace MidiBard;
 

@@ -21,8 +21,8 @@ using MidiBard.DalamudApi;
 using MidiBard.IPC;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
-using MidiBard.Lyrics;
 using static MidiBard.MidiBard;
+using MidiBard.Util.Lyrics;
 
 namespace MidiBard.Control.MidiControl;
 

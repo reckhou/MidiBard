@@ -13,7 +13,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.DalamudApi;
 using Melanchall.DryWetMidi.Interaction;
 
-namespace MidiBard.Lyrics
+namespace MidiBard.Util.Lyrics
 {
     public class Lrc
     {
@@ -121,7 +121,8 @@ namespace MidiBard.Lyrics
                     }
                 }
                 _lrc.LrcWord = dicword.OrderBy(t => t.Key).ToDictionary(t => t.Key, p => p.Value);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 loadSuccessfull = false;
                 PluginLog.LogError(ex.ToString());
@@ -131,7 +132,7 @@ namespace MidiBard.Lyrics
             {
                 PluginLog.Log($"Load LRC: {LrcPath}");
                 LrcTimeStamps = _lrc.LrcWord.Keys.ToList();
-                api.ChatGui.Print(String.Format("[MidiBard 2] Lyrics Loaded: {0}", LrcPath));
+                api.ChatGui.Print(string.Format("[MidiBard 2] Lyrics Loaded: {0}", LrcPath));
             }
         }
 
@@ -144,7 +145,7 @@ namespace MidiBard.Lyrics
 
         public static bool HasLyric()
         {
-            return _lrc == null ? false : (_lrc.LrcWord.Count > 0);
+            return _lrc == null ? false : _lrc.LrcWord.Count > 0;
         }
 
         public static int LrcIdx = -1;
@@ -163,18 +164,18 @@ namespace MidiBard.Lyrics
         {
             LRCDeltaTime = 100; // Assume usual delay between sending and other clients receiving the message would be ~100ms
 
-            if (Lrc.HasLyric())
+            if (HasLyric())
             {
                 if (DalamudApi.api.PartyList.Length <= 1)
                 {
-                    DalamudApi.api.ChatGui.Print(String.Format("[MidiBard 2] Not in a party, Lyrics will not be posted."));
+                    DalamudApi.api.ChatGui.Print(string.Format("[MidiBard 2] Not in a party, Lyrics will not be posted."));
                 }
             }
 
 
             try
             {
-                LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
+                LrcTimeStamps = _lrc.LrcWord.Keys.ToList();
                 if (MidiPlayerControl._stat != MidiPlayerControl.e_stat.Paused)
                 {
                     LrcIdx = -1;
@@ -239,10 +240,10 @@ namespace MidiBard.Lyrics
                             string msg = "";
                             if (idx == 0)
                             {
-                                msg = $"♪ {Lrc._lrc.Title} ♪ ";
-                                msg += (Lrc._lrc.Artist != null && Lrc._lrc.Artist != "") ? $"Artist: {Lrc._lrc.Artist} ♪ " : "";
-                                msg += (Lrc._lrc.Album != null && Lrc._lrc.Album != "") ? $"Album: {Lrc._lrc.Album} ♪ " : "";
-                                msg += (Lrc._lrc.LrcBy != null && Lrc._lrc.LrcBy != "") ? $"Lyric By: {Lrc._lrc.LrcBy} ♪ " : "";
+                                msg = $"♪ {_lrc.Title} ♪ ";
+                                msg += _lrc.Artist != null && _lrc.Artist != "" ? $"Artist: {_lrc.Artist} ♪ " : "";
+                                msg += _lrc.Album != null && _lrc.Album != "" ? $"Album: {_lrc.Album} ♪ " : "";
+                                msg += _lrc.LrcBy != null && _lrc.LrcBy != "" ? $"Lyric By: {_lrc.LrcBy} ♪ " : "";
 
                                 if (!MidiBard.AgentMetronome.EnsembleModeRunning)
                                 {
@@ -251,14 +252,14 @@ namespace MidiBard.Lyrics
                             }
                             else
                             {
-                                PluginLog.LogVerbose($"{Lrc._lrc.LrcWord[LrcTimeStamps[idx]]}");
+                                PluginLog.LogVerbose($"{_lrc.LrcWord[LrcTimeStamps[idx]]}");
                                 if (MidiBard.AgentMetronome.EnsembleModeRunning)
                                 {
-                                    msg = $"/s ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                    msg = $"/s ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
                                 }
                                 else
                                 {
-                                    msg = $"/p ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
+                                    msg = $"/p ♪ {_lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
                                 }
                             }
 
@@ -280,7 +281,7 @@ namespace MidiBard.Lyrics
                 return -1;
 
             int idx = -1;
-            double timeSpan = MidiBard.CurrentPlayback.GetCurrentTime<MetricTimeSpan>().TotalSeconds - Lrc._lrc.Offset / 1000.0f + LRCDeltaTime / 1000.0f;
+            double timeSpan = MidiBard.CurrentPlayback.GetCurrentTime<MetricTimeSpan>().TotalSeconds - _lrc.Offset / 1000.0f + LRCDeltaTime / 1000.0f;
             if (timeSpan < 0)
             {
                 return -1;
