@@ -11,6 +11,7 @@ using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Managers;
 using MidiBard.Util;
+using MidiBard.Util.MidiPreprocessor;
 
 namespace MidiBard.Control.MidiControl.PlaybackInstance;
 
@@ -86,7 +87,7 @@ internal sealed class BardPlayback : Playback
 	{
 		tempoMap = TryGetTempoNap(file);
 		var map = tempoMap;
-		trackChunks = GetNoteTracks(file).ToArray();
+		trackChunks = MidiPreprocessor.ProcessTracks(GetNoteTracks(file).ToArray(), map);
 		trackInfos = trackChunks.Select((chunk, index) => GetTrackInfos(chunk, index, map)).ToArray();
 		timedEventWithMetadata = GetTimedEventWithMetadata(trackChunks).ToArray();
 	}
@@ -196,6 +197,7 @@ internal sealed class BardPlayback : Playback
 		return new BardPlayDevice.MidiPlaybackMetaData(trackIndex, time, compareValue);
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 	public static MidiFileConfig LoadGlobalTrackMapping(MidiFileConfig midiFileConfig)
     {
 		MidiFileConfigManager.UsingGlobalTrackMapping = true;
@@ -232,4 +234,16 @@ internal sealed class BardPlayback : Playback
 
 		return midiFileConfig;
 	}
+
+	[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+	private static TimedEventWithMetadata[] CutLongNotes(TimedEventWithMetadata[] timedEvents)
+    {
+		Dictionary<int, int> noteLengthDict = new Dictionary<int, int>();
+		foreach(var cur in timedEvents)
+        {
+			PluginLog.LogDebug(cur.ToString());
+        }
+
+		return timedEvents;
+    }
 }
