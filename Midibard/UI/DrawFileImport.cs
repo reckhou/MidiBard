@@ -40,7 +40,7 @@ public partial class PluginUI
             ImGui.EndPopup();
         }
 
-        if (api.KeyState[VirtualKey.CONTROL] && api.KeyState[VirtualKey.V])
+        /*if (api.KeyState[VirtualKey.CONTROL] && api.KeyState[VirtualKey.V])
         {
             if (!IsImportRunning)
             {
@@ -83,7 +83,7 @@ public partial class PluginUI
                     Task.Delay(2000).ContinueWith(task => IsImportRunning = false);
                 }
             }
-        }
+        }*/
         ImGui.BeginGroup();
 
         if (ImGuiUtil.IconButton(FontAwesomeIcon.Plus, "buttonimport"))
@@ -91,7 +91,7 @@ public partial class PluginUI
             RunImportFileTask();
         }
 
-        ImGuiUtil.ToolTip("Import midi file\nRight click to select file dialog type\nPress ctrl+V to import files from clipboard".Localize());
+        ImGuiUtil.ToolTip("Import midi file\nRight click to select file dialog type".Localize());
         ImGui.SameLine();
         if (ImGuiUtil.IconButton(FontAwesomeIcon.FolderOpen, "buttonimportFolder"))
         {

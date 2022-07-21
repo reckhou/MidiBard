@@ -231,6 +231,7 @@ public static class FilePlayback
                     CurrentPlayback?.Dispose();
                     CurrentPlayback = null;
                     var playback = GetPlaybackObject(midiFile, PlaylistManager.FilePathList[index].path);
+                    api.ChatGui.Print(String.Format("[MidiBard 2] Now Playing: {0}", PlaylistManager.FilePathList[index].fileName));
                     return playback;
                 });
             Ui.RefreshPlotData();
