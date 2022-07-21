@@ -97,6 +97,11 @@ public partial class PluginUI
 
 	private void DrawPlaylistTable()
 	{
+		if (MidiPlayerControl.SwitchingSong)
+		{
+			return;
+		}
+
 		PushStyleColor(ImGuiCol.Button, 0);
 		PushStyleColor(ImGuiCol.ButtonHovered, 0);
 		PushStyleColor(ImGuiCol.ButtonActive, 0);

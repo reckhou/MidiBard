@@ -287,9 +287,8 @@ public partial class PluginUI
 					{
 						if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
 						{
-							IPCHandles.UpdateMidiFileConfig(config);
+							IPCHandles.UpdateMidiFileConfig(config, true);
 						}
-						IPCHandles.UpdateInstrument(true);
 					}
 				}
 				if (IsItemClicked(ImGuiMouseButton.Right))

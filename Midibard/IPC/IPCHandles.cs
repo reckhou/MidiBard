@@ -42,17 +42,19 @@ static class IPCHandles
 		PlaylistManager.RemoveLocal(message.DataStruct<int>());
 	}
 
-	public static void UpdateMidiFileConfig(MidiFileConfig config)
+	public static void UpdateMidiFileConfig(MidiFileConfig config, bool updateInstrumentAfterFinished = false)
 	{
 		if (!MidiBard.config.SyncClients) return;
 		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
-		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, config.JsonSerialize()).Serialize(), true);
+        string[] data = new string[2] { config.JsonSerialize(), updateInstrumentAfterFinished.ToString() };
+		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, data).Serialize(), true);
 	}
 
 	[IPCHandle(MessageTypeCode.UpdateMidiFileConfig)]
 	private static void HandleUpdateMidiFileConfig(IPCEnvelope message)
 	{
 		var midiFileConfig = message.StringData[0].JsonDeserialize<MidiFileConfig>();
+		bool updateInstrumentAfterFinished = message.StringData[1].ToString() == "True";
 		while (MidiBard.CurrentPlayback == null)
         {
 			System.Threading.Thread.Sleep(5);
@@ -75,6 +77,11 @@ static class IPCHandles
 		}
 
 		MidiBard.config.EnableTransposePerTrack = true;
+		
+		if (updateInstrumentAfterFinished)
+        {
+			UpdateInstrument(true);
+        }
 	}
 
 	public static void LoadPlayback(int index, bool includeSelf = false)

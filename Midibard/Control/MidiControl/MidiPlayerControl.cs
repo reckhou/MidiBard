@@ -9,6 +9,7 @@ using MidiBard.IPC;
 using static MidiBard.MidiBard;
 using MidiBard.Managers;
 using System.Collections.Generic;
+using System.Threading;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 
 namespace MidiBard.Control.MidiControl
@@ -16,6 +17,7 @@ namespace MidiBard.Control.MidiControl
 
     internal static class MidiPlayerControl
     {
+        public static bool SwitchingSong;
 
         internal static void Play()
         {
@@ -284,6 +286,11 @@ namespace MidiBard.Control.MidiControl
 
         public static void SwitchSong(int index, bool startPlaying = false, bool switchInstrument = true, bool syncByPartyCommand = false)
         {
+            if (SwitchingSong)
+            {
+                return;
+            }
+
             LrcIdx = -1;
             _stat = e_stat.Stopped;
             playDeltaTime = 0;
@@ -295,25 +302,28 @@ namespace MidiBard.Control.MidiControl
             }
 
             PlaylistManager.CurrentPlaying = index;
+            SwitchingSong = true;
             Task.Run(async () =>
             {
                 if (!syncByPartyCommand)
                 {
                     IPCHandles.LoadPlayback(index);
                 }
-                await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);
+                await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);    
                 // MUST check the current playback, otherwise IPC thread will stuck waiting for playback
                 if (!syncByPartyCommand)
                 {
+                    Thread.Sleep(2000);
                     if (MidiBard.CurrentPlayback != null)
                     {
                         if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
                         {
-                            IPCHandles.UpdateMidiFileConfig(config);
+                            IPCHandles.UpdateMidiFileConfig(config, true);
                         }
-                        IPCHandles.UpdateInstrument(true);
                     }
                 }
+
+                SwitchingSong = false;
             });
         }
 

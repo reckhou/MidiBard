@@ -14,7 +14,7 @@ public partial class PluginUI
     {
         if (PlaylistManager.CurrentPlaying >= 0 && PlaylistManager.FilePathList.Count > PlaylistManager.CurrentPlaying)
         {
-            var fmt = $"{PlaylistManager.CurrentPlaying + 1:000} {PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].displayName}";
+            var fmt = MidiPlayerControl.SwitchingSong ? "[LOADING...]" : $"{PlaylistManager.CurrentPlaying + 1:000} {PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].displayName}";
             ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.config.themeColor * new Vector4(1, 1, 1, 1.3f));
             ImGui.TextUnformatted(fmt);
             ImGui.PopStyleColor();

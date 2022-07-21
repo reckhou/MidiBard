@@ -7,6 +7,7 @@ using static MidiBard.ImGuiUtil;
 using MidiBard.Control.CharacterControl;
 using Dalamud.Logging;
 using MidiBard.Control.MidiControl.PlaybackInstance;
+using MidiBard.Control.MidiControl;
 
 namespace MidiBard;
 
@@ -28,6 +29,11 @@ public partial class PluginUI
 
     private unsafe void DrawTrackTrunkSelectionWindow()
     {
+        if (MidiPlayerControl.SwitchingSong)
+        {
+            return;
+        }
+
         if (MidiBard.CurrentPlayback?.TrackInfos?.Any() == true)
         {
             if (false)
