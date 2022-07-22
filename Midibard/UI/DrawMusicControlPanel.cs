@@ -127,19 +127,19 @@ public partial class PluginUI
             catch (Exception e)
             {
                 progress = 0;
+                PluginLog.LogError(e.ToString());
             }
 
             if (ImGui.SliderFloat("Progress".Localize(), ref progress, 0, 1,
                     $"{(currentTime.Hours != 0 ? currentTime.Hours + ":" : "")}{currentTime.Minutes:00}:{currentTime.Seconds:00}",
                     ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoRoundToFormat))
             {
-                MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(progress));
                 IPC.IPCHandles.MoveToTime(progress);
             }
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
-                MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(0));
+                progress = 0;
                 IPC.IPCHandles.MoveToTime(progress);
             }
         }

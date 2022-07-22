@@ -254,20 +254,37 @@ static class IPCHandles
 	[IPCHandle(MessageTypeCode.MoveToTime)]
 	public static void HandleMoveToTime(IPCEnvelope message)
 	{
+		if (MidiBard.CurrentPlayback == null)
+        {
+			return;
+        }
+
 		var progress = message.DataStruct<float>();
-		var compensation = MidiBard.CurrentInstrument switch
+		if (MidiBard.CurrentPlayback.IsRunning)
 		{
-			0 or 3 => 105,
-			1 => 85,
-			2 or 4 => 90,
-			>= 5 and <= 8 => 95,
-			9 or 10 => 90,
-			11 or 12 => 80,
-			13 => 85,
-			>= 14 => 30
-		};
-		var timeSpan = MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress);
-		timeSpan.Add(new MetricTimeSpan(compensation * 1000), TimeSpanMode.LengthLength);
-		MidiBard.CurrentPlayback?.MoveToTime(timeSpan);
+			var compensation = MidiBard.CurrentInstrument switch
+			{
+				0 or 3 => 105,
+				1 => 85,
+				2 or 4 => 90,
+				>= 5 and <= 8 => 95,
+				9 or 10 => 90,
+				11 or 12 => 80,
+				13 => 85,
+				>= 14 => 30
+			};
+			var timeSpan = MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress);
+            if (MidiBard.AgentMetronome.EnsembleModeRunning)
+            {
+                timeSpan.Add(new MetricTimeSpan(compensation * 1000), TimeSpanMode.LengthLength);
+            }
+            MidiBard.CurrentPlayback.MoveToTime(timeSpan);
+		} else
+        {
+			var timeSpan = MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress);
+			MidiBard.CurrentPlayback.Stop();
+			MidiBard.CurrentPlayback.MoveToTime(timeSpan);
+			MidiBard.CurrentPlayback.PlaybackStart = timeSpan;
+        }
 	}
 }

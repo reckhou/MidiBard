@@ -71,8 +71,11 @@ internal class EnsembleManager : IDisposable
                         }
                         else
                         {
-	                        MidiBard.CurrentPlayback.Stop();
-	                        MidiBard.CurrentPlayback.MoveToStart();
+                            if (MidiBard.CurrentPlayback.IsRunning)
+                            {
+                                MidiBard.CurrentPlayback.Stop();
+                                MidiBard.CurrentPlayback.MoveToStart();
+                            }                          
                         }
 
                         Lrc.EnsembleStart();
