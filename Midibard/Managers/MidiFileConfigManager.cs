@@ -117,17 +117,20 @@ namespace MidiBard.Managers
 			List<long> existingCidInConfig = new List<long>();
 			foreach(var cur in midiFileConfig.Tracks)
             {
-				if (!trackDict.ContainsKey(cur.PlayerCid))
-                {
-					trackDict.Add(cur.PlayerCid, new List<int>());
-                }
+				foreach (var curCid in cur.AssignedCids)
+				{
+					if (!trackDict.ContainsKey(curCid))
+					{
+						trackDict.Add(curCid, new List<int>());
+					}
 
-				trackDict[cur.PlayerCid].Add(cur.Index);
+					trackDict[curCid].Add(cur.Index);
 
-				if (!existingCidInConfig.Contains(cur.PlayerCid))
-                {
-					existingCidInConfig.Add(cur.PlayerCid);
-                }
+					if (!existingCidInConfig.Contains(curCid))
+					{
+						existingCidInConfig.Add(curCid);
+					}
+				}
 			}
 
 			foreach(var pair in trackDict)
@@ -185,6 +188,35 @@ namespace MidiBard.Managers
 		public GuitarToneMode ToneMode = GuitarToneMode.Off;
 		public bool AdaptNotes = true;
 		public float Speed = 1;
+
+		internal static bool IsCidOnTrack(long cid, DbTrack track)
+		{
+			return track.AssignedCids.Contains(cid);
+		}
+
+		internal static long GetFirstCidInParty(DbTrack track)
+        {
+			long cid = -1;
+
+			foreach(var cur in track.AssignedCids)
+            {
+				foreach(var member in api.PartyList)
+                {
+					if (member.ContentId == cur)
+                    {
+						cid = cur;
+						break;
+                    }
+                }
+
+				if (cid > 0)
+                {
+					break;
+                }
+            }
+
+			return cid;
+        }
 	}
 
 	internal class DbTrack
@@ -194,17 +226,17 @@ namespace MidiBard.Managers
 		public string Name;
 		public int Transpose;
 		public int Instrument;
-		public long PlayerCid;
+		public List<long> AssignedCids = new List<long>();
 	}
 	internal class DbChannel
 	{
 		public int Transpose;
 		public int Instrument;
-		public long PlayerCid;
+		public List<long> AssignedCids = new List<long>();
 	}
 
 	internal class GlobalTrackMapping
     {
-		public Dictionary<long, List<int>> TrackMappingDict = new Dictionary<long, List<int>>(); // PlayerCid - List of Track Indexes
+		public Dictionary<long, List<int>> TrackMappingDict = new Dictionary<long, List<int>>(); // AssignedCids - List of Track Indexes
     }
 }

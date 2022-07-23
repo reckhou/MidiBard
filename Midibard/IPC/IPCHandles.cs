@@ -66,7 +66,7 @@ static class IPCHandles
 		{
 			try
 			{
-				trackStatus[i].Enabled = dbTracks[i].Enabled && dbTracks[i].PlayerCid == (long)api.ClientState.LocalContentId;
+				trackStatus[i].Enabled = dbTracks[i].Enabled && MidiFileConfig.GetFirstCidInParty(dbTracks[i]) == (long)api.ClientState.LocalContentId;
 				trackStatus[i].Transpose = dbTracks[i].Transpose;
 				trackStatus[i].Tone = InstrumentHelper.GetGuitarTone(dbTracks[i].Instrument);
 			}
@@ -117,8 +117,16 @@ static class IPCHandles
 			System.Threading.Thread.Sleep(500);
 		}
 
-		var instrument = MidiBard.CurrentPlayback.MidiFileConfig.Tracks
-			.FirstOrDefault(i => i.Enabled && i.PlayerCid == (long)api.ClientState.LocalContentId)?.Instrument;
+		uint? instrument = null;
+		foreach(var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
+        {
+			if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)api.ClientState.LocalContentId, cur))
+			{ 
+				instrument = (uint?)cur.Instrument;
+				break;
+			}
+        }
+
 		if (instrument != null)
 			SwitchInstrument.SwitchToContinue((uint)instrument);
 		}

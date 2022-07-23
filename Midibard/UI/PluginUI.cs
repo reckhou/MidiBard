@@ -529,13 +529,44 @@ public partial class PluginUI
 							changed |= InputIntWithReset($"##transpose", ref dbTrack.Transpose, 12, () => 0);
 							TableNextColumn(); //3
 							SetNextItemWidth(-1);
-							var current = api.PartyList.ToList().FindIndex(i => i?.ContentId != 0 && i?.ContentId == dbTrack.PlayerCid) + 1;
+							var firstCid = MidiFileConfig.GetFirstCidInParty(dbTrack);
+							var currentNum = api.PartyList.ToList().FindIndex(i => i?.ContentId != 0 && i?.ContentId == firstCid) + 1;
 							var strings = api.PartyList.Select(i => i.NameAndWorld()).ToList();
 							strings.Insert(0, "");
-							if (Combo("##partymemberSelect", ref current, strings.ToArray(), strings.Count))
+							if (Combo("##partymemberSelect", ref currentNum, strings.ToArray(), strings.Count))
 							{
-								dbTrack.PlayerCid = current > 0 ? api.PartyList[current-1]?.ContentId ?? 0 : 0;
-								changed = true;
+								if (currentNum >= 1)
+                                {
+									var currentCid = api.PartyList[currentNum - 1]?.ContentId;
+									if (firstCid > 0 && currentCid != firstCid)
+                                    {
+										// character changed, delete the old one
+										dbTrack.AssignedCids.Remove(firstCid);
+										changed = true;
+									}
+
+									if (currentCid > 0)
+                                    {
+										// add character
+										if (!dbTrack.AssignedCids.Contains((long)currentCid))
+                                        {
+											dbTrack.AssignedCids.Insert(0, (long)currentCid);
+											changed = true;
+										}
+									}
+                                } else
+                                {
+									// choose empty, remove all the characters in the same party
+									foreach (var member in api.PartyList)
+									{
+										if (dbTrack.AssignedCids.Contains(member.ContentId))
+                                        {
+											dbTrack.AssignedCids.Remove(member.ContentId);
+										}
+									}
+
+									changed = true;
+								}						
 							}
 
 							PopStyleColor();

@@ -44,8 +44,8 @@ internal sealed class BardPlayback : Playback
 				MidiFileConfigManager.UsingGlobalTrackMapping = false;
 				for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
 				{
-					var cid = midiFileConfig.Tracks[i].PlayerCid;
-					if (cid != 0)
+					var cid = MidiFileConfig.GetFirstCidInParty(midiFileConfig.Tracks[i]);
+					if (cid > 0)
 					{
 						Cids[i] = cid;
 					}
@@ -221,9 +221,12 @@ internal sealed class BardPlayback : Playback
 		{
 			try
 			{
-				if (midiFileConfig.Tracks[i].PlayerCid == 0)
+				if (MidiFileConfig.GetFirstCidInParty(midiFileConfig.Tracks[i]) <= 0)
 				{
-					midiFileConfig.Tracks[i].PlayerCid = Cids[i];
+					if (!midiFileConfig.Tracks[i].AssignedCids.Contains(Cids[i]))
+                    {
+						midiFileConfig.Tracks[i].AssignedCids.Insert(0, Cids[i]);
+                    }
 				}
 			}
 			catch (Exception e)

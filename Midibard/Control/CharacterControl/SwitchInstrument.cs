@@ -205,7 +205,7 @@ internal static class SwitchInstrument
 
         foreach(var track in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
         {
-            if (track.Enabled && track.PlayerCid == (long)DalamudApi.api.ClientState.LocalContentId
+            if (track.Enabled && MidiFileConfig.IsCidOnTrack((long)DalamudApi.api.ClientState.LocalContentId, track)
                 && MidiBard.guitarGroup.Contains((byte)track.Instrument))
             {
                 var toneID = track.Instrument - MidiBard.guitarGroup[0];
