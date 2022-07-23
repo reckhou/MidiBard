@@ -175,7 +175,7 @@ namespace MidiBard.Util.Lyrics
 
         public static bool LrcLoaded()
         {
-            return api.PartyList.IsPartyLeader() && LrcTimeStamps.Count > 0;
+            return api.PartyList.Length > 1 && LrcTimeStamps.Count > 0;
         }
 
         public static void Play()
