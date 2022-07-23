@@ -167,6 +167,9 @@ public class MidiBard : IDalamudPlugin
             }
 
             wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning;
+        } else
+        {
+            wasEnsembleModeRunning = false;
         }
     }
 
