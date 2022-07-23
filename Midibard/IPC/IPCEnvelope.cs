@@ -39,7 +39,9 @@ public enum MessageTypeCode
 
 	SetOption = 100,
 	ShowWindow,
-	SyncAllSettings
+	SyncAllSettings,
+
+	ErrPlaybackNull = 1000
 }
 
 internal sealed class IPCEnvelope

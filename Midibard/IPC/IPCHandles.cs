@@ -287,4 +287,17 @@ static class IPCHandles
 			MidiBard.CurrentPlayback.PlaybackStart = timeSpan;
         }
 	}
+	
+	public static void ErrPlaybackNull(string characterName)
+	{
+		IPCEnvelope.Create(MessageTypeCode.ErrPlaybackNull, characterName).BroadCast(true);
+	}
+
+	[IPCHandle(MessageTypeCode.ErrPlaybackNull)]
+	public static void HandleErrPlaybackNull(IPCEnvelope message)
+	{
+		var characterName = message.StringData[0];
+		PluginLog.LogWarning($"ERR: Playback Null on character: {characterName}");
+		api.ChatGui.PrintError($"[MidiBard 2]Error: Load song failed on character: {characterName}, please try to switch song again.");
+	}
 }
