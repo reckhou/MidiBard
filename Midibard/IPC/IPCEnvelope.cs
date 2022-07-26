@@ -27,7 +27,7 @@ public enum MessageTypeCode
 	MidiEvent,
 	SetInstrument,
 	EnsembleStartTime,
-	UpdateGlobalTrackMapping,
+	UpdateDefaultPerformer,
 	PlayOnMultipleDevices,
 
 	Macro = 50,

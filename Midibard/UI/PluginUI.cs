@@ -322,52 +322,6 @@ public partial class PluginUI
 			}
 			ToolTip("Open current midi file directory".Localize());
 #endif
-			SameLine();
-			if (IconButton(FontAwesomeIcon.File, "Open current midi config file", width))
-			{
-				try
-				{
-					if (CurrentPlayback != null)
-					{
-						var fileInfo = MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath);
-						if (!fileInfo.Exists)
-						{
-							CurrentPlayback.MidiFileConfig?.Save(fileInfo.FullName);
-						}
-						PluginLog.Debug(fileInfo.FullName);
-						PluginLog.Debug(CurrentPlayback.FilePath);
-						Process.Start(new ProcessStartInfo(fileInfo.FullName) { UseShellExecute = true });
-					}
-				}
-				catch (Exception e)
-				{
-					PluginLog.Error(e, "error when opening config file");
-				}
-			}
-
-			ToolTip("Open current midi config file".Localize());
-
-			SameLine();
-			if (!MidiFileConfigManager.UsingGlobalTrackMapping && IconButton(FontAwesomeIcon.Trash, "deleteConfig", width))
-			{
-				if (CurrentPlayback != null)
-				{
-					MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath).Delete();
-					CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(CurrentPlayback.TrackInfos);
-					if (!MidiBard.config.playOnMultipleDevices)
-					{
-						CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(CurrentPlayback.MidiFileConfig);
-						IPCHandles.LoadPlayback(-1, true);
-					} else
-                    {
-						if (DalamudApi.api.PartyList.Length > 1)
-						{
-							MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
-						}
-					}
-				}
-			}
-			ToolTip("Delete and reset current file config".Localize());
 
 			SameLine();
 			if (IconButton(otherClientsMuted ? FontAwesomeIcon.VolumeMute : FontAwesomeIcon.VolumeUp, "Mute other clients", width))
@@ -391,24 +345,77 @@ public partial class PluginUI
 			ToolTip("Minimize other clients, right click to restore them.".Localize());
 
 			SameLine();
-			if (Button("Sync Client Settings"))
+			if (ImGuiUtil.IconButton(FontAwesomeIcon.SyncAlt, "syncsettings", width))
 			{
 				MidiBard.SaveConfig();
 				IPCHandles.SyncAllSettings();
+			}
+			ImGuiUtil.ToolTip("Sync the client settings");
+
+			if (!MidiFileConfigManager.UsingDefaultPerformer)
+			{
+
+				SameLine();
+				if (IconButton(FontAwesomeIcon.File, "Open current midi config file", width))
+				{
+					try
+					{
+						if (CurrentPlayback != null)
+						{
+							var fileInfo = MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath);
+							if (!fileInfo.Exists)
+							{
+								CurrentPlayback.MidiFileConfig?.Save(fileInfo.FullName);
+							}
+							PluginLog.Debug(fileInfo.FullName);
+							PluginLog.Debug(CurrentPlayback.FilePath);
+							Process.Start(new ProcessStartInfo(fileInfo.FullName) { UseShellExecute = true });
+						}
+					}
+					catch (Exception e)
+					{
+						PluginLog.Error(e, "error when opening config file");
+					}
+				}
+
+				ToolTip("Open current midi config file".Localize());
+
+				SameLine();
+				if (IconButton(FontAwesomeIcon.Trash, "deleteConfig", width))
+				{
+					if (CurrentPlayback != null)
+					{
+						MidiFileConfigManager.GetMidiConfigFileInfo(CurrentPlayback.FilePath).Delete();
+						CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(CurrentPlayback.TrackInfos);
+						if (!MidiBard.config.playOnMultipleDevices)
+						{
+							CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(CurrentPlayback.MidiFileConfig);
+							IPCHandles.LoadPlayback(-1, true);
+						}
+						else
+						{
+							if (DalamudApi.api.PartyList.Length > 1)
+							{
+								MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+							}
+						}
+					}
+				}
+				ToolTip("Delete and reset current file config".Localize());
 			}
 
             SameLine();
 			if (!config.playOnMultipleDevices)
 			{
-				if (MidiFileConfigManager.UsingGlobalTrackMapping)
+				if (MidiFileConfigManager.UsingDefaultPerformer)
 				{
-					LabelText($"[Using Global Track Mapping]", "[Using Global Track Mapping]");
+					LabelText($"[Using Default Performer]", "[Using Default Performer]");
 				}
 				else
 				{
-					if (Button("Export To Global Track Mapping"))
+					if (Button("Export To Default Performer"))
 					{
-						MidiFileConfigManager.ExportToGlobalTrackMapping();
+						MidiFileConfigManager.ExportToDefaultPerformer();
 					}
 				}
 			}

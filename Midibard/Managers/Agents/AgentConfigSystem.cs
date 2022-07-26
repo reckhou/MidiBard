@@ -60,7 +60,6 @@ namespace MidiBard.Managers.Agents
         public static unsafe void SetMinimalObjQuantity()
         {
             originalObjQuantity = _configModule->GetIntValue(ConfigOption.DisplayObjectLimitType);
-            PluginLog.LogDebug("originalObjQuantity: " + originalObjQuantity);
             _configModule->SetOption(ConfigOption.DisplayObjectLimitType, 4);
         }
 

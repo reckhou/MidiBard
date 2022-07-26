@@ -53,7 +53,6 @@ public partial class PluginUI
             if (MidiBard.AgentMetronome.EnsembleModeRunning)
             {
                 // stops ensemble instead of pausing one client
-                // could be pausing all clients by IPC in the future, however the ensemble mode stops anyways without input
                 StopEnsemble();
             } else
             {

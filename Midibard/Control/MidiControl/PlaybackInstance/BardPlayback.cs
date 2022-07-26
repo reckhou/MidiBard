@@ -23,7 +23,7 @@ internal sealed class BardPlayback : Playback
 		PreparePlaybackData(file, out var tempoMap, out var trackChunks, out var trackInfos, out var timedEventWithMetadata);
 
 		MidiFileConfig midiFileConfig = null;
-		// only use midiFileConfig(including global track mapping) when in the party
+		// only use midiFileConfig(including Default Performer) when in the party
 		if (DalamudApi.api.PartyList.Length > 1 || !MidiBard.config.playOnMultipleDevices)
 		{
 			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
@@ -32,16 +32,16 @@ internal sealed class BardPlayback : Playback
 			{
 				midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
 
-				// If can not find individual config, use the global track mapping instead.
+				// If can not find individual config, use the Default Performer instead.
 				if (!MidiBard.config.playOnMultipleDevices)
 				{
-					// global track mapping isn't going to work across devices for now, need some kind of cloud services?
-					midiFileConfig = LoadGlobalTrackMapping(midiFileConfig);
+					// Default Performer isn't going to work across devices for now, need some kind of cloud services?
+					midiFileConfig = LoadDefaultPerformer(midiFileConfig);
 				}
 			}
 			else
 			{
-				MidiFileConfigManager.UsingGlobalTrackMapping = false;
+				MidiFileConfigManager.UsingDefaultPerformer = false;
 				for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
 				{
 					var cid = MidiFileConfig.GetFirstCidInParty(midiFileConfig.Tracks[i]);
@@ -198,12 +198,12 @@ internal sealed class BardPlayback : Playback
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-	public static MidiFileConfig LoadGlobalTrackMapping(MidiFileConfig midiFileConfig)
+	public static MidiFileConfig LoadDefaultPerformer(MidiFileConfig midiFileConfig)
     {
-		MidiFileConfigManager.UsingGlobalTrackMapping = true;
-		ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Global Track Mapping.");
+		MidiFileConfigManager.UsingDefaultPerformer = true;
+		ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Default Performer.");
 		Cids = new long[100];
-		GlobalTrackMapping trackMapping = MidiFileConfigManager.globalTrackMapping;
+		DefaultPerformer trackMapping = MidiFileConfigManager.defaultPerformer;
 		var partyMembers = DalamudApi.api.PartyList.ToList();
 		foreach (var cur in partyMembers)
 		{

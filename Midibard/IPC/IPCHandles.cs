@@ -201,20 +201,20 @@ static class IPCHandles
 		MidiBard.config = jsonDeserialize;
 	}
 
-	public static void UpdateGlobalTrackMapping()
+	public static void UpdateDefaultPerformer()
 	{
-		IPCEnvelope.Create(MessageTypeCode.UpdateGlobalTrackMapping, MidiFileConfigManager.globalTrackMapping.JsonSerialize()).BroadCast();
+		IPCEnvelope.Create(MessageTypeCode.UpdateDefaultPerformer, MidiFileConfigManager.defaultPerformer.JsonSerialize()).BroadCast();
 	}
 
-	[IPCHandle(MessageTypeCode.UpdateGlobalTrackMapping)]
-	public static void HandleUpdateGlobalTrackMapping(IPCEnvelope message)
+	[IPCHandle(MessageTypeCode.UpdateDefaultPerformer)]
+	public static void HandleUpdateDefaultPerformer(IPCEnvelope message)
 	{
 		var str = message.StringData[0];
-		var jsonDeserialize = str.JsonDeserialize<GlobalTrackMapping>();
-		MidiFileConfigManager.globalTrackMapping = jsonDeserialize;
+		var jsonDeserialize = str.JsonDeserialize<DefaultPerformer>();
+		MidiFileConfigManager.defaultPerformer = jsonDeserialize;
 		if (MidiBard.CurrentPlayback != null)
 		{
-			MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadGlobalTrackMapping(MidiBard.CurrentPlayback.MidiFileConfig);
+			MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(MidiBard.CurrentPlayback.MidiFileConfig);
 		}
 	}
 

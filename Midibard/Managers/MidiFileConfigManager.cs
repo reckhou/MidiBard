@@ -28,7 +28,7 @@ namespace MidiBard.Managers
 
 		public static void Save(this MidiFileConfig config, string path)
 		{
-			UsingGlobalTrackMapping = false;
+			UsingDefaultPerformer = false;
 			var fullName = GetMidiConfigFileInfo(path).FullName;
 			File.WriteAllText(fullName, JsonConvert.SerializeObject(config, Formatting.Indented, JsonSerializerSettings));
 		}
@@ -52,40 +52,40 @@ namespace MidiBard.Managers
 
 		public static void Init()
 		{
-			LoadGlobalTrackMapping();
+			LoadDefaultPerformer();
 		}
 
-		public static GlobalTrackMapping globalTrackMapping;
-		public static bool UsingGlobalTrackMapping;
+		public static DefaultPerformer defaultPerformer;
+		public static bool UsingDefaultPerformer;
 
-		static GlobalTrackMapping LoadGlobalTrackMapping()
+		static DefaultPerformer LoadDefaultPerformer()
 		{
-			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json";
+			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json";
 			FileInfo fileInfo = new FileInfo(path);
 			if (!fileInfo.Exists)
             {
-				PluginLog.LogWarning($"Global Track Mapping not exist, creating at {path}");
-				SaveGlobalTrackMapping();
+				PluginLog.LogWarning($"Default Performer not exist, creating at {path}");
+				SaveDefaultPerformer();
             }
 
-			globalTrackMapping = JsonConvert.DeserializeObject<GlobalTrackMapping>(File.ReadAllText(path), JsonSerializerSettings);
-			return globalTrackMapping;
+			defaultPerformer = JsonConvert.DeserializeObject<DefaultPerformer>(File.ReadAllText(path), JsonSerializerSettings);
+			return defaultPerformer;
 		}
 
-		static bool SaveGlobalTrackMapping()
+		static bool SaveDefaultPerformer()
         {
-			if (globalTrackMapping == null)
+			if (defaultPerformer == null)
             {
-				globalTrackMapping = new GlobalTrackMapping();
+				defaultPerformer = new DefaultPerformer();
             }
 
-			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json";
+			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json";
 			try
 			{
-				var trackMappingFileInfo = GetGlobalTrackMappingFileInfo();
+				var trackMappingFileInfo = GetDefaultPerformerFileInfo();
 				if (trackMappingFileInfo != null)
 				{
-					var serializedContents = JsonConvert.SerializeObject(globalTrackMapping, Formatting.Indented);
+					var serializedContents = JsonConvert.SerializeObject(defaultPerformer, Formatting.Indented);
 					File.WriteAllText(trackMappingFileInfo.FullName, serializedContents);
 					PluginLog.LogWarning($"{path} Saved");
 				}
@@ -98,13 +98,13 @@ namespace MidiBard.Managers
 			return true;
 		}
 
-		static FileInfo GetGlobalTrackMappingFileInfo()
+		static FileInfo GetDefaultPerformerFileInfo()
 		{
 			var pluginConfigDirectory = DalamudApi.api.PluginInterface.ConfigDirectory;
-			return new FileInfo(pluginConfigDirectory.FullName + $@"\MidiBardGlobalTrackMapping.json");
+			return new FileInfo(pluginConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json");
 		}
 
-		public static void ExportToGlobalTrackMapping()
+		public static void ExportToDefaultPerformer()
         {
 			if (MidiBard.CurrentPlayback?.MidiFileConfig == null)
             {
@@ -135,16 +135,16 @@ namespace MidiBard.Managers
 
 			foreach(var pair in trackDict)
             {
-				if (!globalTrackMapping.TrackMappingDict.ContainsKey(pair.Key))
+				if (!defaultPerformer.TrackMappingDict.ContainsKey(pair.Key))
                 {
-					globalTrackMapping.TrackMappingDict.Add(pair.Key, pair.Value);
+					defaultPerformer.TrackMappingDict.Add(pair.Key, pair.Value);
 				} else
                 {
-					globalTrackMapping.TrackMappingDict[pair.Key] = pair.Value;
+					defaultPerformer.TrackMappingDict[pair.Key] = pair.Value;
                 }
             }
 
-			// scan for those in the party but not in config anymore, remove them from global track mapping
+			// scan for those in the party but not in config anymore, remove them from Default Performer
 			var partyList = api.PartyList.ToArray();
 			List<long> toRemove = new List<long>();
 			foreach (var cur in partyList)
@@ -157,20 +157,22 @@ namespace MidiBard.Managers
 
             foreach (var cur in toRemove)
             {
-				if (globalTrackMapping.TrackMappingDict.ContainsKey(cur))
+				if (defaultPerformer.TrackMappingDict.ContainsKey(cur))
                 {
-					globalTrackMapping.TrackMappingDict.Remove(cur);
+					defaultPerformer.TrackMappingDict.Remove(cur);
                 }
             }
 
-			bool succeed = SaveGlobalTrackMapping();
+			bool succeed = SaveDefaultPerformer();
 			if (succeed)
 			{
-				ImGuiUtil.AddNotification(NotificationType.Success, "Global Track Mapping Exported.");
-				IPC.IPCHandles.UpdateGlobalTrackMapping();
+				UsingDefaultPerformer = true;
+				ImGuiUtil.AddNotification(NotificationType.Success, "Default Performer Exported.");
+				GetMidiConfigFileInfo(MidiBard.CurrentPlayback.FilePath).Delete();
+				IPC.IPCHandles.UpdateDefaultPerformer();
 			} else
             {
-				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Global Track Mapping!");
+				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Default Performer!");
 			}
 		}
 	}
@@ -235,7 +237,7 @@ namespace MidiBard.Managers
 		public List<long> AssignedCids = new List<long>();
 	}
 
-	internal class GlobalTrackMapping
+	internal class DefaultPerformer
     {
 		public Dictionary<long, List<int>> TrackMappingDict = new Dictionary<long, List<int>>(); // AssignedCids - List of Track Indexes
     }
