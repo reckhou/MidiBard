@@ -232,6 +232,7 @@ static class IPCHandles
 
 	public static void PlaybackSpeed(float playbackSpeed)
 	{
+		if (api.PartyList.Length < 2 || !api.PartyList.IsPartyLeader()) return;
 		IPCEnvelope.Create(MessageTypeCode.PlaybackSpeed, playbackSpeed).BroadCast();
 	}
 
@@ -244,6 +245,7 @@ static class IPCHandles
 	
 	public static void GlobalTranspose(int transpose)
 	{
+		if (api.PartyList.Length < 2 || !api.PartyList.IsPartyLeader()) return;
 		IPCEnvelope.Create(MessageTypeCode.GlobalTranspose, transpose).BroadCast();
 	}
 
@@ -256,6 +258,7 @@ static class IPCHandles
 	
 	public static void MoveToTime(float progress)
 	{
+		if (api.PartyList.Length < 2 || !api.PartyList.IsPartyLeader()) return;
 		IPCEnvelope.Create(MessageTypeCode.MoveToTime, progress).BroadCast(true);
 	}
 
@@ -284,8 +287,8 @@ static class IPCHandles
 			var timeSpan = MidiBard.CurrentPlayback.GetDuration<MetricTimeSpan>().Multiply(progress);
             if (MidiBard.AgentMetronome.EnsembleModeRunning)
             {
-                timeSpan.Add(new MetricTimeSpan(compensation * 1000), TimeSpanMode.LengthLength);
-            }
+				timeSpan.Add(new MetricTimeSpan((105 - compensation) * 1000), TimeSpanMode.LengthLength);
+			}
             MidiBard.CurrentPlayback.MoveToTime(timeSpan);
 		} else
         {
@@ -306,6 +309,6 @@ static class IPCHandles
 	{
 		var characterName = message.StringData[0];
 		PluginLog.LogWarning($"ERR: Playback Null on character: {characterName}");
-		api.ChatGui.PrintError($"[MidiBard 2]Error: Load song failed on character: {characterName}, please try to switch song again.");
+		api.ChatGui.PrintError($"[MidiBard 2] Error: Load song failed on character: {characterName}, please try to switch the song again.");
 	}
 }
