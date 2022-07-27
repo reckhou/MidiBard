@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +16,9 @@ using MidiBard.Control;
 using MidiBard.DalamudApi;
 using MidiBard.IPC;
 using MidiBard.Managers.Ipc;
+using MidiBard.Util;
 using Newtonsoft.Json;
+using TinyIpc.IO;
 using TinyIpc.Messaging;
 
 namespace MidiBard.IPC;
@@ -22,17 +26,17 @@ namespace MidiBard.IPC;
 internal class IPCManager : IDisposable
 {
 	private readonly bool initFailed;
-	private static Dictionary<MessageTypeCode, Action<IPCEnvelope>> _methodInfos;
-	private TinyMessageBus MessageBus { get; }
-
-	private ConcurrentQueue<(byte[] serialized, bool includeSelf)> messageQueue = new();
 	private bool _messagesQueueRunning = true;
-	private AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+	private readonly TinyMessageBus MessageBus;
+	private readonly ConcurrentQueue<(byte[] serialized, bool includeSelf)> messageQueue = new();
+	private readonly AutoResetEvent _autoResetEvent = new(false);
+	private readonly Dictionary<MessageTypeCode, Action<IPCEnvelope>> _methodInfos;
 	internal IPCManager()
 	{
 		try
 		{
-			MessageBus = new TinyMessageBus("Midibard.IPC");
+			const long maxFileSize = 1 << 24;
+			MessageBus = new TinyMessageBus(new TinyMemoryMappedFile("Midibard.IPC", maxFileSize), true);
 			MessageBus.MessageReceived += MessageBus_MessageReceived;
 
 			_methodInfos = typeof(IPCHandles)
@@ -42,24 +46,46 @@ internal class IPCManager : IDisposable
 				.ToDictionary(i => (MessageTypeCode)i.TypeCode,
 					i => i.methodInfo.CreateDelegate<Action<IPCEnvelope>>(null));
 
-			new Thread(() =>
+			var thread = new Thread(() =>
 			{
 				PluginLog.Information($"IPC message queue worker thread started");
 				while (_messagesQueueRunning)
 				{
-					PluginLog.Verbose($"Try dequeue: messageQueue.Count: {messageQueue.Count}");
+					PluginLog.Verbose($"Try dequeue message");
 					while (messageQueue.TryDequeue(out var dequeue))
 					{
-						MessageBus.PublishAsync(dequeue.serialized).Wait();
-						PluginLog.Verbose($"Message published. length: {Dalamud.Utility.Util.FormatBytes(dequeue.serialized.Length)}");
-						if (dequeue.includeSelf) MessageBus_MessageReceived(null, new TinyMessageReceivedEventArgs(dequeue.serialized));
+						try
+						{
+							var message = dequeue.serialized;
+							var messageLength = message.Length;
+							PluginLog.Verbose($"Dequeue serialized. length: {Dalamud.Utility.Util.FormatBytes(messageLength)}");
+							if (messageLength > maxFileSize)
+							{
+								throw new InvalidOperationException($"Message size is too large! TinyIpc will crash when handling this, not gonna let it through. maxFileSize: {Dalamud.Utility.Util.FormatBytes(maxFileSize)}");
+							}
+
+							if (MessageBus.PublishAsync(message).Wait(5000))
+							{
+								PluginLog.Verbose($"Message published.");
+								if (dequeue.includeSelf) MessageBus_MessageReceived(null, new TinyMessageReceivedEventArgs(message));
+							}
+							else
+							{
+								throw new TimeoutException("IPC didn't published in 5000 ms, what happened?");
+							}
+						}
+						catch (Exception e)
+						{
+							PluginLog.Warning(e, $"Error when try publishing ipc");
+						}
 					}
 
 					_autoResetEvent.WaitOne();
 				}
 				PluginLog.Information($"IPC message queue worker thread ended");
-			})
-			{ IsBackground = true }.Start();
+			});
+			thread.IsBackground = true;
+			thread.Start();
 		}
 		catch (PlatformNotSupportedException e)
 		{
@@ -78,35 +104,40 @@ internal class IPCManager : IDisposable
 		if (initFailed) return;
 		try
 		{
-			var message = IPCEnvelope.Deserialize(e.Message);
+			var sw = Stopwatch.StartNew();
+			PluginLog.Verbose($"message received");
+			var bytes = e.Message.Decompress();
+			PluginLog.Verbose($"message decompressed in {sw.Elapsed.TotalMilliseconds}ms");
+			var message = bytes.ProtoDeserialize<IPCEnvelope>();
+			PluginLog.Verbose($"proto deserialized in {sw.Elapsed.TotalMilliseconds}ms");
 			PluginLog.Debug(message.ToString());
 			ProcessMessage(message);
 		}
 		catch (Exception exception)
 		{
-			PluginLog.Error(exception, "error when DeserializeObject");
+			PluginLog.Error(exception, "error when processing received message");
 		}
 	}
 
-	private static void ProcessMessage(IPCEnvelope message)
+	private void ProcessMessage(IPCEnvelope message)
 	{
-		var code = message.MessageType;
-
-		_methodInfos[code](message);
+		if (!MidiBard.config.SyncClients) return;
+		_methodInfos[message.MessageType](message);
 	}
 
 	public void BroadCast(byte[] serialized, bool includeSelf = false)
 	{
 		if (initFailed) return;
+		if (!MidiBard.config.SyncClients) return;
 		try
 		{
-			PluginLog.Verbose($"Enqueue message. length: {Dalamud.Utility.Util.FormatBytes(serialized.Length)} includeSelf: {includeSelf}");
-			messageQueue.Enqueue((serialized, includeSelf));
+			PluginLog.Verbose($"queuing message. length: {Dalamud.Utility.Util.FormatBytes(serialized.Length)}" + (includeSelf ? " includeSelf" : null));
+			messageQueue.Enqueue(new(serialized, includeSelf));
 			_autoResetEvent.Set();
 		}
 		catch (Exception e)
 		{
-			PluginLog.Error(e, "error when public message, tiny ipc internal exception.");
+			PluginLog.Warning(e, "error when queuing message");
 		}
 	}
 

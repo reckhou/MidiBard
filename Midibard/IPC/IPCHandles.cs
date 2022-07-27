@@ -15,12 +15,46 @@ using Melanchall.DryWetMidi.Interaction;
 
 namespace MidiBard.IPC;
 
+public enum MessageTypeCode
+{
+	Hello = 1,
+	Bye,
+	Acknowledge,
+
+	GetMaster,
+	SetSlave,
+	SetUnslave,
+
+	SyncPlaylist = 10,
+	RemoveTrackIndex,
+	LoadPlaybackIndex,
+
+	UpdateMidiFileConfig = 20,
+	UpdateEnsembleMember,
+	MidiEvent,
+	SetInstrument,
+	EnsembleStartTime,
+	UpdateDefaultPerformer,
+
+	SetOption = 100,
+	ShowWindow,
+	SyncAllSettings,
+	Object,
+	SyncPlayStatus,
+	PlaybackSpeed,
+	GlobalTranspose,
+	MoveToTime,
+	PlayOnMultipleDevices,
+
+	ErrPlaybackNull = 1000
+}
+
 static class IPCHandles
 {
 	public static void SyncPlaylist()
 	{
 		if (!MidiBard.config.SyncClients) return;
-		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.SyncPlaylist, MidiBard.config.Playlist.ToArray()).Serialize());
+		IPCEnvelope.Create(MessageTypeCode.SyncPlaylist, MidiBard.config.Playlist.ToArray()).BroadCast();
 	}
 
 	[IPCHandle(MessageTypeCode.SyncPlaylist)]
@@ -33,7 +67,7 @@ static class IPCHandles
 	public static void RemoveTrackIndex(int index)
 	{
 		if (!MidiBard.config.SyncClients) return;
-		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.RemoveTrackIndex, index).Serialize());
+		IPCEnvelope.Create(MessageTypeCode.RemoveTrackIndex, index).BroadCast();
 	}
 
 	[IPCHandle(MessageTypeCode.RemoveTrackIndex)]
@@ -46,8 +80,8 @@ static class IPCHandles
 	{
 		if (!MidiBard.config.SyncClients) return;
 		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
-        string[] data = new string[2] { config.JsonSerialize(), updateInstrumentAfterFinished.ToString() };
-		MidiBard.IpcManager.BroadCast(IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, data).Serialize(), true);
+        string[] strings = new string[2] { config.JsonSerialize(), updateInstrumentAfterFinished.ToString()};
+		IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, strings).BroadCast(true);
 	}
 
 	[IPCHandle(MessageTypeCode.UpdateMidiFileConfig)]
@@ -131,15 +165,15 @@ static class IPCHandles
 			SwitchInstrument.SwitchToContinue((uint)instrument);
 		}
 
-	public static void DoMacro(string[] lines, bool includeSelf = false)
-	{
-		IPCEnvelope.Create(MessageTypeCode.Macro, lines).BroadCast(includeSelf);
-	}
-	[IPCHandle(MessageTypeCode.Macro)]
-	private static void HandleDoMacro(IPCEnvelope message)
-	{
-		ChatCommands.DoMacro(message.StringData);
-	}
+	//public static void DoMacro(string[] lines, bool includeSelf = false)
+	//{
+	//	IPCEnvelope.Create(MessageTypeCode.Macro, lines).BroadCast(includeSelf);
+	//}
+	//[IPCHandle(MessageTypeCode.Macro)]
+	//private static void HandleDoMacro(IPCEnvelope message)
+	//{
+	//	ChatCommands.DoMacro(message.StringData);
+	//}
 
 	public static void SetOption(ConfigOption option, int value, bool includeSelf)
 	{
