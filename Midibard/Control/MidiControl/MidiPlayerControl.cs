@@ -282,7 +282,6 @@ namespace MidiBard.Control.MidiControl
                 // MUST check the current playback, otherwise IPC thread will stuck waiting for playback
                 if (!syncByPartyCommand)
                 {
-                    Thread.Sleep(2000);
                     if (MidiBard.CurrentPlayback != null)
                     {
                         if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
