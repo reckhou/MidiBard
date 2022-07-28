@@ -32,7 +32,7 @@ class Localizer
     }
     private void LoadZh()
     {
-        zh.Add("Import midi file.\nRight click to select file dialog type\nPress ctrl+V to import files from clipboard", "导入MIDI文件\n右键点击选择导入文件对话框类型\n按Ctrl+V导入剪贴板中复制的文件");
+        zh.Add("Import midi file\nRight click to select file dialog type", "导入MIDI文件\n右键点击选择导入文件对话框类型");
         zh.Add("Clear Playlist", "清空播放列表");
         zh.Add("UI Language", "界面语言");
         zh.Add("Help", "常见问题");
@@ -132,9 +132,10 @@ class Localizer
         zh.Add("Standard: Standard midi channel and ProgramChange handling, each channel will keep it's program state separately.", "标准：标准MIDI通道和音色转换事件处理，每个MIDI通道会分别保持其音色，直到同通道的另一个音色转换事件改写其音色状态。");
         zh.Add("Simple: Simple ProgramChange handling, ProgramChange event on any channel will change all channels' program state. (This is BardMusicPlayer's default behavior.)", "简单：简单的音色转换事件处理方式，任一通道上的音色转换事件会改写所有MIDI通道的音色状态。（这是BardMusicPlayer的默认处理方式。）");
         zh.Add("Override by track: Assign guitar tone manually for each track and ignore ProgramChange events.", "分音轨重写：为每个音轨手动指定电吉他音色，无视其音色转换事件。");
-        zh.Add("Auto switch instrument by track name(BMP Rules)", "根据音轨名自动切换乐器(BMP规则)");
-        zh.Add("Transpose/switch instrument based on first enabled midi track name.", "根据首个被启用的音轨的音轨名自动切换乐器和移调。");
-        zh.Add("Auto post command", "自动发送小队命令");
-        zh.Add("Post chat command on party channel automatically.", "在队伍频道自动发送小队命令");
+        zh.Add("Auto switch instrument", "根据音轨名自动切换乐器");
+        zh.Add("Transpose/switch instrument based on first enabled midi track name, follow rules set by BMP.", "根据首个被启用的音轨的音轨名自动切换乐器和移调。");
+        zh.Add("Play on Multiple Devices", "在多台机器上运行");
+        zh.Add("[BETA] Auto change frame limit and character quantity", "[BETA] 自动设置限制后台运行帧率及角色数量");
+        zh.Add("Automatically disablse/sets background frame limit and minimal character quantity, when equipping/unequipping the instuments.", "在未装备乐器时自动设置限制后台运行帧率，角色数量设置为最小。");
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,6 +11,8 @@ using Dalamud.Configuration;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
+using MidiBard.Managers;
+using MidiBard.Util;
 
 namespace MidiBard;
 
@@ -27,7 +30,8 @@ public enum GuitarToneMode
     Off,
     Standard,
     Simple,
-    Override,
+    OverrideByTrack,
+    //OverrideByChannel,
 }
 public enum UILang
 {
@@ -35,10 +39,29 @@ public enum UILang
     CN
 }
 
+public class TrackStatus
+{
+    public bool Enabled = false;
+    public int Tone = 0;
+    public int Transpose = 0;
+}
+
+//public struct ChannelStatus
+//{
+//    public ChannelStatus(bool enabled = true, int tone = 0, int transpose = 0)
+//    {
+//        Enabled = enabled;
+//        Tone = tone;
+//        Transpose = transpose;
+//    }
+
+//    public bool Enabled = true;
+//    public int Tone = 0;
+//    public int Transpose = 0;
+//}
+
 public class Configuration : IPluginConfiguration
 {
-    public static Configuration config;
-
     public int Version { get; set; }
     public bool Debug;
     public bool DebugAgentInfo;
@@ -47,6 +70,9 @@ public class Configuration : IPluginConfiguration
     public bool DebugKeyStroke;
     public bool DebugMisc;
     public bool DebugEnsemble;
+    [JsonIgnore]
+    public TrackStatus[] TrackStatus = Enumerable.Repeat(new TrackStatus(), 100).ToArray().JsonSerialize().JsonDeserialize<TrackStatus[]>();
+    //public ChannelStatus[] ChannelStatus = Enumerable.Repeat(new ChannelStatus(), 16).ToArray();
 
     public List<string> Playlist = new List<string>();
 
@@ -56,14 +82,17 @@ public class Configuration : IPluginConfiguration
     public int TransposeGlobal = 0;
     public bool AdaptNotesOOR = true;
 
+    public bool UseStandalonePlaylistWindow = false;
+    public bool UseStandaloneTrackWindow = false;
+    public bool LowLatencyMode = false;
+
     public bool MonitorOnEnsemble = true;
     public bool AutoOpenPlayerWhenPerforming = true;
+
     public int? SoloedTrack = null;
-    public int[] TonesPerTrack = new int[100];
+    public int? SoloedChannel = null;
     public bool EnableTransposePerTrack = false;
-    public int[] TransposePerTrack = new int[100];
     public int uiLang = DalamudApi.api.PluginInterface.UiLanguage == "zh" ? 1 : 0;
-    public bool showMusicControlPanel = true;
     public bool showSettingsPanel = true;
     public int playlistSizeY = 10;
     public bool miniPlayer = false;
@@ -72,8 +101,8 @@ public class Configuration : IPluginConfiguration
     public bool autoSwitchInstrumentBySongName = true;
     public bool autoTransposeBySongName = true;
 
-    public bool bmpTrackNames = false;
-    public bool autoPostPartyChatCommand = false;
+    //public bool bmpTrackNames = true;
+    public bool playOnMultipleDevices = false;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
@@ -87,7 +116,6 @@ public class Configuration : IPluginConfiguration
     public string lastUsedMidiDeviceName = "";
     public bool autoRestoreListening = false;
     public string lastOpenedFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-
     //public bool autoStartNewListening = false;
 
     //public int testLength = 40;
@@ -104,60 +132,49 @@ public class Configuration : IPluginConfiguration
     public bool PlotTracks;
     public bool LockPlot;
 
+
+    public bool TrimChords = false;
+    public int TrimTo = 1;
+
     //public float plotScale = 10f;
 
+    public bool PlotChannelView = false;
+    public bool PlotShowAllPrograms = false;
 
-    //public List<EnsembleTrack> EnsembleTracks = new List<EnsembleTrack>();
-    public bool StopPlayingWhenEnsembleEnds = false;
+    public bool StopPlayingWhenEnsembleEnds = true;
     public bool AutoSetBackgroundFrameLimit = true;
 
-    //public bool SyncPlaylist = false;
-    //public bool SyncSongSelection = false;
-    //public bool SyncMuteUnMute = false;
+    public bool ShowEnsembleControlWindow = false;
+    public bool SyncClients = true;
+    //public bool SyncPlaybackLoading = false;
+    //public bool SyncTrackStatus = false;
+
     public GuitarToneMode GuitarToneMode = GuitarToneMode.Off;
-    [JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
+    public bool AutoSetOffAFKSwitchingTime = true;
+    //[JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
 
-    //public void Save()
-    //{
-    //    var startNew = Stopwatch.StartNew();
-    //    DalamudApi.api.PluginInterface.SavePluginConfig(this);
-    //    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}.");
-    //}
-
-    public static void Init()
+    public void SetTransposeGlobal(int transpose)
     {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
-        ConfigurationPrivate.Init();
-    }
-
-    public void Save(bool reloadplaylist = false)
-    {
-        Task.Run(() =>
+        bool isDrumTrackPlaying = false;
+        if (MidiBard.CurrentPlayback?.TrackInfos?.Length > 0)
         {
-            try
+            foreach(var trackInfo in MidiBard.CurrentPlayback?.TrackInfos)
             {
-                var startNew = Stopwatch.StartNew();
-                DalamudApi.api.PluginInterface.SavePluginConfig(this);
-                ConfigurationPrivate.config.Save();
-                PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-                if (reloadplaylist && config.autoPostPartyChatCommand)
+                var insID = trackInfo.InstrumentIDFromTrackName;
+                if (trackInfo.IsEnabled && insID >= 10 && insID <= 14)
                 {
-                    MidiBard.SendReloadPlaylistCMD = true;
+                    isDrumTrackPlaying = true;
+                    break;
                 }
             }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, "Error when saving config");
-                ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving config");
-            }
-        });
-    }
+        }
 
-    public static void Load()
-    {
-        config = (Configuration)DalamudApi.api.PluginInterface.GetPluginConfig() ?? new Configuration();
-        ConfigurationPrivate.Load();
-    }
+        if (isDrumTrackPlaying)
+        {
+            TransposeGlobal = 0;
+            return;
+        }
 
-    public bool AutoSetOffAFKSwitchingTime = true;
+        TransposeGlobal = transpose;
+    }
 }

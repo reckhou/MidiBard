@@ -14,8 +14,8 @@ public partial class PluginUI
     {
         if (PlaylistManager.CurrentPlaying >= 0 && PlaylistManager.FilePathList.Count > PlaylistManager.CurrentPlaying)
         {
-            var fmt = $"{PlaylistManager.CurrentPlaying + 1:000} {PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].displayName}";
-            ImGui.PushStyleColor(ImGuiCol.Text, Configuration.config.themeColor * new Vector4(1, 1, 1, 1.3f));
+            var fmt = MidiPlayerControl.SwitchingSong ? "[LOADING...]" : $"{PlaylistManager.CurrentPlaying + 1:000} {PlaylistManager.FilePathList[PlaylistManager.CurrentPlaying].displayName}";
+            ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.config.themeColor * new Vector4(1, 1, 1, 1.3f));
             ImGui.TextUnformatted(fmt);
             ImGui.PopStyleColor();
         }
@@ -37,8 +37,8 @@ public partial class PluginUI
         MetricTimeSpan currentTime = new MetricTimeSpan(0);
         MetricTimeSpan duration = new MetricTimeSpan(0);
         float progress = 0;
-        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, FilePlayback.isWaiting ? *ImGui.GetStyleColorVec4(ImGuiCol.Text) : Configuration.config.themeColor);
-        ImGui.PushStyleColor(ImGuiCol.FrameBg, Configuration.config.themeColorDark);
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, FilePlayback.isWaiting ? *ImGui.GetStyleColorVec4(ImGuiCol.Text) : MidiBard.config.themeColor);
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, MidiBard.config.themeColorDark);
         try
         {
             if (FilePlayback.isWaiting)
@@ -90,7 +90,7 @@ public partial class PluginUI
         ImGui.TextUnformatted(durationText);
         try
         {
-            var currentInstrument = MidiBard.PlayingGuitar && !Configuration.config.OverrideGuitarTones
+            var currentInstrument = MidiBard.PlayingGuitar && !(MidiBard.config.GuitarToneMode is GuitarToneMode.OverrideByTrack)
                 ? (uint)(24 + MidiBard.AgentPerformance.CurrentGroupTone)
                 : MidiBard.CurrentInstrument;
 
@@ -98,7 +98,7 @@ public partial class PluginUI
             if (currentInstrument != 0)
             {
                 currentInstrumentText = MidiBard.InstrumentSheet.GetRow(currentInstrument).Instrument;
-                if (MidiBard.PlayingGuitar && Configuration.config.OverrideGuitarTones)
+                if (MidiBard.PlayingGuitar && !(MidiBard.config.GuitarToneMode is GuitarToneMode.OverrideByTrack))
                 {
                     currentInstrumentText = currentInstrumentText.Split(':', '：').First() + ": Auto";
                 }

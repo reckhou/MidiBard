@@ -8,7 +8,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
-`MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard), developing by [Ori](https://github.com/reckhou/MidiBard) and [SpuriousSnail86](https://github.com/SpuriousSnail86/MidiBard).
+`MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard) and developing by [Ori](https://github.com/reckhou/MidiBard2).
 
 
 # Why MidiBard 2?
@@ -21,7 +21,7 @@
 
 ❖ No need to set key bindings and hotbars on your every bard.
 
-❖ Switches songs and instruments across all bards in the same party, by commands. Those bards don't have to be on the same PC, which means it's possible to play with your friends, and everyone starts to play automatically by following the ensemble mode, no need to countdown on Discord anymore!
+❖ Switches songs and instruments across all bards in the same party, through local ensemble control panel or by commands. Those bards don't have to be on the same PC, which means it's possible to play with your friends, and everyone starts to play automatically by following the ensemble mode, no need to countdown on Discord anymore!
 
 ❖ Plays any number of tracks on the MIDI file, transposes any track separately, or overrides the electric guitar's tone, which greatly helps for testing/performance. 
 

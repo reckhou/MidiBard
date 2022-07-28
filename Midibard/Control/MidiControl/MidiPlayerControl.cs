@@ -4,133 +4,27 @@ using System.Threading.Tasks;
 using Dalamud.Logging;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
+using MidiBard.Control.MidiControl.PlaybackInstance;
+using MidiBard.IPC;
 using static MidiBard.MidiBard;
 using MidiBard.Managers;
 using System.Collections.Generic;
+using System.Threading;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using MidiBard.Util.Lyrics;
 
 namespace MidiBard.Control.MidiControl
-{ 
+{
 
     internal static class MidiPlayerControl
     {
-
-        internal static int playDeltaTime = 0;
-        internal static int LRCDeltaTime = 0;
-    
-        public enum e_stat
-        {
-            Stopped,
-            Paused,
-            Playing
-        }
-
-        public static e_stat _stat = e_stat.Stopped;
-        public static int LrcIdx = -1;
-        public static bool IsLeader;
-
-        public static List<double> LrcTimeStamps = new List<double>();
-
-        public static bool LrcLoaded()
-        {
-            return IsLeader && LrcTimeStamps.Count > 0;
-        }
-
-        public static void Tick(Dalamud.Game.Framework framework)
-        {
-            try
-            {
-                if (_stat != e_stat.Playing)
-                {
-                    return;
-                }
-
-                if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
-                {
-                    int idx = FindLrcIdx(LrcTimeStamps);
-                    if (idx < 0 || idx == LrcIdx)
-                    {
-                        return;
-                    }
-                    else
-                    {                      
-                        if (IsLeader)
-                        {
-                            string msg = "";
-                            if (idx == 0)
-                            {
-                                msg = $"♪ Now Playing: {Lrc._lrc.Title} ♪ Artist: {Lrc._lrc.Artist} ♪ Album: {Lrc._lrc.Album} ♪ Lyric By: {Lrc._lrc.LrcBy} ♪";
-                                if (!AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = "/p " + msg;
-                                }
-                            }
-                            else
-                            {
-                                PluginLog.LogVerbose($"{Lrc._lrc.LrcWord[LrcTimeStamps[idx]]}");
-                                if (AgentMetronome.EnsembleModeRunning)
-                                {
-                                    msg = $"/s ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                } else
-                                {
-                                    msg = $"/p ♪ {Lrc._lrc.LrcWord[LrcTimeStamps[idx]]} ♪";
-                                }
-                            }
-
-                            MidiBard.Cbase.Functions.Chat.SendMessage(msg);
-                        }
-                        LrcIdx = idx;
-                    }
-                }
-            } catch (Exception ex)
-            {
-                PluginLog.LogError($"exception: {ex}");
-            }
-        }
-
-        static int FindLrcIdx(List<double> TimeStamps)
-        {
-            if (TimeStamps.Count == 0)
-                return -1;
-
-            int idx = -1;
-            double timeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>().GetTotalSeconds() - Lrc._lrc.Offset/1000.0f + LRCDeltaTime/1000.0f;
-
-            foreach (double TimeStamp in TimeStamps)
-            {
-                if (timeSpan > TimeStamp)
-                {
-                    idx++;
-                } else
-                {
-                    break;
-                }
-            }
-
-            return idx >= TimeStamps.Count ? -1 : idx;
-        }
+        public static bool SwitchingSong;
 
         internal static void Play()
         {
-	        playDeltaTime = 0;
-            LRCDeltaTime = 0;
-            if (CurrentPlayback != null)
-            {
-                try
-                {
-                    if (CurrentPlayback.GetCurrentTime<MidiTimeSpan>() == CurrentPlayback.GetDuration<MidiTimeSpan>())
-                    {
-                        CurrentPlayback.MoveToStart();
-                    }
+            playDeltaTime = 0;
 
-                    DoPlay();
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Error(e, "error when try to start playing, maybe the playback has been disposed?");
-                }
-            }
-            else
+            if (CurrentPlayback == null)
             {
                 if (!PlaylistManager.FilePathList.Any())
                 {
@@ -147,6 +41,22 @@ namespace MidiBard.Control.MidiControl
                     SwitchSong(PlaylistManager.CurrentPlaying, true);
                 }
             }
+            else
+            {
+                try
+                {
+                    if (CurrentPlayback.GetCurrentTime<MidiTimeSpan>() == CurrentPlayback.GetDuration<MidiTimeSpan>())
+                    {
+                        CurrentPlayback.MoveToStart();
+                    }
+
+                    DoPlay();
+                }
+                catch (Exception e)
+                {
+                    PluginLog.Error(e, "error when try to start playing, maybe the playback has been disposed?");
+                }
+            }
         }
 
         public static void DoPlay()
@@ -156,39 +66,10 @@ namespace MidiBard.Control.MidiControl
                 return;
             }
 
-            IsLeader = false;
-
-            if (Lrc.HasLyric())
-            {
-                if (DalamudApi.api.PartyList.Length > 1)
-                {
-                    // it seems the PartyLeaderIndex always == 0 after joined and leave a party, 
-                    var partyMemberAddr = DalamudApi.api.PartyList.GetPartyMemberAddress((int)DalamudApi.api.PartyList.PartyLeaderIndex);
-                    if (partyMemberAddr != IntPtr.Zero)
-                    {
-                        var partymember = DalamudApi.api.PartyList.CreatePartyMemberReference(partyMemberAddr);
-                        IsLeader = String.Compare(partymember.Name.TextValue, DalamudApi.api.ClientState.LocalPlayer.Name.TextValue) == 0;
-                    }
-                }
-                else
-                {
-                    DalamudApi.api.ChatGui.Print(String.Format("[MidiBard] Not in a party, Lyrics will not be posted."));
-                }
-            }
-
             CurrentPlayback.Start();
-            try
-            {
-                LrcTimeStamps = Lrc._lrc.LrcWord.Keys.ToList();
-                if (_stat != e_stat.Paused)
-                {
-                    LrcIdx = -1;
-                }
-            } catch (Exception e)
-            {
-                PluginLog.LogError(e.Message);
-            }
             _stat = e_stat.Playing;
+
+            Lrc.Play();
         }
 
         internal static void Pause()
@@ -197,7 +78,6 @@ namespace MidiBard.Control.MidiControl
             _stat = e_stat.Paused;
         }
 
-
         internal static void PlayPause()
         {
             if (CurrentPlayback == null)
@@ -205,22 +85,21 @@ namespace MidiBard.Control.MidiControl
                 return;
             }
 
-            var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-            PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
-
             if (FilePlayback.isWaiting)
             {
                 FilePlayback.StopWaiting();
             }
             else
             {
-                if (MidiBard.IsPlaying)
+                if (IsPlaying)
                 {
-                    MidiPlayerControl.Pause();
+                    Pause();
+                    var TimeSpan = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
+                    PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
                 }
                 else
                 {
-                    MidiPlayerControl.Play();
+                    Play();
                 }
             }
         }
@@ -231,7 +110,7 @@ namespace MidiBard.Control.MidiControl
             {
                 if (CurrentPlayback == null)
                 {
-                    CurrentTracks.Clear();
+                    //MidiBard.CurrentPlayback?.TrackInfos.Clear();
                 }
                 else
                 {
@@ -245,17 +124,16 @@ namespace MidiBard.Control.MidiControl
             }
             finally
             {
-                LrcIdx = -1;
+                Lrc.Stop();
                 _stat = e_stat.Stopped;
                 CurrentPlayback?.Dispose();
                 CurrentPlayback = null;
-                IsLeader = false;
             }
         }
 
         internal static void Next()
         {
-            LrcIdx = -1;
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             if (CurrentPlayback != null)
             {
@@ -266,7 +144,7 @@ namespace MidiBard.Control.MidiControl
                     CurrentPlayback = null;
                     int next = PlaylistManager.CurrentPlaying;
 
-                    switch ((PlayMode)Configuration.config.PlayMode)
+                    switch ((PlayMode)MidiBard.config.PlayMode)
                     {
                         case PlayMode.Single:
                         case PlayMode.SingleRepeat:
@@ -304,7 +182,7 @@ namespace MidiBard.Control.MidiControl
 
         internal static void Prev()
         {
-            LrcIdx = -1;
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             if (CurrentPlayback != null)
             {
@@ -315,7 +193,7 @@ namespace MidiBard.Control.MidiControl
                     CurrentPlayback = null;
                     int prev = PlaylistManager.CurrentPlaying;
 
-                    switch ((PlayMode)Configuration.config.PlayMode)
+                    switch ((PlayMode)MidiBard.config.PlayMode)
                     {
                         case PlayMode.Single:
                         case PlayMode.SingleRepeat:
@@ -375,12 +253,17 @@ namespace MidiBard.Control.MidiControl
             }
         }
 
-        public static void SwitchSong(int index, bool startPlaying = false)
+        public static void SwitchSong(int index, bool startPlaying = false, bool switchInstrument = true, bool syncByPartyCommand = false)
         {
-            LrcIdx = -1;
+            if (SwitchingSong)
+            {
+                return;
+            }
+
+            Lrc.Stop();
             _stat = e_stat.Stopped;
             playDeltaTime = 0;
-            LRCDeltaTime = 0;
+
             if (index < 0 || index >= PlaylistManager.FilePathList.Count)
             {
                 PluginLog.Error($"SwitchSong: invalid playlist index {index}");
@@ -388,45 +271,62 @@ namespace MidiBard.Control.MidiControl
             }
 
             PlaylistManager.CurrentPlaying = index;
+            SwitchingSong = true;
             Task.Run(async () =>
             {
-                await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying);
+                if (!syncByPartyCommand)
+                {
+                    IPCHandles.LoadPlayback(index);
+                }
+                await FilePlayback.LoadPlayback(PlaylistManager.CurrentPlaying, startPlaying, switchInstrument);    
+                // MUST check the current playback, otherwise IPC thread will stuck waiting for playback
+                if (!syncByPartyCommand)
+                {
+                    if (MidiBard.CurrentPlayback != null)
+                    {
+                        if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+                        {
+                            IPCHandles.UpdateMidiFileConfig(config, true);
+                        }
+                    }
+                }
+
+                SwitchingSong = false;
             });
         }
 
-	    internal static void ChangeDeltaTime(int delta)
+        internal static int playDeltaTime = 0;
+        
+        public enum e_stat
+        {
+            Stopped,
+            Paused,
+            Playing
+        }
+
+        public static e_stat _stat = e_stat.Stopped;
+
+
+        internal static void ChangeDeltaTime(int delta)
 		{
 			if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
 			{
 				playDeltaTime = 0;
-                LRCDeltaTime = 0;
 				return;
 			}
 
 			var currentTime = CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
 			long msTime = currentTime.TotalMicroseconds;
 			//PluginLog.LogDebug("curTime:" + msTime);
-			if (msTime + delta * 1000 < 0)
-			{
-				return;
-			}
-			msTime += delta * 1000;
-			MetricTimeSpan newTime = new MetricTimeSpan(msTime);
-            //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
-			CurrentPlayback.MoveToTime(newTime);
-			playDeltaTime += delta;
-		}
-
-        internal static void ChangeLRCDeltaTime(int delta)
-        {
-            if (CurrentPlayback == null || !CurrentPlayback.IsRunning)
+            if (msTime + delta * 1000 < 0)
             {
-                playDeltaTime = 0;
-                LRCDeltaTime = 0;
-                return;
+		        return;
             }
-
-            LRCDeltaTime += delta;
-        }
+            msTime += delta * 1000;
+            MetricTimeSpan newTime = new MetricTimeSpan(msTime);
+            //PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
+            CurrentPlayback.MoveToTime(newTime);
+            playDeltaTime += delta;
+		}
     }
 }
