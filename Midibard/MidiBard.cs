@@ -72,7 +72,7 @@ public class MidiBard : IDalamudPlugin
     internal static bool PlayingGuitar => InstrumentHelper.IsGuitar(CurrentInstrument);
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
 
-    public string Name => "MidiBard 2 - Preview";
+    public string Name => "MidiBard 2";
     private static ChatGui _chatGui;
 
     public static XivCommonBase Cbase;
