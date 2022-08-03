@@ -136,7 +136,7 @@ public partial class PluginUI
                         if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                         {
                             MidiBard.config.SoloedTrack = MidiBard.config.SoloedTrack == i ? null : i;
-                            if (!MidiBard.IsPlaying &&
+                            if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying &&
                                 MidiBard.config.SoloedTrack != null
                                 && MidiBard.config.TrackStatus[(int)MidiBard.config.SoloedTrack].Enabled
                                 && MidiBard.CurrentPlayback.TrackInfos[(int)MidiBard.config.SoloedTrack].InstrumentIDFromTrackName != null)
@@ -236,7 +236,7 @@ public partial class PluginUI
 
     private void JudgeSwitchInstrument(int idx)
     {
-        if (!MidiBard.IsPlaying)
+        if (MidiBard.config.bmpTrackNames && !MidiBard.IsPlaying)
         {
             var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(trackInfo => trackInfo.IsEnabled);
             if (firstEnabledTrack?.InstrumentIDFromTrackName != null)

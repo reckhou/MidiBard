@@ -41,32 +41,35 @@ internal static class SwitchInstrument
             UpdateGuitarToneByMidiConfig();
         }
 
-        if (MidiBard.CurrentInstrument == instrumentId)
-            return;
-
-        SwitchingInstrument = true;
-        var sw = Stopwatch.StartNew();
-        try
+        if (MidiBard.config.bmpTrackNames)
         {
-            if (MidiBard.CurrentInstrument != 0)
+            if (MidiBard.CurrentInstrument == instrumentId)
+                return;
+
+            SwitchingInstrument = true;
+            var sw = Stopwatch.StartNew();
+            try
             {
-                PerformActions.DoPerformAction(0);
-                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
-            }
+                if (MidiBard.CurrentInstrument != 0)
+                {
+                    PerformActions.DoPerformAction(0);
+                    await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
+                }
 
-            PerformActions.DoPerformAction(instrumentId);
-            await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
-            await Task.Delay(200);
-            PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
-            //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
-        }
-        finally
-        {
-            SwitchingInstrument = false;
+                PerformActions.DoPerformAction(instrumentId);
+                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+                await Task.Delay(200);
+                PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
+                //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
+            }
+            finally
+            {
+                SwitchingInstrument = false;
+            }
         }
     }
 
