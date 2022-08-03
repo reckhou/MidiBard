@@ -19,19 +19,19 @@ internal static class SwitchInstrument
 {
     public static bool SwitchingInstrument { get; private set; }
 
-    public static void SwitchToContinue(uint instrumentId, int timeOut = 3000)
+    public static void SwitchToContinue(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
     {
         Task.Run(async () =>
         {
             var isPlaying = MidiBard.IsPlaying;
             MidiBard.CurrentPlayback?.Stop();
-            await SwitchTo(instrumentId);
+            await SwitchTo(instrumentId, forceSwitch, timeOut);
             if (isPlaying)
                 MidiBard.CurrentPlayback?.Start();
         });
     }
 
-    public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
+    public static async Task SwitchTo(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
     {
         if (MidiBard.config.playOnMultipleDevices)
         {
@@ -41,7 +41,7 @@ internal static class SwitchInstrument
             UpdateGuitarToneByMidiConfig();
         }
 
-        if (MidiBard.config.bmpTrackNames)
+        if (forceSwitch || MidiBard.config.bmpTrackNames)
         {
             if (MidiBard.CurrentInstrument == instrumentId)
                 return;
