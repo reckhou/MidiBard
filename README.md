@@ -38,11 +38,11 @@ For example, composers may have `Clean` and `Overdriven` guitars on two tracks, 
 ❖ Track visualization, helps for testing/debugging.
 
 # How to Install
-To use you need to install and boot the game by using [FFXIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher).
+You need to install and boot the game by using [FFXIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher).
 
-This tutorial assumes you installed FFXIVLauncher and boot the game by it, and you have the basic knowledge of the usage of the Dalamud plugin system.
+This tutorial assumes you installed `FFXIVLauncher` and boot the game by it, and you have the basic knowledge of the usage of the `Dalamud plugin system`.
 
-You need to add my custom plugin repository to install MidiBard.  
+You need to add our custom plugin repository to install MidiBard:  
 `https://raw.githubusercontent.com/reckhou/DalamudPlugins-Ori/api6/pluginmaster.json` 
 
 Please open ``Dalamud Settings``, on ``Experimental`` page, add a ``Custom Plugin Repository`` as below:
@@ -51,13 +51,13 @@ Please open ``Dalamud Settings``, on ``Experimental`` page, add a ``Custom Plugi
 
 Back to `Plugin Installer`, search `Midibard 2` and install.
 
-![enter image description here](https://i.imgur.com/LB6UMEk.png)
+![enter image description here](https://i.imgur.com/MoKudpz.png)
 
 # Recommend Settings
 
-If you are new to `MidiBard 2`, please use those settings below. Those settings are recommended for the band.
+If you are new to `MidiBard 2`, please use those settings below. Those settings are recommended for the bands.
 
-![image](https://i.imgur.com/mGXTy0O.png)
+![image](https://i.imgur.com/yEtHOM5.png)
 
 # How to Use
 
@@ -67,7 +67,7 @@ If you are new to `MidiBard 2`, please use those settings below. Those settings 
 
 Type `/midibard` in the chatbox and the window will show up. Press the `+` icon to add MIDI files to the playlist(hold `Ctrl` or `Shift` key to choose multiple files).  Double click any songs on the playlist to switch. Select the tracks you wish to play, and choose the instrument you wish to use. 
 
-![enter image description here](https://i.imgur.com/Iu9wVyQ.png)
+![enter image description here](https://i.imgur.com/z0vkgrh.png)
 
 Press the triangle icon to start playing.
 
@@ -75,14 +75,25 @@ If you are a solo bard, this is all you need to know 😊
 
 * **How to Play as a Band**  
 
-1. Form a party with all of your bards. For the first time user, I recommend trying it on 2 bards to help you get the idea of how it works, the rest are just adding more bards. Also the bards **DON'T** have to be on the same PC, which means it's possible to play with your friends at the same party.
-2. After forming the party, import the MIDI files then immediately type `reloadplaylist` on **PARTY CHAT**. All bards on the **SAME PC** will then share the same playlist. You only need to do this once after changing the playlist. If you play with your friends, make sure everyone has the same playlist before continuing.
-3. Type `switchto <song number>` in the party chat, then every bard in the party will load the same song and switch instruments if the track name follows BMP standards. For example, typing "switchto 1" will make everyone in the party open the 1st song on the playlist.
-4. Check every bard to make sure everyone's choosing the correct track they are playing. You only need to do it once after rebooting the game or reloading the playlist. They will always play the same track number even on different songs.
-5. After everything's been set, start the ensemble mode in-game and the song will start playing automatically.
+Form a party with all of your bards. For the first time user, I recommend trying it on 2 bards to help you get the idea of how it works, the rest are just adding more bards. Also the bards **DON'T** have to be on the same PC, which means it's possible to play with your friends at the same party.
 
-![enter image description here](https://i.imgur.com/ZxsXKKp.png)
+* **If all of your bards are on the same device**
 
+On party leader, click the `Ensemble Panel` button to open ensemble panel. Assign your bards and instruments from there. Click the guitar button(optional) to switch instruments, then start the ensemble mode. All of your bards will start to play automatically.
+
+![enter image description here](https://i.imgur.com/kOmttbG.png)
+![enter image description here](https://i.imgur.com/TkYVzCj.png)
+![enter image description here](https://i.imgur.com/sh1wIpC.png)
+
+**You may also `Export to Default Performer`, then you don't need to assign your bards again when switching to new songs.**
+
+* **Alternatively, if your bards are on different devices, or to play with your friends**
+
+Tick the `Play on Multiple Devices` option. Choose tracks from every client, then switch to the song you want to play. `MidiBard` will send commands to the party chat automatically to switch instruments. Start the ensemble mode then all of your bards will start to play automatically.
+
+![enter image description here](https://i.imgur.com/Fz5qsJ0.png)
+
+**You only need to assign the tracks once after rebooting the game. They will always play the same track number even on different songs.**
 
 
 # Q&A
@@ -120,14 +131,27 @@ Type these commands in the party chat to control all bards in the same party tha
 
 * **switchto [song number]**
 
-Switching to the Xth song on the playlist. e.g. `switchto 2` will make every bard switch to the 2nd song on the playlist(assuming everyone has the same playlist).
+Switches to the Xth song on the playlist. e.g. `switchto 2` will make every bard switch to the 2nd song on the playlist(assuming everyone has the same playlist).
+
 * **close**
 
-Stop playing and quit performance mode.
+Stops playing and quit performance mode.
 
-*  **reloadplaylist**
+*  **reloadconfig**
 
-Reload the config file which saves the playlist. This can be used after any changes to the playlist so the clients on the same PC can have the same playlist.
+Reloads the config file.
+
+*  **speed [number]**
+
+Sets playback speed on all clients. 1 means normal speed, the value should be larger than 0.1. e.g. `speed 2` makes the song play 2x faster.
+
+*  **transpose [number]**
+
+Sets global transpose between all clients, the drum tracks won't be affected. e.g. `transpose -2`.
+
+*  **pmd [on|off] playonmultipledevices [on|off]**
+
+Sets the option `Play on Multiple Devices` on all clients. e.g `pmd on` or `playonmultipledevices off`.
 
 # BMP Track Name References For Auto-Switch Instruments
 

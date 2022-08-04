@@ -19,19 +19,19 @@ internal static class SwitchInstrument
 {
     public static bool SwitchingInstrument { get; private set; }
 
-    public static void SwitchToContinue(uint instrumentId, int timeOut = 3000)
+    public static void SwitchToContinue(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
     {
         Task.Run(async () =>
         {
             var isPlaying = MidiBard.IsPlaying;
             MidiBard.CurrentPlayback?.Stop();
-            await SwitchTo(instrumentId);
+            await SwitchTo(instrumentId, forceSwitch, timeOut);
             if (isPlaying)
                 MidiBard.CurrentPlayback?.Start();
         });
     }
 
-    public static async Task SwitchTo(uint instrumentId, int timeOut = 3000)
+    public static async Task SwitchTo(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
     {
         if (MidiBard.config.playOnMultipleDevices)
         {
@@ -41,32 +41,35 @@ internal static class SwitchInstrument
             UpdateGuitarToneByMidiConfig();
         }
 
-        if (MidiBard.CurrentInstrument == instrumentId)
-            return;
-
-        SwitchingInstrument = true;
-        var sw = Stopwatch.StartNew();
-        try
+        if (forceSwitch || MidiBard.config.bmpTrackNames)
         {
-            if (MidiBard.CurrentInstrument != 0)
+            if (MidiBard.CurrentInstrument == instrumentId)
+                return;
+
+            SwitchingInstrument = true;
+            var sw = Stopwatch.StartNew();
+            try
             {
-                PerformActions.DoPerformAction(0);
-                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
-            }
+                if (MidiBard.CurrentInstrument != 0)
+                {
+                    PerformActions.DoPerformAction(0);
+                    await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
+                }
 
-            PerformActions.DoPerformAction(instrumentId);
-            await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
-            await Task.Delay(200);
-            PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
-            //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
-        }
-        finally
-        {
-            SwitchingInstrument = false;
+                PerformActions.DoPerformAction(instrumentId);
+                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+                await Task.Delay(200);
+                PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
+                //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
+            }
+            finally
+            {
+                SwitchingInstrument = false;
+            }
         }
     }
 
