@@ -143,6 +143,7 @@ static class IPCHandles
 		if (!takeout)
 		{
 			SwitchInstrument.SwitchToContinue(0);
+			MidiPlayerControl.Stop();
 			return;
 		}
 
@@ -275,6 +276,10 @@ static class IPCHandles
 	{
 		var playbackSpeed = message.DataStruct<float>();
 		MidiBard.config.playSpeed = playbackSpeed;
+		if (MidiBard.CurrentPlayback != null)
+		{
+			MidiBard.CurrentPlayback.Speed = MidiBard.config.playSpeed;
+		}
 	}
 	
 	public static void GlobalTranspose(int transpose)

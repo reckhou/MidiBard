@@ -66,22 +66,14 @@ public partial class PluginUI
         ImGui.SameLine();
         if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
         {
-            if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
+            if (FilePlayback.isWaiting)
             {
-                MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+                FilePlayback.CancelWaiting();
             }
             else
             {
-                if (FilePlayback.isWaiting)
-                {
-                    FilePlayback.CancelWaiting();
-                }
-                else
-                { 
-                    MidiPlayerControl.Stop();
-                    IPCHandles.UpdateInstrument(false);
-                }
-            }
+                StopEnsemble();
+            }         
         }
     }
 
@@ -130,10 +122,16 @@ public partial class PluginUI
 
     private static void StopEnsemble()
     {
-        if (MidiBard.AgentMetronome.EnsembleModeRunning)
+        if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
         {
-            MidiPlayerControl.Stop();
-            IPCHandles.UpdateInstrument(false);
+            MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+        }
+        else
+        {
+            if (MidiBard.AgentMetronome.EnsembleModeRunning)
+            {
+                IPCHandles.UpdateInstrument(false);
+            }
         }
     }
 }
