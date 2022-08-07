@@ -124,11 +124,6 @@ static class IPCHandles
 	private static void HandleUpdateMidiFileConfig(IPCEnvelope message)
 	{
 		var midiFileConfig = message.StringData[0].JsonDeserialize<MidiFileConfig>();
-		bool updateInstrumentAfterFinished = message.StringData[1].ToString() == "True";
-		while (MidiBard.CurrentPlayback == null)
-        {
-			System.Threading.Thread.Sleep(5);
-        }
 		MidiBard.CurrentPlayback.MidiFileConfig = midiFileConfig;
 		var dbTracks = midiFileConfig.Tracks;
 		var trackStatus = MidiBard.config.TrackStatus;

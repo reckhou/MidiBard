@@ -285,6 +285,19 @@ public partial class PluginUI
 								}
 							}
 
+							if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+							{
+								// choose empty, remove all the characters in the same party
+								foreach (var member in api.PartyList)
+								{
+									if (dbTrack.AssignedCids.Contains(member.ContentId))
+									{
+										dbTrack.AssignedCids.Remove(member.ContentId);
+									}
+								}
+								changed = true;
+							}
+
 							ImGuiUtil.ToolTip(ensemble_combo_tooltip_assign_track_character);
 
 							ImGui.PopStyleColor();

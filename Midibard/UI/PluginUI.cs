@@ -156,7 +156,7 @@ public partial class PluginUI
 					DrawButtonVisualization();
 					if (api.PartyList.Length > 1 && api.PartyList.IsPartyLeader())
 					{
-						DrawButtonShowEnsembleControl();
+					DrawButtonShowEnsembleControl();
 					} else
                     {
 						ShowEnsembleControlWindow = false;

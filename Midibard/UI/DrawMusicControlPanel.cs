@@ -26,8 +26,6 @@ public partial class PluginUI
             LRCDeltaTime();
         }
 
-        ComboBoxSwitchInstrument();
-
 		var inputDevices = InputDeviceManager.Devices;
 		if (BeginCombo(setting_label_midi_input_device, InputDeviceManager.CurrentInputDevice.DeviceName()))
 		{

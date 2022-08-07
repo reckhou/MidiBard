@@ -41,6 +41,12 @@ public partial class PluginUI
 				ref MidiBard.config.AutoSetBackgroundFrameLimit);
 			ImGuiUtil.ToolTip(setting_tooltip_auto_set_background_frame_limit);
 
+			if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
+			{
+				IPC.IPCHandles.PlayOnMultipleDevices(MidiBard.config.playOnMultipleDevices);
+			}
+			ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
+
 			//ImGui.Checkbox(checkbox_auto_restart_listening, ref MidiBard.config.autoRestoreListening);
 			//ImGuiUtil.ToolTip(checkbox_auto_restart_listening_tooltip);
 
@@ -104,15 +110,6 @@ public partial class PluginUI
 
 		Checkbox(setting_label_auto_transpose_by_file_name, ref MidiBard.config.autoTransposeBySongName);
 		ImGuiUtil.ToolTip(setting_tooltip_auto_transpose_by_file_name);
-
-		if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
-        {
-            IPC.IPCHandles.PlayOnMultipleDevices(MidiBard.config.playOnMultipleDevices);
-        }
-        ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
-
-		ImGui.Checkbox("[BETA] Auto change frame limit and character quantity", ref MidiBard.config.AutoSetBackgroundFrameLimit);
-        ImGuiUtil.ToolTip("Automatically disablse/sets background frame limit and minimal character quantity, when equipping/unequipping the instuments.");
 
 		ImGuiGroupPanel.EndGroupPanel();
 		Spacing();
