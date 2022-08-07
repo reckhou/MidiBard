@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -133,13 +134,11 @@ static class Extensions
 	public static T ProtoDeepClone<T>(this T obj) => ProtoBuf.Serializer.DeepClone(obj);
 	public static string JsonSerialize<T>(this T obj) where T : class => JsonConvert.SerializeObject(obj, Formatting.Indented, JsonSerializerSettings);
 	public static T JsonDeserialize<T>(this string str) where T : class => JsonConvert.DeserializeObject<T>(str);
-	public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> valueCreator)
+	public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> valueFactory)
 	{
-		if (!dict.TryGetValue(key, out TValue val))
-		{
-			val = valueCreator();
-			dict.Add(key, val);
-		}
+		if (dict.TryGetValue(key, out TValue val)) return val;
+		val = valueFactory();
+		dict.Add(key, val);
 
 		return val;
 	}
@@ -167,4 +166,49 @@ static class Extensions
 	//	if (value.CompareTo(Tmin) < 0) value = Tmax;
 	//	if (value.CompareTo(Tmax) > 0) value = Tmin;
 	//}
+
+
+	public static string EllipsisString(this string rawString, int maxLength = 30, char delimiter = '\\')
+	{
+		maxLength -= 3; //account for delimiter spacing
+
+		if (rawString.Length <= maxLength)
+		{
+			return rawString;
+		}
+
+		string final = rawString;
+		List<string> parts;
+
+		int loops = 0;
+		while (loops++ < 100)
+		{
+			parts = rawString.Split(delimiter).ToList();
+			parts.RemoveRange(parts.Count - 1 - loops, loops);
+			if (parts.Count == 1)
+			{
+				return parts.Last();
+			}
+
+			parts.Insert(parts.Count - 1, "...");
+			final = string.Join(delimiter.ToString(), parts);
+			if (final.Length < maxLength)
+			{
+				return final;
+			}
+		}
+
+		return rawString.Split(delimiter).ToList().Last();
+	}
+
+	public static void ExecuteCmd(string url, string args = null)
+	{
+		ProcessStartInfo processStartInfo;
+		processStartInfo = args is null
+			? new ProcessStartInfo(url)
+			: new ProcessStartInfo(url, args);
+		processStartInfo.UseShellExecute = true;
+
+		Process.Start(processStartInfo);
+	}
 }

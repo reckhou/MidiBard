@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -45,7 +46,6 @@ public class MidiBard : IDalamudPlugin
     public static Configuration config { get; internal set; }
     internal static PluginUI Ui { get; set; }
     internal static BardPlayback CurrentPlayback { get; set; }
-    internal static Localizer Localizer { get; set; }
     internal static AgentMetronome AgentMetronome { get; set; }
     internal static AgentPerformance AgentPerformance { get; set; }
     internal static AgentConfigSystem AgentConfigSystem { get; set; }
@@ -65,7 +65,6 @@ public class MidiBard : IDalamudPlugin
     internal static PlayNoteHook PlayNoteHook;
 
     internal static bool SlaveMode = false;
-    internal static bool BroadcastNotes = false;
 
     internal static byte CurrentInstrument => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset);
     internal static byte CurrentTone => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset + 1);
@@ -100,10 +99,15 @@ public class MidiBard : IDalamudPlugin
         TryLoadConfig();
         MidiFileConfigManager.Init();
 
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        //migrate old playlist
+        if (MidiBard.config.Playlist.Any()) {
+	        PlaylistManager.CurrentContainer.SongPaths.AddRange(MidiBard.config.Playlist.Select(i=> new SongEntry(){FilePath = i}));
+            MidiBard.config.Playlist.Clear();
+        }
+        
+        ConfigureLanguage(GetCultureCodeString((CultureCode)config.uiLang));
 
-        //Configuration.Init();
-        Localizer = new Localizer((UILang)config.uiLang);
+ 
         IpcManager = new IPCManager();
         PartyWatcher = new PartyWatcher();
 
@@ -124,8 +128,6 @@ public class MidiBard : IDalamudPlugin
 #endif
         _chatGui = chatGui;
         _chatGui.ChatMessage += PartyChatCommand.OnChatMessage;
-
-        Task.Run(() => PlaylistManager.AddAsync(MidiBard.config.Playlist.ToArray(), true, true));
 
         _ = BardPlayDevice.Instance;
         InputDeviceManager.ScanMidiDeviceThread.Start();
@@ -311,19 +313,61 @@ public class MidiBard : IDalamudPlugin
         }
     }
 
+    public enum CultureCode
+    {
+	    English,
+	    简体中文,
+        //繁體中文,
+        //日本語,
+        //Deutsch,
+    }
+
+    public static string GetCultureCodeString(CultureCode culture)
+    {
+	    return culture switch
+	    {
+		    CultureCode.English => "en",
+		    CultureCode.简体中文 => "zh-Hans",
+		    //CultureCode.繁體中文 => "zh-Hant",
+		    //CultureCode.日本語 => "ja",
+		    //CultureCode.Deutsch => "de",
+		    _ => null
+	    };
+    }
+
+    //https://git.annaclemens.io/ascclemens/SoundFilter/src/commit/0a109907477bf1839e220c460253da68c6162d5c/SoundFilter/Ui/PluginUi.cs#L31
+    internal static void ConfigureLanguage(string? langCode = null)
+    {
+	    // ReSharper disable once ConstantNullCoalescingCondition
+	    langCode ??= api.PluginInterface.UiLanguage ?? "en";
+	    try
+	    {
+		    MidiBard2Preview.Resources.Language.Culture = new CultureInfo(langCode);
+	    }
+	    catch (Exception ex)
+	    {
+		    PluginLog.LogError(ex, $"Could not set culture to {langCode} - falling back to default");
+		    MidiBard2Preview.Resources.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
+	    }
+    }
+
     internal static void SaveConfig()
     {
-        try
-        {
-            var startNew = Stopwatch.StartNew();
-            api.PluginInterface.SavePluginConfig(config);
-            PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error(e, "Error when saving config");
-            ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
-        }
+	    var startNew = Stopwatch.StartNew();
+	    Task.Run(() =>
+	    {
+		    try
+		    {
+			    api.PluginInterface.SavePluginConfig(config);
+			    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
+		    }
+		    catch (Exception e)
+		    {
+			    PluginLog.Warning($"error when saving config {e.Message}");
+			    //ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
+
+            }
+        });
     }
 
     internal static void TryLoadConfig(int trycount = 10)
@@ -363,6 +407,7 @@ public class MidiBard : IDalamudPlugin
             api.Framework.Update -= OnFrameworkUpdate;
             api.Framework.Update -= Lrc.Tick;
             api.PluginInterface.UiBuilder.Draw -= Ui.Draw;
+            PlaylistManager.CurrentContainer.Save();
 
             EnsembleManager.Dispose();
             PartyWatcher.Dispose();

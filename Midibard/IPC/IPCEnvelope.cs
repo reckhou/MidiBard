@@ -60,8 +60,6 @@ internal class IPCEnvelope
 	public byte[] Data { get; init; }
 	[ProtoMember(7)]
 	public string[] StringData { get; init; }
-	//[ProtoMember(8)]
-	//public PlaylistContainer PlaylistContainer { get; set; }
-
-	public byte[] Serialize() => Dalamud.Utility.Util.CompressString(JsonConvert.SerializeObject(this, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.None }));
+	[ProtoMember(8)]
+	public PlaylistContainer PlaylistContainer { get; set; }
 }

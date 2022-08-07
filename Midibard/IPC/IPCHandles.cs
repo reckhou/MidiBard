@@ -1,4 +1,7 @@
-﻿using System;
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -14,7 +17,6 @@ using MidiBard.Control.MidiControl.PlaybackInstance;
 using Melanchall.DryWetMidi.Interaction;
 
 namespace MidiBard.IPC;
-
 public enum MessageTypeCode
 {
 	Hello = 1,
@@ -49,39 +51,73 @@ public enum MessageTypeCode
 	ErrPlaybackNull = 1000
 }
 
+enum PlaylistOperation
+{
+	SyncAll = 1,
+	AddIndex,
+	CloneIndex,
+	RemoveIndex,
+	ReorderIndex,
+	RenameIndex,
+}
+
 static class IPCHandles
 {
+	[IPCHandle(MessageTypeCode.Hello)]
+	private static void HandleHello(IPCEnvelope message)
+	{
+		ArrayBufferWriter<byte> b = new ArrayBufferWriter<byte>();
+	}
+
 	public static void SyncPlaylist()
 	{
-		if (!MidiBard.config.SyncClients) return;
-		IPCEnvelope.Create(MessageTypeCode.SyncPlaylist, MidiBard.config.Playlist.ToArray()).BroadCast();
+		var ipcEnvelope = IPCEnvelope.Create(MessageTypeCode.SyncPlaylist);
+		ipcEnvelope.PlaylistContainer = PlaylistManager.CurrentContainer;
+		ipcEnvelope.BroadCast();
 	}
 
 	[IPCHandle(MessageTypeCode.SyncPlaylist)]
 	private static void HandleSyncPlaylist(IPCEnvelope message)
 	{
-		var paths = message.StringData;
-		Task.Run(() => PlaylistManager.AddAsync(paths, true, true));
+		PlaylistManager.SetContainerPrivate(message.PlaylistContainer);
 	}
 
-	public static void RemoveTrackIndex(int index)
+	//public static void SyncPlayStatus(bool loadPlayback)
+	//{
+	//	var status = (PlaylistContainerManager.CurrentPlaylistIndex, PlaylistManager.CurrentSongIndex, loadPlayback);
+	//	var ipcEnvelope = IPCEnvelope.Create(MessageTypeCode.SyncPlayStatus, status);
+	//	ipcEnvelope.BroadCast();
+	//}
+
+	//[IPCHandle(MessageTypeCode.SyncPlayStatus)]
+	//private static void HandleSyncPlayStatus(IPCEnvelope message)
+	//{
+	//	var (playlistIndex, songIndex, loadPlayback) = message.DataStruct<(int,int,bool)>();
+	//	var container = PlaylistContainerManager.Container;
+	//	container.CurrentListIndex = playlistIndex;
+	//	container.CurrentPlaylist.CurrentSongIndex = songIndex;
+
+	//	if (loadPlayback)
+	//	{
+	//		PlaylistManager.LoadPlayback(null, false, false);
+	//	}
+	//}
+
+	public static void RemoveTrackIndex(int playlistIndex, int index)
 	{
-		if (!MidiBard.config.SyncClients) return;
-		IPCEnvelope.Create(MessageTypeCode.RemoveTrackIndex, index).BroadCast();
+		IPCEnvelope.Create(MessageTypeCode.RemoveTrackIndex, (playlistIndex, index)).BroadCast();
 	}
 
 	[IPCHandle(MessageTypeCode.RemoveTrackIndex)]
 	private static void HandleRemoveTrackIndex(IPCEnvelope message)
 	{
-		PlaylistManager.RemoveLocal(message.DataStruct<int>());
+		var tuple = message.DataStruct<(int, int)>();
+		PlaylistManager.RemoveLocal(tuple.Item1, tuple.Item2);
 	}
 
 	public static void UpdateMidiFileConfig(MidiFileConfig config, bool updateInstrumentAfterFinished = false)
 	{
-		if (!MidiBard.config.SyncClients) return;
-		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
-        string[] strings = new string[2] { config.JsonSerialize(), updateInstrumentAfterFinished.ToString()};
-		IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, strings).BroadCast(true);
+		IPCEnvelope.Create(MessageTypeCode.UpdateMidiFileConfig, config.JsonSerialize()).BroadCast(true);
 	}
 
 	[IPCHandle(MessageTypeCode.UpdateMidiFileConfig)]
@@ -109,25 +145,20 @@ static class IPCHandles
 				PluginLog.Error(e, $"error when updating track {i}");
 			}
 		}
-
-		MidiBard.config.EnableTransposePerTrack = true;
-		
-		if (updateInstrumentAfterFinished)
-        {
-			UpdateInstrument(true);
-        }
 	}
 
 	public static void LoadPlayback(int index, bool includeSelf = false)
 	{
-		if (!MidiBard.config.SyncClients) return;
-		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
-		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast(includeSelf);
+		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast();
 	}
+
 	[IPCHandle(MessageTypeCode.LoadPlaybackIndex)]
 	private static void HandleLoadPlayback(IPCEnvelope message)
 	{
-		FilePlayback.LoadPlayback(message.DataStruct<int>(), false, false);
+		var index = message.DataStruct<int>();
+		PlaylistManager.CurrentContainer.CurrentSongIndex = index;
+
+		PlaylistManager.LoadPlayback(null, false, false);
 	}
 
 	public static void UpdateInstrument(bool takeout)
@@ -147,34 +178,19 @@ static class IPCHandles
 			return;
 		}
 
-		while (MidiBard.CurrentPlayback == null)
-		{
-			System.Threading.Thread.Sleep(500);
-		}
-
 		uint? instrument = null;
-		foreach(var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
-        {
+		foreach (var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
+		{
 			if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)api.ClientState.LocalContentId, cur))
-			{ 
+			{
 				instrument = (uint?)cur.Instrument;
 				break;
 			}
-        }
+		}
 
 		if (instrument != null)
 			SwitchInstrument.SwitchToContinue((uint)instrument);
-		}
-
-	//public static void DoMacro(string[] lines, bool includeSelf = false)
-	//{
-	//	IPCEnvelope.Create(MessageTypeCode.Macro, lines).BroadCast(includeSelf);
-	//}
-	//[IPCHandle(MessageTypeCode.Macro)]
-	//private static void HandleDoMacro(IPCEnvelope message)
-	//{
-	//	ChatCommands.DoMacro(message.StringData);
-	//}
+	}
 
 	public static void SetOption(ConfigOption option, int value, bool includeSelf)
 	{
@@ -198,27 +214,17 @@ static class IPCHandles
 		var hWnd = api.PluginInterface.UiBuilder.WindowHandlePtr;
 		var isIconic = Winapi.IsIconic(hWnd);
 
-		if (nCmdShow == Winapi.nCmdShow.SW_RESTORE)
+		switch (nCmdShow)
 		{
-			MidiBard.Ui.Open();
-
-			if (!isIconic)
-			{
-				return;
-			}
+			case Winapi.nCmdShow.SW_RESTORE when isIconic:
+				MidiBard.Ui.Open();
+				Winapi.ShowWindow(hWnd, nCmdShow);
+				break;
+			case Winapi.nCmdShow.SW_MINIMIZE when !isIconic:
+				MidiBard.Ui.Close();
+				Winapi.ShowWindow(hWnd, nCmdShow);
+				break;
 		}
-
-		if (nCmdShow == Winapi.nCmdShow.SW_MINIMIZE)
-		{
-			MidiBard.Ui.Close();
-
-			if (isIconic)
-			{
-				return;
-			}
-		}
-
-		Winapi.ShowWindow(hWnd, nCmdShow);
 	}
 
 	public static void SyncAllSettings()
@@ -227,7 +233,7 @@ static class IPCHandles
 	}
 
 	[IPCHandle(MessageTypeCode.SyncAllSettings)]
-	public static void HandleSyncAllSettings(IPCEnvelope message)
+	private static void HandleSyncAllSettings(IPCEnvelope message)
 	{
 		var str = message.StringData[0];
 		var jsonDeserialize = str.JsonDeserialize<Configuration>();
@@ -275,10 +281,10 @@ static class IPCHandles
 	public static void HandlePlaybackSpeed(IPCEnvelope message)
 	{
 		var playbackSpeed = message.DataStruct<float>();
-		MidiBard.config.playSpeed = playbackSpeed;
+		MidiBard.config.PlaySpeed = playbackSpeed;
 		if (MidiBard.CurrentPlayback != null)
 		{
-			MidiBard.CurrentPlayback.Speed = MidiBard.config.playSpeed;
+			MidiBard.CurrentPlayback.Speed = MidiBard.config.PlaySpeed;
 		}
 	}
 	

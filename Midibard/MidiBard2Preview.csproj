@@ -1,36 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <LangVersion>10.0</LangVersion>
-    <AssemblyVersion>2.2.0.0</AssemblyVersion>
-	  <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	  <Nullable>disable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<LangVersion>10</LangVersion>
+		<AssemblyVersion>2.2.0.0</AssemblyVersion>
+		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<Nullable>disable</Nullable>
 		<UseWpf>true</UseWpf>
 		<Configurations>Debug;Release;DEBUG2</Configurations>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="lib\**" />
-    <EmbeddedResource Remove="lib\**" />
-    <None Remove="lib\**" />
-  </ItemGroup>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.7" />
-    <!--<PackageReference Include="ILRepack" Version="2.0.18" />-->
-    <PackageReference Include="Melanchall.DryWetMidi" Version="6.1.1" />
-	<PackageReference Include="morelinq" Version="3.3.2" />
-	<PackageReference Include="TinyIpc" Version="3.1.1" />
-	<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="Fody" Version="6.6.3" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+    <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all" />
+		<!--<PackageReference Include="ILRepack" Version="2.0.18" />-->
+		<PackageReference Include="Melanchall.DryWetMidi" Version="6.1.1" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     <PackageReference Include="XivCommon" Version="5.0.1-alpha.1" />
-  </ItemGroup>
-  	<ItemGroup>
+		<PackageReference Include="TinyIpc" Version="3.1.1" />
+	</ItemGroup>
+	<ItemGroup>
 	  <ProjectReference Include="..\playlib\playlib.csproj" />
 	</ItemGroup>
 
@@ -65,16 +62,37 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Language.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Language.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Language.zh-Hans.resx">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
 
-  <Target Name="CleanOutDir" AfterTargets="Build">
-    <ItemGroup>
-      <!--<DeleteAssemblies Include="$(TargetDir)*.pdb" />-->
-      <DeleteAssemblies Include="$(TargetDir)$(AssemblyName).deps.json" />
-    </ItemGroup>
-    <Message Text="Deleting @(DeleteAssemblies)" Importance="high" />
-    <Delete Files="@(DeleteAssemblies)" />
-    <RemoveDir Directories="$(TargetDir)\ref\" />
-  </Target>
+	<ItemGroup>
+	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\Language.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Language.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<Target Name="CleanOutDir" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<ItemGroup>
+			<!--<DeleteAssemblies Include="$(TargetDir)*.pdb" />-->
+			<DeleteAssemblies Include="$(TargetDir)$(AssemblyName).deps.json" />
+		</ItemGroup>
+		<Message Text="Deleting @(DeleteAssemblies)" Importance="high" />
+		<Delete Files="@(DeleteAssemblies)" />
+		<RemoveDir Directories="$(TargetDir)\ref\" />
+	</Target>
 
 	<Target Name="PackagePlugin" AfterTargets="CleanOutDir" Condition="'$(Configuration)' == 'Release'">
 		<DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" Exclude="*.pdb;" AssemblyName="$(AssemblyName)" />

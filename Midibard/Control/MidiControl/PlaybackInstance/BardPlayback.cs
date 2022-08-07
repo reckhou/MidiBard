@@ -59,14 +59,16 @@ internal sealed class BardPlayback : Playback
 			FilePath = filePath,
 			TrackChunks = trackChunks,
 			TrackInfos = trackInfos,
-			MidiFileConfig = midiFileConfig
+			MidiFileConfig = midiFileConfig,
+			DisplayName = $"{PlaylistManager.CurrentSongIndex + 1:000} {Path.GetFileNameWithoutExtension(filePath)}"
 		};
 	}
+	
 
 
 
 	private BardPlayback(IEnumerable<TimedEventWithMetadata> timedObjects, TempoMap tempoMap)
-		: base(timedObjects, tempoMap, new PlaybackSettings { ClockSettings = new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() } })
+	: base(timedObjects, tempoMap, new PlaybackSettings { ClockSettings = new MidiClockSettings { CreateTickGeneratorCallback = () => new HighPrecisionTickGenerator() } })
 	{
 	}
 
@@ -82,6 +84,8 @@ internal sealed class BardPlayback : Playback
 	internal string FilePath { get; init; }
 	internal TrackChunk[] TrackChunks { get; init; }
 	internal TrackInfo[] TrackInfos { get; init; }
+
+	internal string DisplayName { get; init; }
 
 	private static void PreparePlaybackData(MidiFile file, out TempoMap tempoMap, out TrackChunk[] trackChunks, out TrackInfo[] trackInfos, out TimedEventWithMetadata[] timedEventWithMetadata)
 	{
@@ -175,7 +179,7 @@ internal sealed class BardPlayback : Playback
 	{
 		var timedEvents = tracks
 			.SelectMany((track, index) => track.GetTimedEvents()
-					.Where(i => i.Event.EventType is not MidiEventType.ControlChange)
+					.Where(i => i.Event.EventType is not MidiEventType.ControlChange and not MidiEventType.PitchBend and not MidiEventType.UnknownMeta)
 					.Select(timedEvent => new TimedEventWithMetadata(timedEvent.Event, timedEvent.Time, GetMetadataForEvent(timedEvent.Event, timedEvent.Time, index))))
 			.OrderBy(e => e.Time)
 			.ThenBy(i => ((BardPlayDevice.MidiPlaybackMetaData)i.Metadata).eventValue);
@@ -237,16 +241,4 @@ internal sealed class BardPlayback : Playback
 
 		return midiFileConfig;
 	}
-
-	[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-	private static TimedEventWithMetadata[] CutLongNotes(TimedEventWithMetadata[] timedEvents)
-    {
-		Dictionary<int, int> noteLengthDict = new Dictionary<int, int>();
-		foreach(var cur in timedEvents)
-        {
-			PluginLog.LogDebug(cur.ToString());
-        }
-
-		return timedEvents;
-    }
 }

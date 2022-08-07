@@ -42,7 +42,7 @@ namespace MidiBard.Managers
 					Index = i.Index,
 					Name = i.TrackName,
 					Instrument = (int)(i.InstrumentIDFromTrackName ?? 0),
-					Transpose = i.TransposeFromTrackName
+					Transpose = i.TransposeFromTrackName,
 				}).ToList(),
 				AdaptNotes = MidiBard.config.AdaptNotesOOR,
 				ToneMode = MidiBard.config.GuitarToneMode,

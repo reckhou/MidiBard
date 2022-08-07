@@ -48,7 +48,8 @@ namespace MidiBard
 					return;
 				}
 
-				MidiPlayerControl.SwitchSong(number - 1, false, true, true);
+				MidiPlayerControl.SwitchSong();
+				PlaylistManager.LoadPlayback(number-1);
 				Ui.Open();
 			}
             else if (cmd == "reloadconfig") // reload the config
@@ -58,7 +59,7 @@ namespace MidiBard
             else if (cmd == "close") // switch off the instrument
 			{
 				MidiPlayerControl.Stop();
-				SwitchInstrument.SwitchTo(0);
+				SwitchInstrument.SwitchToAsync(0);
 			} else if (cmd == "speed")
             {
 				if (strings.Length < 2)
@@ -73,7 +74,7 @@ namespace MidiBard
 					return;
 				}
 
-				MidiBard.config.playSpeed = Math.Max(0.1f, number);
+				MidiBard.config.PlaySpeed = Math.Max(0.1f, number);
 			} else if (cmd == "transpose")
             {
 				if (strings.Length < 2)
