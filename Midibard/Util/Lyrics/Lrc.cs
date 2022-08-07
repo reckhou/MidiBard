@@ -245,7 +245,8 @@ namespace MidiBard.Util.Lyrics
                     return;
                 }
 
-                if (MidiPlayerControl._stat == MidiPlayerControl.e_stat.Playing && !SongTitlePosted && api.PartyList.IsPartyLeader())
+                if (MidiPlayerControl._stat == MidiPlayerControl.e_stat.Playing && HasLyric()
+                    && !SongTitlePosted && api.PartyList.IsPartyLeader())
                 {
                     string msg = "";
                     msg = $"♪ {_lrc.Title} ♪ ";
