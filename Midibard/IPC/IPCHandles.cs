@@ -46,7 +46,6 @@ public enum MessageTypeCode
 	PlaybackSpeed,
 	GlobalTranspose,
 	MoveToTime,
-	PlayOnMultipleDevices,
 
 	ErrPlaybackNull = 1000
 }
@@ -252,18 +251,6 @@ static class IPCHandles
 		{
 			MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(MidiBard.CurrentPlayback.MidiFileConfig);
 		}
-	}
-
-	public static void PlayOnMultipleDevices(bool playOnMultipleDevices)
-	{
-		IPCEnvelope.Create(MessageTypeCode.PlayOnMultipleDevices, playOnMultipleDevices).BroadCast();
-	}
-
-	[IPCHandle(MessageTypeCode.PlayOnMultipleDevices)]
-	public static void HandlePlayOnMultipleDevices(IPCEnvelope message)
-	{
-		var playOnMultipleDevices = message.DataStruct<bool>();
-		MidiBard.config.playOnMultipleDevices = playOnMultipleDevices;
 	}
 
 	public static void PlaybackSpeed(float playbackSpeed)

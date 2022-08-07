@@ -239,8 +239,8 @@ namespace MidiBard.Util.Lyrics
         public static void Tick(Dalamud.Game.Framework framework)
         {
             try
-            {;
-                if (MidiPlayerControl._stat != MidiPlayerControl.e_stat.Playing)
+            {
+                if (!MidiBard.config.playLyrics || MidiPlayerControl._stat != MidiPlayerControl.e_stat.Playing)
                 {
                     return;
                 }

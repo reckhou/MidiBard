@@ -43,9 +43,15 @@ public partial class PluginUI
 
 			if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
 			{
-				IPC.IPCHandles.PlayOnMultipleDevices(MidiBard.config.playOnMultipleDevices);
+				IPCHandles.SyncAllSettings();
 			}
 			ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
+
+			if (ImGui.Checkbox("Play Lyrics", ref MidiBard.config.playLyrics))
+            {
+				IPCHandles.SyncAllSettings();
+            }
+			ImGuiUtil.ToolTip("Choose this if you want to post lyrics.");
 
 			//ImGui.Checkbox(checkbox_auto_restart_listening, ref MidiBard.config.autoRestoreListening);
 			//ImGuiUtil.ToolTip(checkbox_auto_restart_listening_tooltip);

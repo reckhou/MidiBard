@@ -99,6 +99,7 @@ public class Configuration : IPluginConfiguration
 
     public bool bmpTrackNames = true;
     public bool playOnMultipleDevices = false;
+    public bool playLyrics = true;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
