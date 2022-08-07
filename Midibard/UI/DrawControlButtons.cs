@@ -51,31 +51,44 @@ public partial class PluginUI
 
 	private unsafe void DrawButtonPlayPause()
 	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
+        {
+			return;
+        }
+
 		var PlayPauseIcon = MidiBard.IsPlaying ? FontAwesomeIcon.Pause : FontAwesomeIcon.Play;
 		if (ImGuiUtil.IconButton(PlayPauseIcon, "playpause"))
 		{
 			PluginLog.Debug($"PlayPause pressed. wasplaying: {MidiBard.IsPlaying}");
+			MidiPlayerControl.PlayPause();
 		}
+		ImGui.SameLine();
 	}
 
 	private unsafe void DrawButtonStop()
 	{
-		ImGui.SameLine();
 		if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
 		{
 			if (FilePlayback.IsWaiting)
 			{
 				FilePlayback.CancelWaiting();
-			}
-			else
+			} else if (MidiBard.AgentMetronome.EnsembleModeRunning)
 			{
 				StopEnsemble();
-			}
+			} else
+            {
+				MidiPlayerControl.Stop();
+			}	
 		}
 	}
 
 	private unsafe void DrawButtonFastForward()
 	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
+		{
+			return;
+		}
+
 		ImGui.SameLine();
 		if (IconButton(((FontAwesomeIcon)0xf050), "btnff"))
 		{
@@ -90,6 +103,11 @@ public partial class PluginUI
 
 	private unsafe void DrawButtonPlayMode()
 	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
+		{
+			return;
+		}
+
 		ImGui.SameLine();
 		FontAwesomeIcon icon = (PlayMode)MidiBard.config.PlayMode switch
 		{

@@ -57,6 +57,7 @@ public partial class PluginUI
 				else
 				{
 					MidiBard.EnsembleManager.StopEnsemble();
+					IPCHandles.UpdateInstrument(false);
 				}
 			}
 
