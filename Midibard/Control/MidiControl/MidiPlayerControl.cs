@@ -15,8 +15,6 @@ internal static class MidiPlayerControl
 {
 	internal static void Play()
 	{
-		playDeltaTime = 0;
-
 		if (MidiBard.CurrentPlayback == null)
 		{
 			if (!PlaylistManager.FilePathList.Any())
@@ -43,15 +41,27 @@ internal static class MidiPlayerControl
 					MidiBard.CurrentPlayback.MoveToStart();
 				}
 
-				MidiBard.CurrentPlayback.Start();
-				_stat = e_stat.Playing;
-				Lrc.Play();
+				DoPlay();
 			}
 			catch (Exception e)
 			{
 				PluginLog.Error(e, "error when try to start playing, maybe the playback has been disposed?");
 			}
 		}
+	}
+
+	public static void DoPlay()
+	{
+		if (MidiBard.CurrentPlayback == null)
+		{
+			return;
+		}
+
+		playDeltaTime = 0;
+		MidiBard.CurrentPlayback.Start();
+		_stat = e_stat.Playing;
+
+		Lrc.Play();
 	}
 
 	internal static void Pause()

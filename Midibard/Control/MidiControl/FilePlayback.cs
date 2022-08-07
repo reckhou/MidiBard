@@ -68,7 +68,7 @@ public static class FilePlayback
 						break;
 					case PlayMode.SingleRepeat:
 						CurrentPlayback.MoveToStart();
-						CurrentPlayback.Start();
+						MidiPlayerControl.DoPlay();
 						break;
 					case PlayMode.ListOrdered when PlaylistManager.CurrentSongIndex >= PlaylistManager.FilePathList.Count - 1:
 						break;
