@@ -137,7 +137,7 @@ static class PlaylistManager
 
 			if (Path.GetExtension(path).Equals(".mmsong"))
 				file = LoadMMSongFile(path);
-			else if (Path.GetExtension(path).Equals(".mid"))
+			else if (Path.GetExtension(path).Equals(".mid") || Path.GetExtension(path).Equals(".midi"))
 				file = LoadMidiFile(path);
 			if (file is not null) yield return path;
 		}

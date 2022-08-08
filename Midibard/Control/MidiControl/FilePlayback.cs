@@ -88,7 +88,12 @@ public static class FilePlayback
 
 	internal static async Task<bool> LoadPlayback(string filePath)
 	{
-		MidiFile midiFile = await Task.Run(() => PlaylistManager.LoadMidiFile(filePath));
+		MidiFile midiFile = null;
+		if (Path.GetExtension(filePath).Equals(".mmsong"))
+			midiFile = await Task.Run(() => PlaylistManager.LoadMMSongFile(filePath));
+		else if (Path.GetExtension(filePath).Equals(".mid") || Path.GetExtension(filePath).Equals(".midi"))
+			midiFile = await Task.Run(() => PlaylistManager.LoadMidiFile(filePath));
+
 		if (midiFile == null)
 		{
 			// delete file if can't be loaded(likely to be deleted locally)

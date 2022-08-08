@@ -24,7 +24,7 @@ static class FileDialogs
 		var t = new Thread(() =>
 		{
 			var dialog = new OpenFileDialog {
-				Filter = "midi file (*.mid)|*.mid",
+				Filter = "Midi Files (*.mid, *.midi, *.mmsong)|*.mid;*.midi;*.mmsong",
 				RestoreDirectory = true,
 				CheckFileExists = true,
 				Multiselect = true,
