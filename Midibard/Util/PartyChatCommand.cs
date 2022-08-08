@@ -55,7 +55,11 @@ namespace MidiBard
             else if (cmd == "reloadconfig") // reload the config
             {
 				IPCHandles.SyncAllSettings();
-			}
+			} else if (cmd == "reloadplaylist")
+            {
+				// hacky way to reload the opening play list
+				PlaylistManager.CurrentContainer = PlaylistManager.LoadLastPlaylist();
+            }
             else if (cmd == "close") // switch off the instrument
 			{
 				MidiPlayerControl.Stop();
@@ -136,6 +140,16 @@ namespace MidiBard
 
 			var str = isOn ? "on" : "off";
 			MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
+		}
+
+		internal static void SendReloadPlaylist()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
 		}
 	}
 }

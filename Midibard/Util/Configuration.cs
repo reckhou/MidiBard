@@ -99,6 +99,7 @@ public class Configuration : IPluginConfiguration
 
     public bool bmpTrackNames = true;
     public bool playOnMultipleDevices = false;
+    public bool usingFileSharingServices = true;
     public bool playLyrics = true;
     public string defaultPerformerFolder = DalamudApi.api.PluginInterface.ConfigDirectory.FullName;
 

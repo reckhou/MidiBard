@@ -29,17 +29,19 @@ namespace MidiBard;
 
 static class PlaylistManager
 {
-	private static PlaylistContainer LoadLastPlaylist()
+	internal static PlaylistContainer LoadLastPlaylist()
 	{
 		var config = MidiBard.config;
 		var recentUsedPlaylists = config.RecentUsedPlaylists;
 		var lastOrDefault = recentUsedPlaylists.LastOrDefault();
 
 		if (lastOrDefault is null) {
+			PluginLog.Log("Load Default playlist");
 			return PlaylistContainer.FromFile(
 				Path.Combine(api.PluginInterface.GetPluginConfigDirectory(), "DefaultPlaylist.mpl"), true);
 		}
 
+		PluginLog.Log($"Load playlist: {lastOrDefault}");
 		return PlaylistContainer.FromFile(lastOrDefault);
 	}
 
@@ -78,6 +80,7 @@ static class PlaylistManager
 		var playlistIndex = CurrentContainer.CurrentSongIndex;
 		RemoveLocal(playlistIndex, index);
 		IPCHandles.RemoveTrackIndex(playlistIndex, index);
+		CurrentContainer.Save();
 	}
 
 	public static void RemoveLocal(int playlistIndex, int index)
@@ -125,7 +128,7 @@ static class PlaylistManager
 		});
 
 		IPCHandles.SyncPlaylist();
-
+		CurrentContainer.Save();
 		PluginLog.Information(
 			$"File import all complete in {sw.Elapsed.TotalMilliseconds} ms! success: {success} total: {count}");
 	}

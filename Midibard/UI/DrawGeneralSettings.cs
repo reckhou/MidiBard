@@ -42,22 +42,6 @@ public partial class PluginUI
 				ref MidiBard.config.AutoSetBackgroundFrameLimit);
 			ImGuiUtil.ToolTip(setting_tooltip_auto_set_background_frame_limit);
 
-			bool pmdWasOn = MidiBard.config.playOnMultipleDevices;
-			if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
-			{
-				if (pmdWasOn || MidiBard.config.playOnMultipleDevices)
-				{
-					PartyChatCommand.SendPMD(MidiBard.config.playOnMultipleDevices);
-				}
-			}
-			ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
-
-			if (ImGui.Checkbox("Play Lyrics", ref MidiBard.config.playLyrics))
-            {
-				IPCHandles.SyncAllSettings();
-            }
-			ImGuiUtil.ToolTip("Choose this if you want to post lyrics.");
-
 			//ImGui.Checkbox(checkbox_auto_restart_listening, ref MidiBard.config.autoRestoreListening);
 			//ImGuiUtil.ToolTip(checkbox_auto_restart_listening_tooltip);
 
@@ -121,18 +105,46 @@ public partial class PluginUI
 
 		Checkbox(setting_label_auto_transpose_by_file_name, ref MidiBard.config.autoTransposeBySongName);
 		ImGuiUtil.ToolTip(setting_tooltip_auto_transpose_by_file_name);
-		
-		ImGui.LabelText("", $"Default Performer Folder:");
-		SameLine();
-		ImGui.SetCursorPosX((ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin()).X - 50);
-		ImGui.SetNextItemWidth(50);
-		if (ImGui.Button("Change"))
+
+		if (ImGui.Checkbox("Play Lyrics", ref MidiBard.config.playLyrics))
 		{
-			RunSetDefaultPerformerFolderImGui();
-			MidiBard.SaveConfig();
-			IPCHandles.UpdateDefaultPerformer();
+			IPCHandles.SyncAllSettings();
 		}
-		ImGui.LabelText("", MidiBard.config.defaultPerformerFolder);
+		ImGuiUtil.ToolTip("Choose this if you want to post lyrics.");
+
+		bool pmdWasOn = MidiBard.config.playOnMultipleDevices;
+		if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
+		{
+			if (pmdWasOn || MidiBard.config.playOnMultipleDevices)
+			{
+				PartyChatCommand.SendPMD(MidiBard.config.playOnMultipleDevices);
+			}
+		}
+		ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
+
+		if (MidiBard.config.playOnMultipleDevices)
+		{
+			if (ImGui.Checkbox("Using File Sharing Services", ref MidiBard.config.usingFileSharingServices))
+			{
+				IPCHandles.SyncAllSettings();
+			}
+			ImGuiUtil.ToolTip("Using File Sharing Services like Google Drive to sync songs and performer settings.");
+		}
+
+		if (MidiBard.config.usingFileSharingServices)
+        {
+			ImGui.Text($"Default Performer Folder:");
+			SameLine();
+			ImGui.SetCursorPosX((ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin()).X - 50);
+			ImGui.SetNextItemWidth(50);
+			if (ImGui.Button("Change"))
+			{
+				RunSetDefaultPerformerFolderImGui();
+				MidiBard.SaveConfig();
+				IPCHandles.UpdateDefaultPerformer();
+			}
+			ImGui.Text(MidiBard.config.defaultPerformerFolder);
+		}
 
 		ImGuiGroupPanel.EndGroupPanel();
 		Spacing();

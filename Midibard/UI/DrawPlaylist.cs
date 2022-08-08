@@ -178,8 +178,14 @@ public partial class PluginUI
 
 				//sync playlist
 				if (MenuItem(Language.menu_label_sync_playlist)) {
-					IPCHandles.SyncPlaylist();
 					IPCHandles.SyncAllSettings();
+					if (MidiBard.config.playOnMultipleDevices && MidiBard.config.usingFileSharingServices)
+                    {
+						PartyChatCommand.SendReloadPlaylist();
+                    } else
+                    {
+						IPCHandles.SyncPlaylist();
+					}
 				}
 
 				//save playlist
