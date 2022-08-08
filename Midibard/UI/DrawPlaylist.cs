@@ -528,8 +528,7 @@ public partial class PluginUI
 				{
 					if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
 					{
-						string msg = $"/p switchto {i + 1}";
-						MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+						PartyChatCommand.SendSwitchTo(i + 1);
 					}
 					else
 					{

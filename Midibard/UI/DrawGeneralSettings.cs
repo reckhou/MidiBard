@@ -41,9 +41,13 @@ public partial class PluginUI
 				ref MidiBard.config.AutoSetBackgroundFrameLimit);
 			ImGuiUtil.ToolTip(setting_tooltip_auto_set_background_frame_limit);
 
+			bool pmdWasOn = MidiBard.config.playOnMultipleDevices;
 			if (ImGui.Checkbox("Play on Multiple Devices", ref MidiBard.config.playOnMultipleDevices))
 			{
-				IPCHandles.SyncAllSettings();
+				if (pmdWasOn || MidiBard.config.playOnMultipleDevices)
+				{
+					PartyChatCommand.SendPMD(MidiBard.config.playOnMultipleDevices);
+				}
 			}
 			ImGuiUtil.ToolTip("Choose this if your bards are spread between different devices.");
 

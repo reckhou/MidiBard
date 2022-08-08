@@ -56,7 +56,13 @@ public partial class PluginUI
 				}
 				else
 				{
-					IPCHandles.UpdateInstrument(false);
+					if (!MidiBard.config.playOnMultipleDevices)
+					{
+						IPCHandles.UpdateInstrument(false);
+					} else
+                    {
+						PartyChatCommand.SendClose();
+                    }
 				}
 			}
 
@@ -155,18 +161,8 @@ public partial class PluginUI
 					{
 						MidiFileConfigManager.GetMidiConfigFileInfo(MidiBard.CurrentPlayback.FilePath).Delete();
 						MidiBard.CurrentPlayback.MidiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(MidiBard.CurrentPlayback.TrackInfos);
-						if (!MidiBard.config.playOnMultipleDevices)
-						{
-							MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(MidiBard.CurrentPlayback.MidiFileConfig);
-							IPCHandles.UpdateInstrument(false);
-						}
-						else
-						{
-							if (DalamudApi.api.PartyList.Length > 1)
-							{
-								MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
-							}
-						}
+						MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(MidiBard.CurrentPlayback.MidiFileConfig);
+						IPCHandles.UpdateInstrument(false);						
 					}
 				}
 			}

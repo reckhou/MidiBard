@@ -75,7 +75,11 @@ public partial class PluginUI
 			} else if (MidiBard.AgentMetronome.EnsembleModeRunning)
 			{
 				StopEnsemble();
-			} else
+			} else if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
+			{
+				PartyChatCommand.SendClose();
+			}
+			else
             {
 				MidiPlayerControl.Stop();
 			}	
@@ -148,7 +152,7 @@ public partial class PluginUI
 	{
 		if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
 		{
-			MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+			PartyChatCommand.SendClose();
 		}
 		else
 		{

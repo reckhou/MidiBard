@@ -15,9 +15,9 @@ using static MidiBard.MidiBard;
 
 namespace MidiBard
 {
-	public class PartyChatCommand
+	internal class PartyChatCommand
 	{
-		public static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+		internal static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
 			if (isHandled)
 				return;
@@ -105,6 +105,37 @@ namespace MidiBard
 					MidiBard.config.playOnMultipleDevices = false;
                 }
 			}
+		}
+
+		internal static void SendClose()
+		{
+			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+		}
+
+		internal static void SendSwitchTo(int songNumber)
+        {
+			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p switchto {songNumber}");
+		}
+
+		internal static void SendPMD(bool isOn)
+		{
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			var str = isOn ? "on" : "off";
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
 		}
 	}
 }
