@@ -116,7 +116,7 @@ public partial class PluginUI
 					ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #else
 			var name = $"♪ MidiBard 2 v{typeof(PluginUI).Assembly.GetName().Version} ♪ {api.ClientState.LocalPlayer?.Name.TextValue}@{api.ClientState.LocalPlayer?.HomeWorld.GameData.Name.ToString()} ###MIDIBARD";
-			if (Begin(name, ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag | ImGuiWindowFlags.NoCollapse))
+			if (Begin(name, ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #endif
 			{
 				var icon = (FontAwesomeIcon)(MidiBard.config.miniPlayer ? 0xF424 : 0xF422);

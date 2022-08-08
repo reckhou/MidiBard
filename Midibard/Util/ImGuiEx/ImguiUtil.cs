@@ -302,7 +302,7 @@ public static class ImGuiUtil
 		var prevCursorPos = GetCursorPos();
 		var height = GetTextLineHeightWithSpacing() * 0.95f;
 		var textLineHeight = new Vector2(height);
-		var buttonPos = new Vector2(GetWindowWidth() - (nodeco ? 1.05f : 2.1f) * height, (GetFrameHeight() - height) / 2);
+		var buttonPos = new Vector2(GetWindowWidth() - (nodeco ? 1.05f : 2.85f) * height, (GetFrameHeight() - height) / 2);
 		SetCursorPos(buttonPos);
 		var drawList = GetWindowDrawList();
 		drawList.PushClipRectFullScreen();
