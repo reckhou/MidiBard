@@ -12,6 +12,7 @@ using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Managers;
 using MidiBard.Util;
 using MidiBard.Util.MidiPreprocessor;
+using MidiBard.IPC;
 
 namespace MidiBard.Control.MidiControl.PlaybackInstance;
 
@@ -41,13 +42,30 @@ internal sealed class BardPlayback : Playback
 			}
 			else
 			{
+				var defaultConfig = LoadDefaultPerformer(midiFileConfig);
 				MidiFileConfigManager.UsingDefaultPerformer = false;
+				bool changed = false;
 				for (int i = 0; i < midiFileConfig.Tracks.Count; i++)
 				{
 					var cid = MidiFileConfig.GetFirstCidInParty(midiFileConfig.Tracks[i]);
-					if (cid > 0)
+					if (cid <= 0)
 					{
-						Cids[i] = cid;
+						// try to fall back to default performer if can't find any person in the individual config(possbily caused by changing characters)
+						cid = MidiFileConfig.GetFirstCidInParty(defaultConfig.Tracks[i]);
+						changed = true;
+                        midiFileConfig.Tracks[i].AssignedCids.Add(cid);
+					}
+					Cids[i] = cid;
+				}
+
+				if (changed)
+                {
+					try
+					{
+						midiFileConfig.Save(filePath);
+					}
+					catch (Exception e)
+					{
 					}
 				}
 			}
