@@ -34,8 +34,12 @@ internal sealed class BardPlayback : Playback
 				midiFileConfig = MidiFileConfigManager.GetMidiConfigFromTrack(trackInfos);
 
 				// If can not find individual config, use the Default Performer instead.
-				if (!MidiBard.config.playOnMultipleDevices || (MidiBard.config.playOnMultipleDevices && MidiBard.config.usingFileSharingServices))
+				if (!MidiBard.config.playOnMultipleDevices)
 				{
+					midiFileConfig = LoadDefaultPerformer(midiFileConfig);
+				} else if (MidiBard.config.playOnMultipleDevices && MidiBard.config.usingFileSharingServices)
+                {
+					MidiFileConfigManager.LoadDefaultPerformer();
 					midiFileConfig = LoadDefaultPerformer(midiFileConfig);
 				}
 			}

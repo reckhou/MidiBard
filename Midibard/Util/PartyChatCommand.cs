@@ -63,8 +63,8 @@ namespace MidiBard
 				PlaylistManager.CurrentContainer = PlaylistManager.LoadLastPlaylist();
             } else if (cmd == "updatedefaultperformer")
             {
-				IPCHandles.UpdateDefaultPerformer();
-            } else if (cmd == "updateinstrument")
+				MidiFileConfigManager.LoadDefaultPerformer();
+			} else if (cmd == "updateinstrument")
             {
 				UpdateInstrument();
             }

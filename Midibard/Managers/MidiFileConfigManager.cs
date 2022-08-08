@@ -58,7 +58,7 @@ namespace MidiBard.Managers
 		public static DefaultPerformer defaultPerformer;
 		public static bool UsingDefaultPerformer = true;
 
-		static DefaultPerformer LoadDefaultPerformer()
+		internal static DefaultPerformer LoadDefaultPerformer()
 		{
 			var path = MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json";
 			FileInfo fileInfo = new FileInfo(path);
@@ -171,10 +171,7 @@ namespace MidiBard.Managers
 				if (!MidiBard.config.playOnMultipleDevices)
 				{
 					IPC.IPCHandles.UpdateDefaultPerformer();
-				} else
-                {
-					PartyChatCommand.SendUpdateDefaultPerformer();
-                }
+				}
 			} else
             {
 				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Default Performer!");
