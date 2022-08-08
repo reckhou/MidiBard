@@ -95,10 +95,45 @@ public partial class PluginUI
 		ImGuiUtil.EnumCombo(setting_label_tone_mode, ref MidiBard.config.GuitarToneMode, _toolTips);
 		ImGuiUtil.ToolTip(setting_tooltip_tone_mode);
 
-
-
-
 		//-------------------
+
+		const uint DiscordColor = 0x00F26558;
+		PushStyleColor(ImGuiCol.Button, 0xFF000000 | DiscordColor);
+		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | DiscordColor);
+		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | DiscordColor);
+		if (Button("Join Discord", new Vector2(GetFrameHeight() * 4, GetFrameHeight())))
+		{
+			try
+			{
+				Extensions.ExecuteCmd("https://discord.gg/ff14bard");
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error(e.ToString());
+			}
+		}
+
+		PopStyleColor(3);
+
+		SameLine();
+
+		const uint KofiColor = 0x005E5BFF;
+		PushStyleColor(ImGuiCol.Button, 0xFF000000 | KofiColor);
+		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | KofiColor);
+		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | KofiColor);
+		if (Button("Support us on Ko-fi!", new Vector2(GetFrameHeight() * 6, GetFrameHeight())))
+		{
+			try
+			{
+				Extensions.ExecuteCmd("https://ko-fi.com/midibard");
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error(e.ToString());
+			}
+		}
+
+		PopStyleColor(3);
 	}
 
 	private static void SetSpeed()

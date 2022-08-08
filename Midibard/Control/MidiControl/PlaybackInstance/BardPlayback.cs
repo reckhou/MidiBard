@@ -50,7 +50,7 @@ internal sealed class BardPlayback : Playback
 					var cid = MidiFileConfig.GetFirstCidInParty(midiFileConfig.Tracks[i]);
 					if (cid <= 0)
 					{
-						// try to fall back to default performer if can't find any person in the individual config(possbily caused by changing characters)
+						// fall back to default performer if can't find any record in the individual config(caused by changing characters)
 						cid = MidiFileConfig.GetFirstCidInParty(defaultConfig.Tracks[i]);
 						changed = true;
                         midiFileConfig.Tracks[i].AssignedCids.Add(cid);
