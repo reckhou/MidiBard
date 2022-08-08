@@ -143,6 +143,7 @@ static class IPCHandles
 
 	public static void LoadPlayback(int index, bool includeSelf = false)
 	{
+		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2 || MidiBard.config.playOnMultipleDevices) return;
 		IPCEnvelope.Create(MessageTypeCode.LoadPlaybackIndex, index).BroadCast();
 	}
 
@@ -158,7 +159,7 @@ static class IPCHandles
 	public static void UpdateInstrument(bool takeout)
 	{
 		if (!MidiBard.config.SyncClients) return;
-		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2) return;
+		if (!api.PartyList.IsPartyLeader() || api.PartyList.Length < 2 || MidiBard.config.playOnMultipleDevices) return;
 		IPCEnvelope.Create(MessageTypeCode.SetInstrument, takeout).BroadCast(true);
 	}
 	[IPCHandle(MessageTypeCode.SetInstrument)]

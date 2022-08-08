@@ -94,7 +94,6 @@ internal static class MidiPlayerControl
 
 	internal static void Stop()
 	{
-		MidiBard.EnsembleManager.StopEnsemble();
 		MidiBard.CurrentPlayback?.Dispose();
 		MidiBard.CurrentPlayback = null;
 		Lrc.Stop();

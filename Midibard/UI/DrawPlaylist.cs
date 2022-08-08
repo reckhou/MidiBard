@@ -524,18 +524,19 @@ public partial class PluginUI
 			    ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick |
 			    ImGuiSelectableFlags.AllowItemOverlap)) {
 			if (IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-				if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
+				if (!MidiBard.AgentMetronome.EnsembleModeRunning)
 				{
-					string msg = $"/p switchto {i + 1}";
-					MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+					if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
+					{
+						string msg = $"/p switchto {i + 1}";
+						MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+					}
+					else
+					{
+						MidiPlayerControl.SwitchSong();
+						PlaylistManager.LoadPlayback(i);
+					}
 				}
-				else
-				{
-					// switches instrument when solo, otherwise wait for IPC to be handled
-					MidiPlayerControl.SwitchSong();
-					PlaylistManager.LoadPlayback(i);
-				}
-				
 			}
 		}
 	}

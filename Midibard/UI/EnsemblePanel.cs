@@ -56,7 +56,6 @@ public partial class PluginUI
 				}
 				else
 				{
-					MidiBard.EnsembleManager.StopEnsemble();
 					IPCHandles.UpdateInstrument(false);
 				}
 			}
@@ -159,7 +158,7 @@ public partial class PluginUI
 						if (!MidiBard.config.playOnMultipleDevices)
 						{
 							MidiBard.CurrentPlayback.MidiFileConfig = BardPlayback.LoadDefaultPerformer(MidiBard.CurrentPlayback.MidiFileConfig);
-							IPCHandles.LoadPlayback(-1, true);
+							IPCHandles.UpdateInstrument(false);
 						}
 						else
 						{
