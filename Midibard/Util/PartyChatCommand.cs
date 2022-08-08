@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Dalamud;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -9,6 +10,7 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using MidiBard.IPC;
+using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using System.Threading.Tasks;
 using static MidiBard.MidiBard;
@@ -59,6 +61,12 @@ namespace MidiBard
             {
 				// hacky way to reload the opening play list
 				PlaylistManager.CurrentContainer = PlaylistManager.LoadLastPlaylist();
+            } else if (cmd == "updatedefaultperformer")
+            {
+				IPCHandles.UpdateDefaultPerformer();
+            } else if (cmd == "updateinstrument")
+            {
+				UpdateInstrument();
             }
             else if (cmd == "close") // switch off the instrument
 			{
@@ -150,6 +158,67 @@ namespace MidiBard
 			}
 
 			MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
+		}
+
+		internal static void SendUpdateDefaultPerformer()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updatedefaultperformer");
+		}
+
+		internal static void SendUpdateInstrument()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updateinstrument");
+		}
+
+		private static void UpdateInstrument()
+        {
+			// updates midifile config and instruments
+			// code copied from IPCHandles.cs
+			if (CurrentPlayback == null)
+            {
+				return;
+            }
+
+			var dbTracks = MidiBard.CurrentPlayback.MidiFileConfig.Tracks;
+			var trackStatus = MidiBard.config.TrackStatus;
+			for (var i = 0; i < dbTracks.Count; i++)
+			{
+				try
+				{
+					trackStatus[i].Enabled = dbTracks[i].Enabled && MidiFileConfig.GetFirstCidInParty(dbTracks[i]) == (long)DalamudApi.api.ClientState.LocalContentId;
+					trackStatus[i].Transpose = dbTracks[i].Transpose;
+					trackStatus[i].Tone = Util.InstrumentHelper.GetGuitarTone(dbTracks[i].Instrument);
+				}
+				catch (Exception e)
+				{
+					PluginLog.Error(e, $"error when updating track {i}");
+				}
+			}
+
+			uint? instrument = null;
+			foreach (var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
+			{
+				if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)DalamudApi.api.ClientState.LocalContentId, cur))
+				{
+					instrument = (uint?)cur.Instrument;
+					break;
+				}
+			}
+
+			if (instrument != null)
+				SwitchInstrument.SwitchToContinue((uint)instrument);
+
+			PluginLog.LogDebug($"Instrument: {instrument}");
 		}
 	}
 }

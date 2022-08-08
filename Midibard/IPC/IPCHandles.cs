@@ -239,7 +239,7 @@ static class IPCHandles
 
 	public static void UpdateDefaultPerformer()
 	{
-		IPCEnvelope.Create(MessageTypeCode.UpdateDefaultPerformer, MidiFileConfigManager.defaultPerformer.JsonSerialize()).BroadCast();
+		IPCEnvelope.Create(MessageTypeCode.UpdateDefaultPerformer, MidiFileConfigManager.defaultPerformer.JsonSerialize()).BroadCast(true);
 	}
 
 	[IPCHandle(MessageTypeCode.UpdateDefaultPerformer)]

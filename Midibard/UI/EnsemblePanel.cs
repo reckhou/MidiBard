@@ -7,6 +7,7 @@ using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
+using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.DalamudApi;
 using MidiBard.IPC;
@@ -37,60 +38,84 @@ public partial class PluginUI
 		{
 			ImGuiUtil.PushIconButtonSize(new Vector2(ImGuiHelpers.GlobalScale * 40, ImGui.GetFrameHeight()));
 			var ensembleRunning = MidiBard.AgentMetronome.EnsembleModeRunning;
-			if (ImGuiUtil.IconButton(ensembleRunning ? FontAwesomeIcon.Stop : FontAwesomeIcon.UserCheck,
-					"ensembleBegin", ensembleRunning ? ensemble_stop_ensemble : ensemble_begin_ensemble_ready_check))
+
+			if (!MidiBard.config.playOnMultipleDevices || (MidiBard.config.playOnMultipleDevices && MidiBard.config.usingFileSharingServices))
 			{
-				if (!ensembleRunning)
+
+				if (ImGuiUtil.IconButton(ensembleRunning ? FontAwesomeIcon.Stop : FontAwesomeIcon.UserCheck,
+						"ensembleBegin", ensembleRunning ? ensemble_stop_ensemble : ensemble_begin_ensemble_ready_check))
 				{
-					if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+					if (!ensembleRunning)
 					{
-						IPCHandles.UpdateMidiFileConfig(config);
-					}
+						if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+						{
+							IPCHandles.UpdateMidiFileConfig(config);
+						}
 
-					if (MidiBard.config.UpdateInstrumentBeforeReadyCheck)
+						if (MidiBard.config.UpdateInstrumentBeforeReadyCheck)
+						{
+							if (!MidiBard.config.playOnMultipleDevices)
+							{
+								IPCHandles.UpdateInstrument(true);
+							}
+						}
+
+						MidiBard.EnsembleManager.BeginEnsembleReadyCheck();
+					}
+					else
 					{
-						IPCHandles.UpdateInstrument(true);
+						if (!MidiBard.config.playOnMultipleDevices)
+						{
+							IPCHandles.UpdateInstrument(false);
+						}
+						else
+						{
+							PartyChatCommand.SendClose();
+						}
 					}
+				}
 
-					MidiBard.EnsembleManager.BeginEnsembleReadyCheck();
+
+				ImGui.SameLine();
+				if (ensembleRunning)
+				{
+					ImGuiUtil.IconButton(FontAwesomeIcon.Guitar, "UpdateInstrument", ensemble_update_instruments, ImGui.GetColorU32(ImGuiCol.TextDisabled));
 				}
 				else
 				{
-					if (!MidiBard.config.playOnMultipleDevices)
+					if (ImGuiUtil.IconButton(FontAwesomeIcon.Guitar, "UpdateInstrument", ensemble_update_instruments))
 					{
-						IPCHandles.UpdateInstrument(false);
-					} else
-                    {
-						PartyChatCommand.SendClose();
-                    }
-				}
-			}
+						if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+						{
+							IPCHandles.UpdateMidiFileConfig(config);
+						}
 
-
-			ImGui.SameLine();
-			if (ensembleRunning)
-			{
-				ImGuiUtil.IconButton(FontAwesomeIcon.Guitar, "UpdateInstrument", ensemble_update_instruments, ImGui.GetColorU32(ImGuiCol.TextDisabled));
-			}
-			else
-			{
-				if (ImGuiUtil.IconButton(FontAwesomeIcon.Guitar, "UpdateInstrument", ensemble_update_instruments))
-				{
-					if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
-					{
-						IPCHandles.UpdateMidiFileConfig(config);
+						if (!MidiBard.config.playOnMultipleDevices)
+						{
+							IPCHandles.UpdateInstrument(true);
+						}
+						else
+						{
+							PartyChatCommand.SendUpdateInstrument();
+						}
 					}
 
-					IPCHandles.UpdateInstrument(true);
+					if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+					{
+						if (!MidiBard.config.playOnMultipleDevices)
+						{
+							IPCHandles.UpdateInstrument(false);
+						}
+						else
+						{
+							PartyChatCommand.SendClose();
+						}
+					}
 				}
 
-				if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-				{
-					IPCHandles.UpdateInstrument(false);
-				}
+				ImGui.SameLine();
 			}
 
-			ImGui.SameLine();
 			if (ImGuiUtil.IconButton(
 					otherClientsMuted ? FontAwesomeIcon.VolumeOff : FontAwesomeIcon.VolumeUp,
 					"Mute other clients", otherClientsMuted
@@ -108,7 +133,7 @@ public partial class PluginUI
 				IPCHandles.ShowWindow(Winapi.nCmdShow.SW_MINIMIZE);
 			}
 
-			if (!MidiBard.config.playOnMultipleDevices && !MidiFileConfigManager.UsingDefaultPerformer)
+			if (!MidiFileConfigManager.UsingDefaultPerformer && !(MidiBard.config.playOnMultipleDevices && !MidiBard.config.usingFileSharingServices))
 			{
 				ImGui.SameLine();
 				if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -165,48 +190,45 @@ public partial class PluginUI
 						IPCHandles.UpdateInstrument(false);						
 					}
 				}
+
+				ImGui.SameLine();
+
+				if (ImGui.Button("Export To Default Performer"))
+				{
+					MidiFileConfigManager.ExportToDefaultPerformer();
+				}
+				ImGuiUtil.PopIconButtonSize();	
 			}
 
-			if (!MidiBard.config.playOnMultipleDevices)
+			if (MidiFileConfigManager.UsingDefaultPerformer)
 			{
 				ImGui.SameLine();
-				if (MidiFileConfigManager.UsingDefaultPerformer)
-				{
-					ImGui.LabelText($"", "[Using Default Performer]");
-				}
-				else
-				{
-					if (ImGui.Button("Export To Default Performer"))
-					{
-						MidiFileConfigManager.ExportToDefaultPerformer();
-					}
-					ImGuiUtil.PopIconButtonSize();
-				}
+				ImGui.Text("[Using Default Performer]");
 			}
 
-			//SameLine();
-			//if (Button("TEST3"))
-			//{
-			//	try
-			//	{
-			//		IPCHandles.UpdateInstrument(false);
-			//		IPCHandles.SyncAllSettings();
-			//		IPCHandles.UpdateInstrument(false);
-			//		IPCHandles.SyncAllSettings();
-			//		IPCHandles.UpdateInstrument(false);
-			//		IPCHandles.SyncAllSettings();
-			//		IPCHandles.UpdateInstrument(false);
-			//	}
-			//	catch (Exception e)
-			//	{
-			//		PluginLog.Error(e.ToString());
-			//	}
-			//}
+				//SameLine();
+				//if (Button("TEST3"))
+				//{
+				//	try
+				//	{
+				//		IPCHandles.UpdateInstrument(false);
+				//		IPCHandles.SyncAllSettings();
+				//		IPCHandles.UpdateInstrument(false);
+				//		IPCHandles.SyncAllSettings();
+				//		IPCHandles.UpdateInstrument(false);
+				//		IPCHandles.SyncAllSettings();
+				//		IPCHandles.UpdateInstrument(false);
+				//	}
+				//	catch (Exception e)
+				//	{
+				//		PluginLog.Error(e.ToString());
+				//	}
+				//}
 
-			ImGui.Separator();
-			if (MidiBard.config.playOnMultipleDevices)
+				ImGui.Separator();
+			if (MidiBard.config.playOnMultipleDevices && !MidiBard.config.usingFileSharingServices)
 			{
-				ImGui.Button($"Playing On Multiple Devices\nTrack assign is disabled\nPlease choose the tracks on clients individually.", new Vector2(-1, 100));
+				ImGui.Button($"You are NOT using file sharing services to sync settings.\nTrack assign is disabled.\nPlease choose the tracks on clients individually.", new Vector2(-1, 100));
 			}
 			else if (MidiBard.CurrentPlayback == null)
 			{
@@ -338,7 +360,10 @@ public partial class PluginUI
 			}
 
 			ImGui.Separator();
-			ImGui.Checkbox(ensemble_config_Update_instrument_when_begin_ensemble, ref MidiBard.config.UpdateInstrumentBeforeReadyCheck);
+			if (!MidiBard.config.playOnMultipleDevices)
+			{
+				ImGui.Checkbox(ensemble_config_Update_instrument_when_begin_ensemble, ref MidiBard.config.UpdateInstrumentBeforeReadyCheck);
+			}
 #if DEBUG
 			try
 			{

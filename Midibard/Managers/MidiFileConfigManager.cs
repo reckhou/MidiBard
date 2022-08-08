@@ -56,7 +56,7 @@ namespace MidiBard.Managers
 		}
 
 		public static DefaultPerformer defaultPerformer;
-		public static bool UsingDefaultPerformer;
+		public static bool UsingDefaultPerformer = true;
 
 		static DefaultPerformer LoadDefaultPerformer()
 		{
@@ -168,7 +168,13 @@ namespace MidiBard.Managers
 				UsingDefaultPerformer = true;
 				ImGuiUtil.AddNotification(NotificationType.Success, "Default Performer Exported.");
 				GetMidiConfigFileInfo(MidiBard.CurrentPlayback.FilePath).Delete();
-				IPC.IPCHandles.UpdateDefaultPerformer();
+				if (!MidiBard.config.playOnMultipleDevices)
+				{
+					IPC.IPCHandles.UpdateDefaultPerformer();
+				} else
+                {
+					PartyChatCommand.SendUpdateDefaultPerformer();
+                }
 			} else
             {
 				ImGuiUtil.AddNotification(NotificationType.Error, "Fail to Export Default Performer!");

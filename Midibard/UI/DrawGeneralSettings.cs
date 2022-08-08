@@ -131,20 +131,17 @@ public partial class PluginUI
 			ImGuiUtil.ToolTip("Using File Sharing Services like Google Drive to sync songs and performer settings.");
 		}
 
-		if (MidiBard.config.usingFileSharingServices)
-        {
-			ImGui.Text($"Default Performer Folder:");
-			SameLine();
-			ImGui.SetCursorPosX((ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin()).X - 50);
-			ImGui.SetNextItemWidth(50);
-			if (ImGui.Button("Change"))
-			{
-				RunSetDefaultPerformerFolderImGui();
-				MidiBard.SaveConfig();
-				IPCHandles.UpdateDefaultPerformer();
-			}
-			ImGui.Text(MidiBard.config.defaultPerformerFolder);
+		ImGui.Text($"Default Performer Folder:");
+		SameLine();
+		ImGui.SetCursorPosX((ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin()).X - 50);
+		ImGui.SetNextItemWidth(50);
+		if (ImGui.Button("Change"))
+		{
+			RunSetDefaultPerformerFolderImGui();
+			MidiBard.SaveConfig();
+			IPCHandles.UpdateDefaultPerformer();
 		}
+		ImGui.Text(MidiBard.config.defaultPerformerFolder);
 
 		ImGuiGroupPanel.EndGroupPanel();
 		Spacing();
