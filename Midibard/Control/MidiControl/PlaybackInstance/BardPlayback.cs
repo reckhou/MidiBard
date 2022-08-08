@@ -25,7 +25,7 @@ internal sealed class BardPlayback : Playback
 
 		MidiFileConfig midiFileConfig = null;
 		// only use midiFileConfig(including Default Performer) when in the party
-		if (DalamudApi.api.PartyList.Length > 1 || !MidiBard.config.playOnMultipleDevices)
+		if (DalamudApi.api.PartyList.Length > 1)
 		{
 			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
 

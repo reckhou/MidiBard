@@ -60,7 +60,7 @@ namespace MidiBard.Managers
 
 		static DefaultPerformer LoadDefaultPerformer()
 		{
-			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json";
+			var path = MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json";
 			FileInfo fileInfo = new FileInfo(path);
 			if (!fileInfo.Exists)
             {
@@ -79,7 +79,7 @@ namespace MidiBard.Managers
 				defaultPerformer = new DefaultPerformer();
             }
 
-			var path = DalamudApi.api.PluginInterface.ConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json";
+			var path = MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json";
 			try
 			{
 				var trackMappingFileInfo = GetDefaultPerformerFileInfo();
@@ -100,8 +100,7 @@ namespace MidiBard.Managers
 
 		static FileInfo GetDefaultPerformerFileInfo()
 		{
-			var pluginConfigDirectory = DalamudApi.api.PluginInterface.ConfigDirectory;
-			return new FileInfo(pluginConfigDirectory.FullName + $@"\MidiBardDefaultPerformer.json");
+			return new FileInfo(MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json");
 		}
 
 		public static void ExportToDefaultPerformer()

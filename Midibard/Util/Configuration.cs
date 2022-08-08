@@ -100,6 +100,7 @@ public class Configuration : IPluginConfiguration
     public bool bmpTrackNames = true;
     public bool playOnMultipleDevices = false;
     public bool playLyrics = true;
+    public string defaultPerformerFolder = DalamudApi.api.PluginInterface.ConfigDirectory.FullName;
 
     //public bool autoSwitchInstrumentByTrackName = false;
     //public bool autoTransposeByTrackName = false;
@@ -120,8 +121,6 @@ public class Configuration : IPluginConfiguration
     public bool useLegacyFileDialog;
     public bool PlotTracks;
     public bool LockPlot;
-
-    public long[] TrackDefaultCids = new long[100];
 
     public bool TrimChords = false;
     public int TrimTo = 1;

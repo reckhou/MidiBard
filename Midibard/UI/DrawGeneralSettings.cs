@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Logging;
@@ -120,8 +121,32 @@ public partial class PluginUI
 
 		Checkbox(setting_label_auto_transpose_by_file_name, ref MidiBard.config.autoTransposeBySongName);
 		ImGuiUtil.ToolTip(setting_tooltip_auto_transpose_by_file_name);
+		
+		ImGui.LabelText("", $"Default Performer Folder:");
+		SameLine();
+		ImGui.SetCursorPosX((ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin()).X - 50);
+		ImGui.SetNextItemWidth(50);
+		if (ImGui.Button("Change"))
+		{
+			RunSetDefaultPerformerFolderImGui();
+			MidiBard.SaveConfig();
+			IPCHandles.UpdateDefaultPerformer();
+		}
+		ImGui.LabelText("", MidiBard.config.defaultPerformerFolder);
 
 		ImGuiGroupPanel.EndGroupPanel();
 		Spacing();
+	}
+
+	private void RunSetDefaultPerformerFolderImGui()
+	{
+		fileDialogManager.OpenFolderDialog("Set Default Performer Folder", (b, filePath) =>
+		{
+			PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", filePath)}");
+			if (b)
+			{
+				MidiBard.config.defaultPerformerFolder = filePath;
+			}
+		}, MidiBard.config.defaultPerformerFolder);
 	}
 }
