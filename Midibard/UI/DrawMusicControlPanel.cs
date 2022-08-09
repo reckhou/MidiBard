@@ -105,7 +105,7 @@ public partial class PluginUI
 		{
 			try
 			{
-				Extensions.ExecuteCmd("https://discord.gg/ff14bard");
+				Extensions.ExecuteCmd("https://discord.gg/ejGt2mXHJM");
 			}
 			catch (Exception e)
 			{
@@ -126,6 +126,26 @@ public partial class PluginUI
 			try
 			{
 				Extensions.ExecuteCmd("https://ko-fi.com/midibard");
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error(e.ToString());
+			}
+		}
+
+		PopStyleColor(3);
+
+		SameLine();
+
+		const uint WebsiteColor = 0x00C7A416;
+		PushStyleColor(ImGuiCol.Button, 0xFF000000 | WebsiteColor);
+		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | WebsiteColor);
+		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | WebsiteColor);
+		if (Button("MidiBard.org", new Vector2(GetFrameHeight() * 4, GetFrameHeight())))
+		{
+			try
+			{
+				Extensions.ExecuteCmd("https://midibard.org/");
 			}
 			catch (Exception e)
 			{
