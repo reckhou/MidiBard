@@ -61,6 +61,7 @@ public class MidiBard : IDalamudPlugin
     internal static string[] InstrumentStrings;
     internal static readonly byte[] guitarGroup = { 24, 25, 26, 27, 28 };
     internal static IDictionary<SevenBitNumber, uint> ProgramInstruments;
+    internal static MidiBard2.Managers.NetworkWatcher NetworkWatcher;
     internal static PartyWatcher PartyWatcher;
     internal static PlayNoteHook PlayNoteHook;
 
@@ -105,6 +106,7 @@ public class MidiBard : IDalamudPlugin
         //Configuration.Init();
         Localizer = new Localizer((UILang)config.uiLang);
         IpcManager = new IPCManager();
+        NetworkWatcher = new MidiBard2.Managers.NetworkWatcher();
         PartyWatcher = new PartyWatcher();
 
         playlib.init();
@@ -365,6 +367,7 @@ public class MidiBard : IDalamudPlugin
             api.PluginInterface.UiBuilder.Draw -= Ui.Draw;
 
             EnsembleManager.Dispose();
+            NetworkWatcher.Dispose();
             PartyWatcher.Dispose();
             IpcManager.Dispose();
             PlayNoteHook?.Dispose();
