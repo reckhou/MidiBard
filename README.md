@@ -4,7 +4,13 @@
 
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
 
-**Buy me a coffee if you wish:**
+<p align="left">
+  <a href="https://discord.gg/ff14bard">
+    <img src="https://discord.com/api/guilds/897518233068920852/widget.png" alt="Discord">
+  </a>
+</p>
+
+**Buy us some coffee if you wish:**
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
