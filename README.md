@@ -5,7 +5,7 @@
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
 
 <p align="left">
-  <a href="https://discord.gg/ff14bard">
+  <a href="https://discord.gg/xvNhquhnVT">
     <img src="https://discord.com/api/guilds/897518233068920852/widget.png" alt="Discord">
   </a>
 </p>
