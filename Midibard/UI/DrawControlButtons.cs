@@ -72,15 +72,9 @@ public partial class PluginUI
 			if (FilePlayback.IsWaiting)
 			{
 				FilePlayback.CancelWaiting();
-			} else if (MidiBard.AgentMetronome.EnsembleModeRunning)
-			{
-				StopEnsemble();
-			} else if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
-			{
-				PartyChatCommand.SendClose();
-			}
-			else
+			} else
             {
+				StopEnsemble();
 				MidiPlayerControl.Stop();
 			}	
 		}
@@ -156,10 +150,7 @@ public partial class PluginUI
 		}
 		else
 		{
-			if (MidiBard.AgentMetronome.EnsembleModeRunning)
-			{
-				IPCHandles.UpdateInstrument(false);
-			}
+			IPCHandles.UpdateInstrument(false);
 		}
 	}
 }
