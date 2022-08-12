@@ -178,12 +178,12 @@ internal static class MidiPlayerControl
 	public static e_stat _stat = e_stat.Stopped;
 
 
-	internal static void ChangeDeltaTime(int delta)
+	internal static bool ChangeDeltaTime(int delta)
 	{
 		if (MidiBard.CurrentPlayback == null || !MidiBard.CurrentPlayback.IsRunning)
 		{
 			playDeltaTime = 0;
-			return;
+			return false;
 		}
 
 		var currentTime = MidiBard.CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
@@ -191,13 +191,15 @@ internal static class MidiPlayerControl
 		//PluginLog.LogDebug("curTime:" + msTime);
 		if (msTime + delta * 1000 < 0)
 		{
-			return;
+			return false;
 		}
 		msTime += delta * 1000;
 		MetricTimeSpan newTime = new MetricTimeSpan(msTime);
 		//PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
 		MidiBard.CurrentPlayback.MoveToTime(newTime);
 		playDeltaTime += delta;
+
+		return true;
 	}
 
 	internal static void SwitchSong()

@@ -33,9 +33,9 @@ namespace MidiBard.Managers
             
 
             string hexString = BitConverter.ToString(msg);
-            PluginLog.Debug(timeStamp.ToString());
-            PluginLog.Debug("NET: " + Convert.ToString(opCode));
-            PluginLog.Debug(hexString);
+            //PluginLog.Debug(timeStamp.ToString());
+            //PluginLog.Debug("NET: " + Convert.ToString(opCode));
+            //PluginLog.Debug(hexString);
 
             switch (opCode)
             {

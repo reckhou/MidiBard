@@ -158,7 +158,7 @@ internal class EnsembleManager : IDisposable
 				{
 					Lrc.Ensemble2MeasuresElapsed(compensation);
 				}
-				PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
+				//PluginLog.Verbose($"[Metronome] {barElapsed} {currentBeat}/{beatsPerBar}");
 			}
 		}
 		catch (Exception e)
