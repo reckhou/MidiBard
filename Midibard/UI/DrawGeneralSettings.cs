@@ -6,6 +6,7 @@ using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 using MidiBard.IPC;
+using MidiBard.Managers;
 using MidiBard2Preview.Resources;
 using MidiBard.Util;
 using static ImGuiNET.ImGui;
@@ -154,7 +155,7 @@ public partial class PluginUI
 			PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", filePath)}");
 			if (b)
 			{
-				MidiBard.config.defaultPerformerFolder = filePath;
+				MidiFileConfigManager.SetDefaultPerformerFolder(filePath);
 			}
 		}, MidiBard.config.defaultPerformerFolder);
 	}

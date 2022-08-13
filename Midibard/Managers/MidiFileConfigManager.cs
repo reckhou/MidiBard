@@ -58,15 +58,48 @@ namespace MidiBard.Managers
 		public static DefaultPerformer defaultPerformer;
 		public static bool UsingDefaultPerformer = true;
 
+		internal static void SetDefaultPerformerFolder(string path)
+        {
+			MidiBard.config.defaultPerformerFolder = path;
+			LoadDefaultPerformer();
+		}
+
 		internal static DefaultPerformer LoadDefaultPerformer()
 		{
-			var path = MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json";
+			PluginLog.LogDebug("Loading Default Performer...");
+			var folder = MidiBard.config.defaultPerformerFolder;
+			bool succeed = true;
+			if (!Directory.Exists(folder))
+            {
+				PluginLog.LogWarning($"Default Performer folder not exist, creating at {folder}");
+				try
+				{
+					Directory.CreateDirectory(folder);
+				} catch (Exception e)
+                {
+					PluginLog.LogError($"Invalid default performer foler: {folder}, using default folder!");
+					ImGuiUtil.AddNotification(NotificationType.Error, $"Invalid default performer foler: {folder}, using default folder instead!");
+					MidiBard.config.defaultPerformerFolder = DalamudApi.api.PluginInterface.ConfigDirectory.FullName;
+					folder = MidiBard.config.defaultPerformerFolder;
+				}
+			}
+
+			var path = folder + $@"\MidiBardDefaultPerformer.json";
 			FileInfo fileInfo = new FileInfo(path);
+			
 			if (!fileInfo.Exists)
             {
 				PluginLog.LogWarning($"Default Performer not exist, creating at {path}");
-				SaveDefaultPerformer();
+				succeed = SaveDefaultPerformer();
             }
+
+			if (!succeed)
+			{
+				ImGuiUtil.AddNotification(NotificationType.Error, $"Save Default Performer failed: {path}, using default folder instead!");
+				MidiBard.config.defaultPerformerFolder = DalamudApi.api.PluginInterface.ConfigDirectory.FullName;
+				path = MidiBard.config.defaultPerformerFolder + $@"\MidiBardDefaultPerformer.json";
+				SaveDefaultPerformer();				
+			}
 
 			defaultPerformer = JsonConvert.DeserializeObject<DefaultPerformer>(File.ReadAllText(path), JsonSerializerSettings);
 			return defaultPerformer;
