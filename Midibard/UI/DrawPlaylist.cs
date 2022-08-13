@@ -266,7 +266,7 @@ public partial class PluginUI
 										PlaylistManager.CurrentContainer = playlistContainer;
 									}
 									else {
-										AddNotification(NotificationType.Error, $"{playlistPath} is not exist!");
+										AddNotification(NotificationType.Error, $"{playlistPath} NOT exist!");
 										MidiBard.config.RecentUsedPlaylists.Remove(playlistPath);
 									}
 								}

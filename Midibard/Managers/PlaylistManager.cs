@@ -24,6 +24,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using Newtonsoft.Json;
 using ProtoBuf;
+using Dalamud.Interface.Internal.Notifications;
 
 namespace MidiBard;
 
@@ -34,8 +35,15 @@ static class PlaylistManager
 		var config = MidiBard.config;
 		var recentUsedPlaylists = config.RecentUsedPlaylists;
 		var lastOrDefault = recentUsedPlaylists.LastOrDefault();
+		var fileExists = false;
 
-		if (lastOrDefault is null) {
+		if (lastOrDefault != null)
+		{
+			fileExists = File.Exists(lastOrDefault);
+		}
+
+		if (lastOrDefault is null || !fileExists) {
+			ImGuiUtil.AddNotification(NotificationType.Error, $"Latest playlist NOT exist: {lastOrDefault}, using default playlist instead!");
 			PluginLog.Log("Load Default playlist");
 			return PlaylistContainer.FromFile(
 				Path.Combine(api.PluginInterface.GetPluginConfigDirectory(), "DefaultPlaylist.mpl"), true);
