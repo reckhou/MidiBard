@@ -9,5 +9,9 @@
     "other"
   ],
   "DalamudApiLevel": 7,
-  "IconUrl": "https://i.imgur.com/2Lr2Che.png"
+  "IconUrl": "https://i.imgur.com/2Lr2Che.png",
+  "Changelog": "API7, .NET 6.0.",
+  "ImageUrls": [
+    "https://i.imgur.com/sh1wIpC.png"
+  ]
 }
