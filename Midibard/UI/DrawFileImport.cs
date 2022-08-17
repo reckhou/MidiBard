@@ -13,6 +13,7 @@ using ImGuiNET;
 using Microsoft.Win32;
 using MidiBard.DalamudApi;
 using MidiBard.Managers.Ipc;
+using MidiBard2.Resources;
 using MidiBard.UI.Win32;
 using MidiBard.Util;
 
@@ -21,88 +22,6 @@ namespace MidiBard;
 public partial class PluginUI
 {
     #region import
-
-    private static readonly string LabelFileImportRunning = "Import in progress...".Localize();
-
-    private void ButtonImport()
-    {
-        if (ImGui.BeginPopup("OpenFileDialog_selection"))
-        {
-            if (ImGui.MenuItem("Win32 file dialog".Localize(), null, MidiBard.config.useLegacyFileDialog))
-            {
-                MidiBard.config.useLegacyFileDialog = true;
-            }
-            else if (ImGui.MenuItem("ImGui file dialog".Localize(), null, !MidiBard.config.useLegacyFileDialog))
-            {
-                MidiBard.config.useLegacyFileDialog = false;
-            }
-
-            ImGui.EndPopup();
-        }
-
-        /*if (api.KeyState[VirtualKey.CONTROL] && api.KeyState[VirtualKey.V])
-        {
-            if (!IsImportRunning)
-            {
-                IsImportRunning = true;
-                string[] array = null;
-                var t = new Thread(() =>
-                {
-                    PluginLog.Information($"start getting GetFileDropList thread");
-                    try
-                    {
-                        array = Clipboard.GetFileDropList().Cast<string>().Where(i => i.EndsWith(".mid")).ToArray();
-                    }
-                    catch (Exception e)
-                    {
-                        PluginLog.Error(e, "error when getting files from clipboard");
-                        array = new string[] { };
-                    }
-                    finally
-                    {
-                        PluginLog.Information($"getting GetFileDropList thread end");
-                    }
-                });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
-
-                try
-                {
-                    Task.Run(async () =>
-                    {
-                        await Coroutine.WaitUntil(() => array != null, 5000);
-                        await PlaylistManager.AddAsync(array);
-                    });
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Error(e, "error when importing files from clipboard");
-                }
-                finally
-                {
-                    Task.Delay(2000).ContinueWith(task => IsImportRunning = false);
-                }
-            }
-        }*/
-        ImGui.BeginGroup();
-
-        if (ImGuiUtil.IconButton(FontAwesomeIcon.Plus, "buttonimport"))
-        {
-            RunImportFileTask();
-        }
-
-        ImGuiUtil.ToolTip("Import midi file\nRight click to select file dialog type".Localize());
-        ImGui.SameLine();
-        if (ImGuiUtil.IconButton(FontAwesomeIcon.FolderOpen, "buttonimportFolder"))
-        {
-            RunImportFolderTask();
-        }
-        ImGuiUtil.ToolTip("Import folder\nImports all midi files in selected folder and it's all subfolders.\nThis may take a while when you select a folder that contains multiple layers of folders.".Localize());
-        ImGui.EndGroup();
-
-        ImGui.OpenPopupOnItemClick("OpenFileDialog_selection", ImGuiPopupFlags.MouseButtonRight);
-    }
-
     private void RunImportFileTask()
     {
         if (!IsImportRunning)
@@ -128,48 +47,44 @@ public partial class PluginUI
 
             if (MidiBard.config.useLegacyFileDialog)
             {
-                RunImportFolderTaskImGui();
+                RunImportFolderTaskWin32();
             }
             else
             {
-                RunImportFolderTaskWin32();
+                RunImportFolderTaskImGui();
             }
         }
     }
 
+
     private void RunImportFileTaskWin32()
     {
-        var b = new Browse((result, filePath) =>
+        FileDialogs.OpenMidiFileDialog((result, filePaths) =>
         {
-            if (result == true)
-            {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await PlaylistManager.AddAsync(filePath);
-                    }
-                    finally
-                    {
-                        IsImportRunning = false;
-                    }
-                });
-            }
-            else
-            {
-                IsImportRunning = false;
-            }
+	        if (result == true)
+	        {
+		        Task.Run(async () =>
+		        {
+			        try
+			        {
+				        await PlaylistManager.AddAsync(filePaths);
+			        }
+			        finally
+			        {
+				        IsImportRunning = false;
+			        }
+		        });
+	        }
+	        else
+	        {
+		        IsImportRunning = false;
+	        }
         });
-
-        var t = new Thread(b.BrowseDLL);
-        t.IsBackground = true;
-        t.SetApartmentState(ApartmentState.STA);
-        t.Start();
     }
 
     private void RunImportFileTaskImGui()
     {
-        fileDialogManager.OpenFileDialog("Open", ".mid,.mmsong", (b, strings) =>
+        fileDialogManager.OpenFileDialog("Open", ".mid,.midi,.mmsong", (b, strings) =>
         {
             PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", strings)}");
             if (b)
@@ -193,7 +108,7 @@ public partial class PluginUI
         }, 0);
     }
 
-    private void RunImportFolderTaskWin32()
+    private void RunImportFolderTaskImGui()
     {
         fileDialogManager.OpenFolderDialog("Open folder", (b, filePath) =>
         {
@@ -205,6 +120,8 @@ public partial class PluginUI
                     try
                     {
                         var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
+                        await PlaylistManager.AddAsync(files);
+                        files = Directory.GetFiles(filePath, "*.midi", SearchOption.AllDirectories);
                         await PlaylistManager.AddAsync(files);
                         files = Directory.GetFiles(filePath, "*.mmsong", SearchOption.AllDirectories);
                         await PlaylistManager.AddAsync(files);
@@ -222,21 +139,23 @@ public partial class PluginUI
         });
     }
 
-    private void RunImportFolderTaskImGui()
+    private void RunImportFolderTaskWin32()
     {
-        var b = new BrowseFolder((result, filePath) =>
+        FileDialogs.FolderPicker((result, folderPath) =>
         {
             if (result == true)
             {
                 Task.Run(async () =>
                 {
-                    if (Directory.Exists(filePath))
+                    if (Directory.Exists(folderPath))
                     {
                         try
                         {
-                            var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
+                            var files = Directory.GetFiles(folderPath, "*.mid", SearchOption.AllDirectories);
                             await PlaylistManager.AddAsync(files);
-                            files = Directory.GetFiles(filePath, "*.mmsong", SearchOption.AllDirectories);
+                            files = Directory.GetFiles(folderPath, "*.midi", SearchOption.AllDirectories);
+                            await PlaylistManager.AddAsync(files);
+                            files = Directory.GetFiles(folderPath, "*.mmsong", SearchOption.AllDirectories);
                             await PlaylistManager.AddAsync(files);
                         }
                         finally
@@ -251,18 +170,8 @@ public partial class PluginUI
                 IsImportRunning = false;
             }
         });
-
-        var t = new Thread(b.Browse);
-        t.IsBackground = true;
-        t.SetApartmentState(ApartmentState.STA);
-        t.Start();
     }
-
-    private void ButtonImportInProgress()
-    {
-        ImGui.Button(LabelFileImportRunning);
-    }
-
+    
     public bool IsImportRunning { get; private set; }
     
     #endregion

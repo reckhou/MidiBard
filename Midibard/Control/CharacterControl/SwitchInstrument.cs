@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
@@ -17,203 +18,199 @@ namespace MidiBard.Control.CharacterControl;
 
 internal static class SwitchInstrument
 {
-    public static bool SwitchingInstrument { get; private set; }
+	public static bool SwitchingInstrument { get; private set; }
 
-    public static void SwitchToContinue(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
-    {
-        Task.Run(async () =>
-        {
-            var isPlaying = MidiBard.IsPlaying;
-            MidiBard.CurrentPlayback?.Stop();
-            await SwitchTo(instrumentId, forceSwitch, timeOut);
-            if (isPlaying)
-                MidiBard.CurrentPlayback?.Start();
-        });
-    }
+	public static void SwitchToContinue(uint instrumentId)
+	{
+		Task.Run(async () =>
+		{
+			try
+			{
+				var isPlaying = MidiBard.IsPlaying;
+				MidiBard.CurrentPlayback?.Stop();
+				await SwitchToAsync(instrumentId);
+				if (isPlaying) MidiBard.CurrentPlayback?.Start();
+			}
+			catch (Exception e)
+			{
+				PluginLog.Error(e, "Error when switching instrument");
+			}
+		});
+	}
 
-    public static async Task SwitchTo(uint instrumentId, bool forceSwitch = false, int timeOut = 3000)
-    {
-        if (MidiBard.config.playOnMultipleDevices)
-        {
-            UpdateGuitarToneByConfig();
-        } else
-        {
-            UpdateGuitarToneByMidiConfig();
-        }
+	public static async Task SwitchToAsync(uint instrumentId, int timeOut = 3000)
+	{
+		if (MidiBard.PlayingGuitar)
+		{
+			var instrument = MidiBard.Instruments[instrumentId];
+			if (instrument.IsGuitar)
+			{
+				playlib.GuitarSwitchTone(instrument.GuitarTone);
+				return;
+			}
+		}
 
-        if (forceSwitch || MidiBard.config.bmpTrackNames)
-        {
-            if (MidiBard.CurrentInstrument == instrumentId)
-                return;
+		if (MidiBard.CurrentInstrument == instrumentId)
+			return;
 
-            SwitchingInstrument = true;
-            var sw = Stopwatch.StartNew();
-            try
-            {
-                if (MidiBard.CurrentInstrument != 0)
-                {
-                    PerformActions.DoPerformAction(0);
-                    await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
-                }
+		SwitchingInstrument = true;
+		var sw = Stopwatch.StartNew();
+		try
+		{
+			await DoSwitchInstrumentAsync(instrumentId, timeOut);
+			PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
+			//ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
+		}
+		catch (Exception e)
+		{
+			PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
+		}
+		finally
+		{
+			SwitchingInstrument = false;
+		}
+	}
 
-                PerformActions.DoPerformAction(instrumentId);
-                await Util.Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
-                await Task.Delay(200);
-                PluginLog.Debug($"instrument switching succeed in {sw.Elapsed.TotalMilliseconds} ms");
-                //ImGuiUtil.AddNotification(NotificationType.Success, $"Switched to {MidiBard.InstrumentStrings[instrumentId]}");
-            }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, $"instrument switching failed in {sw.Elapsed.TotalMilliseconds} ms");
-            }
-            finally
-            {
-                SwitchingInstrument = false;
-            }
-        }
-    }
+	private static async Task DoSwitchInstrumentAsync(uint instrumentId, int timeOut)
+	{
+		if (MidiBard.CurrentInstrument != 0)
+		{
+			PerformActions.DoPerformAction(0);
+			await Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == 0, timeOut);
+		}
 
-    private static readonly Regex regex = new Regex(@"^#(?<ins>.*?)(?<trans>[-|+][0-9]+)?#(?<name>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		PerformActions.DoPerformAction(instrumentId);
+		await Coroutine.WaitUntil(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+		await Task.Delay(200);
+	}
 
-    public static string ParseSongName(string inputString, out uint? instrumentId, out int? transpose)
-    {
-        var match = regex.Match(inputString);
-        if (match.Success)
-        {
-            var capturedInstrumentString = match.Groups["ins"].Value;
-            var capturedTransposeString = match.Groups["trans"].Value;
-            var capturedSongName = match.Groups["name"].Value;
+	private static void DoSwitchInstrument(uint instrumentId, int timeOut)
+	{
+		if (MidiBard.CurrentInstrument != 0)
+		{
+			PerformActions.DoPerformAction(0);
+			Coroutine.WaitUntilSync(() => MidiBard.CurrentInstrument == 0, timeOut);
+		}
 
-            PluginLog.Debug($"input: \"{inputString}\", instrumentString: {capturedInstrumentString}, transposeString: {capturedTransposeString}");
-            transpose = int.TryParse(capturedTransposeString, out var t) ? t : null;
-            instrumentId = TryParseInstrumentName(capturedInstrumentString, out var id) ? id : null;
-            return !string.IsNullOrEmpty(capturedSongName) ? capturedSongName : inputString;
-        }
+		PerformActions.DoPerformAction(instrumentId);
+		Coroutine.WaitUntilSync(() => MidiBard.CurrentInstrument == instrumentId, timeOut);
+		Thread.Sleep(200);
+	}
 
-        instrumentId = null;
-        transpose = null;
-        return inputString;
-    }
+	private static readonly Regex regex = new Regex(@"^#(?<ins>.*?)(?<trans>[-|+][0-9]+)?#(?<name>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    public static bool TryParseInstrumentName(string capturedInstrumentString, out uint instrumentId)
-    {
-        Perform equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-            i?.Instrument?.RawString.Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
-        Perform contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-            i?.Instrument?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
-        Perform gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-            i?.Name?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
+	public static string ParseSongName(string inputString, out uint? instrumentId, out int? transpose)
+	{
+		var match = regex.Match(inputString);
+		if (match.Success)
+		{
+			var capturedInstrumentString = match.Groups["ins"].Value;
+			var capturedTransposeString = match.Groups["trans"].Value;
+			var capturedSongName = match.Groups["name"].Value;
 
-        var rowId = (equal ?? contains ?? gmName)?.RowId;
-        PluginLog.Debug($"equal: {equal?.Instrument?.RawString}, contains: {contains?.Instrument?.RawString}, gmName: {gmName?.Name?.RawString} finalId: {rowId}");
-        if (rowId is null)
-        {
-            instrumentId = 0;
-            return false;
-        }
-        else
-        {
-            instrumentId = rowId.Value;
-            return true;
-        }
-    }
+			PluginLog.Debug($"input: \"{inputString}\", instrumentString: {capturedInstrumentString}, transposeString: {capturedTransposeString}");
+			transpose = int.TryParse(capturedTransposeString, out var t) ? t : null;
+			instrumentId = TryParseInstrumentName(capturedInstrumentString, out var id) ? id : null;
+			return !string.IsNullOrEmpty(capturedSongName) ? capturedSongName : inputString;
+		}
 
-    internal static async Task WaitSwitchInstrumentForSong(string songName)
-    {
-        var config = MidiBard.config;
+		instrumentId = null;
+		transpose = null;
+		return inputString;
+	}
 
-        ParseSongName(songName, out var idFromSongName, out var transposeGlobal);
+	public static bool TryParseInstrumentName(string capturedInstrumentString, out uint instrumentId)
+	{
+		Perform equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+			i?.Instrument?.RawString.Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
+		Perform contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+			i?.Instrument?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
+		Perform gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+			i?.Name?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
 
-        if (config.autoTransposeBySongName)
-        {
-            if (transposeGlobal != null)
-            {
-                config.TransposeGlobal = (int)transposeGlobal;
-            }
-            else
-            {
-                config.TransposeGlobal = 0;
-            }
-        }
+		var rowId = (equal ?? contains ?? gmName)?.RowId;
+		PluginLog.Debug($"equal: {equal?.Instrument?.RawString}, contains: {contains?.Instrument?.RawString}, gmName: {gmName?.Name?.RawString} finalId: {rowId}");
+		if (rowId is null)
+		{
+			instrumentId = 0;
+			return false;
+		}
+		else
+		{
+			instrumentId = rowId.Value;
+			return true;
+		}
+	}
 
-        if (config.autoSwitchInstrumentBySongName)
-        {
-            if (idFromSongName != null)
-            {
-                await SwitchTo((uint)idFromSongName);
-                return;
-            }
-        }
+	internal static async Task WaitSwitchInstrumentForSong(string songName)
+	{
+		var config = MidiBard.config;
 
-        TrackInfo firstEnabledTrack = null;
-        if (config.EnableTransposePerTrack)
-        {
-            var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
-            foreach (var trackInfo in currentTracks)
-            {
-                var transposePerTrack = trackInfo.TransposeFromTrackName;
-                if (transposePerTrack != 0)
-                {
-                    PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
-                }
-                config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
-            }
+		if (config.bmpTrackNames)
+		{
+			var firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
+			UpdateGuitarToneByConfig();
 
-            config.TransposeGlobal = 0;
-        }
-        else
-        {
-            firstEnabledTrack = MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled);
-            var transpose = firstEnabledTrack?.TransposeFromTrackName ?? 0;
-            config.TransposeGlobal = transpose;
-        }
+			var currentTracks = MidiBard.CurrentPlayback.TrackInfos;
+			foreach (var trackInfo in currentTracks)
+			{
+				var transposePerTrack = trackInfo.TransposeFromTrackName;
+				if (transposePerTrack != 0)
+				{
+					PluginLog.Information($"applying transpose {transposePerTrack:+#;-#;0} for track [{trackInfo.Index + 1}]{trackInfo.TrackName}");
+				}
+				config.TrackStatus[trackInfo.Index].Transpose = transposePerTrack;
+			}
 
-        //MidiBard.config.OverrideGuitarTones = true;
+			config.TransposeGlobal = 0;
 
-        firstEnabledTrack = MidiBard.config.SoloedTrack == null ? MidiBard.CurrentPlayback.TrackInfos.FirstOrDefault(i => i.IsEnabled) : MidiBard.CurrentPlayback.TrackInfos[(int)MidiBard.config.SoloedTrack];
-        var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
-        if (idFromTrackName != null)
-        {
-            await SwitchTo((uint)idFromTrackName);
-        }
-    }
+			var idFromTrackName = firstEnabledTrack?.InstrumentIDFromTrackName;
+			if (idFromTrackName != null)
+			{
+				await SwitchToAsync((uint)idFromTrackName);
+			}
 
-    private static void UpdateGuitarToneByConfig()
-    {
-        if (MidiBard.CurrentPlayback?.TrackInfos == null)
-        {
-            return;
-        }
+			return;
+		}
 
-        for (int track = 0; track < MidiBard.CurrentPlayback.TrackInfos.Length; track++)
-        {
-            if (MidiBard.config.TrackStatus[track].Enabled && MidiBard.CurrentPlayback?.TrackInfos[track] != null)
-            {
-                var curInstrument = MidiBard.CurrentPlayback?.TrackInfos[track]?.InstrumentIDFromTrackName;
-                if (curInstrument != null && MidiBard.guitarGroup.Contains((byte)curInstrument))
-                {
-                    var toneID = curInstrument - MidiBard.guitarGroup[0];
-                    MidiBard.config.TrackStatus[track].Tone = (int)toneID;
-                }
-            }
-        }
-    }
+		ParseSongName(songName, out var idFromSongName, out var transposeGlobal);
 
-    public static void UpdateGuitarToneByMidiConfig()
-    {
-        if (MidiBard.CurrentPlayback?.TrackInfos == null)
-        {
-            return;
-        }
+		if (config.autoTransposeBySongName)
+		{
+			if (transposeGlobal != null)
+			{
+				config.TransposeGlobal = (int)transposeGlobal;
+			}
+			else
+			{
+				config.TransposeGlobal = 0;
+			}
+		}
 
-        foreach(var track in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
-        {
-            if (track.Enabled && MidiFileConfig.IsCidOnTrack((long)DalamudApi.api.ClientState.LocalContentId, track)
-                && MidiBard.guitarGroup.Contains((byte)track.Instrument))
-            {
-                var toneID = track.Instrument - MidiBard.guitarGroup[0];
-                MidiBard.config.TrackStatus[track.Index].Tone = (int)toneID;
-            }
-        }
-    }
+		if (config.autoSwitchInstrumentBySongName)
+		{
+			if (idFromSongName != null)
+			{
+				await SwitchToAsync((uint)idFromSongName);
+			}
+		}
+	}
+
+	private static void UpdateGuitarToneByConfig()
+	{
+		if (MidiBard.CurrentPlayback == null) return;
+
+		for (int track = 0; track < MidiBard.CurrentPlayback.TrackInfos.Length; track++)
+		{
+			var instrumentId = MidiBard.CurrentPlayback.TrackInfos[track].InstrumentIDFromTrackName;
+			if (instrumentId != null)
+			{
+				var instrument = MidiBard.Instruments[(int)instrumentId];
+				if (instrument.IsGuitar)
+				{
+					MidiBard.config.TrackStatus[track].Tone = instrument.GuitarTone;
+				}
+			}
+		}
+	}
 }

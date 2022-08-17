@@ -240,30 +240,37 @@ namespace MidiBard.Util.Lyrics
         {
             try
             {
-                if (MidiPlayerControl._stat != MidiPlayerControl.e_stat.Playing || EnsembleInFirst2Measures)
+                if (!MidiBard.config.playLyrics || MidiPlayerControl._stat != MidiPlayerControl.e_stat.Playing)
+                {
+                    return;
+                }
+
+                if (MidiPlayerControl._stat == MidiPlayerControl.e_stat.Playing && HasLyric()
+                    && !SongTitlePosted && api.PartyList.IsPartyLeader())
+                {
+                    string msg = "";
+                    msg = $"♪ {_lrc.Title} ♪ ";
+                    msg += _lrc.Artist != null && _lrc.Artist != "" ? $"Artist: {_lrc.Artist} ♪ " : "";
+                    msg += _lrc.Album != null && _lrc.Album != "" ? $"Album: {_lrc.Album} ♪ " : "";
+                    msg += _lrc.LrcBy != null && _lrc.LrcBy != "" ? $"Lyric By: {_lrc.LrcBy} ♪ " : "";
+
+                    if (!MidiBard.AgentMetronome.EnsembleModeRunning)
+                    {
+                        msg = "/p " + msg;
+                    }
+
+                    MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                    SongTitlePosted = true;
+                    return;
+                }
+
+                if (EnsembleInFirst2Measures)
                 {
                     return;
                 }
 
                 if (LrcTimeStamps.Count > 0 && LrcIdx < LrcTimeStamps.Count)
                 {
-                    if (!SongTitlePosted && api.PartyList.IsPartyLeader())
-                    {
-                        string msg = "";
-                        msg = $"♪ {_lrc.Title} ♪ ";
-                        msg += _lrc.Artist != null && _lrc.Artist != "" ? $"Artist: {_lrc.Artist} ♪ " : "";
-                        msg += _lrc.Album != null && _lrc.Album != "" ? $"Album: {_lrc.Album} ♪ " : "";
-                        msg += _lrc.LrcBy != null && _lrc.LrcBy != "" ? $"Lyric By: {_lrc.LrcBy} ♪ " : "";
-
-                        if (!MidiBard.AgentMetronome.EnsembleModeRunning)
-                        {
-                            msg = "/p " + msg;
-                        }
-
-                        MidiBard.Cbase.Functions.Chat.SendMessage(msg);
-                        SongTitlePosted = true;
-                    }
-
                     int idx = FindLrcIdx(LrcTimeStamps);
                     if (idx < 0 || idx == LrcIdx)
                     {

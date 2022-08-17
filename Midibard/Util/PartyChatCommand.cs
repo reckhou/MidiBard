@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Dalamud;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -9,15 +10,16 @@ using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using MidiBard.IPC;
+using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using System.Threading.Tasks;
 using static MidiBard.MidiBard;
 
 namespace MidiBard
 {
-	public class PartyChatCommand
+	internal class PartyChatCommand
 	{
-		public static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+		internal static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
 		{
 			if (isHandled)
 				return;
@@ -48,17 +50,28 @@ namespace MidiBard
 					return;
 				}
 
-				MidiPlayerControl.SwitchSong(number - 1, false, true, true);
+				MidiPlayerControl.SwitchSong();
+				PlaylistManager.LoadPlayback(number-1);
 				Ui.Open();
 			}
             else if (cmd == "reloadconfig") // reload the config
             {
 				IPCHandles.SyncAllSettings();
-			}
+			} else if (cmd == "reloadplaylist")
+            {
+				// hacky way to reload the opening play list
+				PlaylistManager.CurrentContainer = PlaylistManager.LoadLastPlaylist();
+            } else if (cmd == "updatedefaultperformer")
+            {
+				MidiFileConfigManager.LoadDefaultPerformer();
+			} else if (cmd == "updateinstrument")
+            {
+				UpdateInstrument();
+            }
             else if (cmd == "close") // switch off the instrument
 			{
 				MidiPlayerControl.Stop();
-				SwitchInstrument.SwitchTo(0);
+				SwitchInstrument.SwitchToAsync(0);
 			} else if (cmd == "speed")
             {
 				if (strings.Length < 2)
@@ -73,7 +86,7 @@ namespace MidiBard
 					return;
 				}
 
-				MidiBard.config.playSpeed = Math.Max(0.1f, number);
+				MidiBard.config.PlaySpeed = Math.Max(0.1f, number);
 			} else if (cmd == "transpose")
             {
 				if (strings.Length < 2)
@@ -104,6 +117,108 @@ namespace MidiBard
 					MidiBard.config.playOnMultipleDevices = false;
                 }
 			}
+		}
+
+		internal static void SendClose()
+		{
+			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+		}
+
+		internal static void SendSwitchTo(int songNumber)
+        {
+			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p switchto {songNumber}");
+		}
+
+		internal static void SendPMD(bool isOn)
+		{
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			var str = isOn ? "on" : "off";
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
+		}
+
+		internal static void SendReloadPlaylist()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
+		}
+
+		internal static void SendUpdateDefaultPerformer()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updatedefaultperformer");
+		}
+
+		internal static void SendUpdateInstrument()
+        {
+			if (DalamudApi.api.PartyList.Length < 2)
+			{
+				return;
+			}
+
+			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updateinstrument");
+		}
+
+		private static void UpdateInstrument()
+        {
+			// updates midifile config and instruments
+			// code copied from IPCHandles.cs
+			if (CurrentPlayback == null)
+            {
+				return;
+            }
+
+			var dbTracks = MidiBard.CurrentPlayback.MidiFileConfig.Tracks;
+			var trackStatus = MidiBard.config.TrackStatus;
+			for (var i = 0; i < dbTracks.Count; i++)
+			{
+				try
+				{
+					trackStatus[i].Enabled = dbTracks[i].Enabled && MidiFileConfig.GetFirstCidInParty(dbTracks[i]) == (long)DalamudApi.api.ClientState.LocalContentId;
+					trackStatus[i].Transpose = dbTracks[i].Transpose;
+					trackStatus[i].Tone = Util.InstrumentHelper.GetGuitarTone(dbTracks[i].Instrument);
+				}
+				catch (Exception e)
+				{
+					PluginLog.Error(e, $"error when updating track {i}");
+				}
+			}
+
+			uint? instrument = null;
+			foreach (var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
+			{
+				if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)DalamudApi.api.ClientState.LocalContentId, cur))
+				{
+					instrument = (uint?)cur.Instrument;
+					break;
+				}
+			}
+
+			if (instrument != null)
+				SwitchInstrument.SwitchToContinue((uint)instrument);
+
+			PluginLog.LogDebug($"Instrument: {instrument}");
 		}
 	}
 }

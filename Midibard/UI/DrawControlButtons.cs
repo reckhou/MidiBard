@@ -4,6 +4,8 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
+using MidiBard.Managers;
+using MidiBard2.Resources;
 using MidiBard.Control.CharacterControl;
 using static MidiBard.ImGuiUtil;
 using MidiBard.IPC;
@@ -12,126 +14,143 @@ namespace MidiBard;
 
 public partial class PluginUI
 {
-    private static unsafe void DrawButtonMiniPlayer()
-    {
-        //mini player
+	private unsafe void DrawButtonVisualization()
+	{
+		ImGui.SameLine();
+		var color = MidiBard.config.PlotTracks ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text);
+		if (IconButton((FontAwesomeIcon)0xf008, "visualizertoggle", Language.icon_button_tooltip_visualization,
+				ImGui.ColorConvertFloat4ToU32(color)))
+			MidiBard.config.PlotTracks ^= true;
+		if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+		{
+			_resetPlotWindowPosition = true;
+		}
+	}
 
-        ImGui.SameLine();
-        if (IconButton(((FontAwesomeIcon)(MidiBard.config.miniPlayer ? 0xF424 : 0xF422)),"miniplayer"))
-            MidiBard.config.miniPlayer ^= true;
+	private unsafe void DrawButtonShowSettingsPanel()
+	{
+		ImGui.SameLine();
+		ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.Ui.showSettingsPanel ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
 
-        ToolTip("Mini player".Localize());
-    }
+		if (IconButton(FontAwesomeIcon.Cog, "btnsettingp")) showSettingsPanel ^= true;
 
-    private static unsafe void DrawButtonShowSettingsPanel()
-    {
-        ImGui.SameLine();
-        ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.config.showSettingsPanel ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
+		ImGui.PopStyleColor();
+		ToolTip(Language.icon_button_tooltip_settings_panel);
+	}
 
-        if (IconButton(FontAwesomeIcon.Cog, "btnsettingp")) MidiBard.config.showSettingsPanel ^= true;
+	private unsafe void DrawButtonShowEnsembleControl()
+	{
+		ImGui.SameLine();
+		ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.Ui.ShowEnsembleControlWindow ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
 
-        ImGui.PopStyleColor();
-        ToolTip("Settings panel".Localize());
-    }
+		if (IconButton((FontAwesomeIcon)0xF0C0, "btnensemble")) ShowEnsembleControlWindow ^= true;
 
-    private static unsafe void DrawButtonShowEnsembleControl()
-    {
-	    ImGui.SameLine();
-	    ImGui.PushStyleColor(ImGuiCol.Text, MidiBard.config.ShowEnsembleControlWindow ? MidiBard.config.themeColor : *ImGui.GetStyleColorVec4(ImGuiCol.Text));
+		ImGui.PopStyleColor();
+		ToolTip(Language.icon_button_tooltip_ensemble_panel);
+	}
 
-	    if (IconButton((FontAwesomeIcon)0xF0C0, "btnensemble")) MidiBard.config.ShowEnsembleControlWindow ^= true;
-
-	    ImGui.PopStyleColor();
-	    ToolTip("Ensemble panel".Localize());
-    }
-
-    private static unsafe void DrawButtonPlayPause()
-    {
-        var PlayPauseIcon = MidiBard.IsPlaying ? (MidiBard.AgentMetronome.EnsembleModeRunning ? FontAwesomeIcon.Stop : FontAwesomeIcon.Pause) : FontAwesomeIcon.Play;
-        if (ImGuiUtil.IconButton(PlayPauseIcon,"playpause"))
+	private unsafe void DrawButtonPlayPause()
+	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
         {
-            if (MidiBard.AgentMetronome.EnsembleModeRunning)
+			return;
+        }
+
+		var PlayPauseIcon = MidiBard.IsPlaying ? FontAwesomeIcon.Pause : FontAwesomeIcon.Play;
+		if (ImGuiUtil.IconButton(PlayPauseIcon, "playpause"))
+		{
+			PluginLog.Debug($"PlayPause pressed. wasplaying: {MidiBard.IsPlaying}");
+			MidiPlayerControl.PlayPause();
+		}
+		ImGui.SameLine();
+	}
+
+	private unsafe void DrawButtonStop()
+	{
+		if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
+		{
+			if (FilePlayback.IsWaiting)
+			{
+				FilePlayback.CancelWaiting();
+			} else
             {
-                // stops ensemble instead of pausing one client
-                StopEnsemble();
-            } else
-            {
-                MidiPlayerControl.PlayPause();
-            }
-        }
-    }
+				StopEnsemble();
+				MidiPlayerControl.Stop();
+			}	
+		}
+	}
 
-    private static unsafe void DrawButtonStop()
-    {
-        ImGui.SameLine();
-        if (IconButton(FontAwesomeIcon.Stop, "btnstop"))
-        {
-            if (FilePlayback.isWaiting)
-            {
-                FilePlayback.CancelWaiting();
-            }
-            else
-            {
-                StopEnsemble();
-            }         
-        }
-    }
+	private unsafe void DrawButtonFastForward()
+	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
+		{
+			return;
+		}
 
-    private static unsafe void DrawButtonFastForward()
-    {
-        ImGui.SameLine();
-        if (IconButton(((FontAwesomeIcon)0xf050), "btnff"))
-        {
-            MidiPlayerControl.Next();
-        }
+		ImGui.SameLine();
+		if (IconButton(((FontAwesomeIcon)0xf050), "btnff"))
+		{
+			MidiPlayerControl.Next();
+		}
 
-        if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
-        {
-            MidiPlayerControl.Prev();
-        }
-    }
+		if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+		{
+			MidiPlayerControl.Prev();
+		}
+	}
 
-    private static unsafe void DrawButtonPlayMode()
-    {
-        ImGui.SameLine();
-        FontAwesomeIcon icon = (PlayMode)MidiBard.config.PlayMode switch
-        {
-            PlayMode.Single => (FontAwesomeIcon)0xf3e5,
-            PlayMode.ListOrdered => (FontAwesomeIcon)0xf884,
-            PlayMode.ListRepeat => (FontAwesomeIcon)0xf021,
-            PlayMode.SingleRepeat => (FontAwesomeIcon)0xf01e,
-            PlayMode.Random => (FontAwesomeIcon)0xf074,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+	private unsafe void DrawButtonPlayMode()
+	{
+		if (MidiBard.AgentMetronome.EnsembleModeRunning)
+		{
+			return;
+		}
 
-        if (IconButton(icon,"btnpmode"))
-        {
-            MidiBard.config.PlayMode += 1;
-            MidiBard.config.PlayMode %= 5;
-        }
+		ImGui.SameLine();
+		FontAwesomeIcon icon = (PlayMode)MidiBard.config.PlayMode switch
+		{
+			PlayMode.Single => (FontAwesomeIcon)0xf3e5,
+			PlayMode.ListOrdered => (FontAwesomeIcon)0xf884,
+			PlayMode.ListRepeat => (FontAwesomeIcon)0xf021,
+			PlayMode.SingleRepeat => (FontAwesomeIcon)0xf01e,
+			PlayMode.Random => (FontAwesomeIcon)0xf074,
+			_ => throw new ArgumentOutOfRangeException()
+		};
 
-        if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
-        {
-            MidiBard.config.PlayMode += 4;
-            MidiBard.config.PlayMode %= 5;
-        }
+		if (IconButton(icon, "btnpmode"))
+		{
+			MidiBard.config.PlayMode += 1;
+			MidiBard.config.PlayMode %= 5;
+		}
 
-        ToolTip("Playmode: ".Localize() +
-                $"{(PlayMode)MidiBard.config.PlayMode}".Localize());
-    }
+		if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+		{
+			MidiBard.config.PlayMode += 4;
+			MidiBard.config.PlayMode %= 5;
+		}
 
-    private static void StopEnsemble()
-    {
-        if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
-        {
-            MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
-        }
-        else
-        {
-            if (MidiBard.AgentMetronome.EnsembleModeRunning)
-            {
-                IPCHandles.UpdateInstrument(false);
-            }
-        }
-    }
+		ToolTip(array[MidiBard.config.PlayMode]);
+	}
+
+	string[] array = new string[]
+	{
+		Language.play_mode_single,
+		Language.play_mode_single_repeat,
+		Language.play_mode_list_ordered,
+		Language.play_mode_list_repeat,
+		Language.play_mode_random,
+	};
+
+
+	private static void StopEnsemble()
+	{
+		if (MidiBard.config.playOnMultipleDevices && DalamudApi.api.PartyList.Length > 1)
+		{
+			PartyChatCommand.SendClose();
+		}
+		else
+		{
+			IPCHandles.UpdateInstrument(false);
+		}
+	}
 }
