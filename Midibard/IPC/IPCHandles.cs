@@ -173,6 +173,12 @@ static class IPCHandles
 			return;
 		}
 
+		if (MidiBard.CurrentPlayback == null || MidiBard.CurrentPlayback.MidiFileConfig == null)
+        {
+			IPCHandles.ErrPlaybackNull(api.ClientState.LocalPlayer.Name.ToString());
+			return;
+        }
+
 		uint? instrument = null;
 		foreach (var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
 		{
