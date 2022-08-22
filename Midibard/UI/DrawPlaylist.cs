@@ -135,6 +135,9 @@ public partial class PluginUI
 			PopIconButtonSize();
 
 			if (BeginPopup("PlaylistMenu")) {
+				var shortenPath = Path.ChangeExtension(PlaylistManager.CurrentContainer.FilePathWhenLoading, null).EllipsisString(40);
+				MenuItem(shortenPath, false);
+
 				var useWin32 = MidiBard.config.useLegacyFileDialog;
 				//open playlist
 				if (MenuItem(Language.menu_label_open_playlist)) {
