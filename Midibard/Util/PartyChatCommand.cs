@@ -36,6 +36,29 @@ namespace MidiBard
 			}
 
 			string cmd = strings[0].ToLower();
+
+			if (cmd == "playonmultipledevices" || cmd == "pmd")
+			{
+				if (strings.Length < 2)
+				{
+					return;
+				}
+
+				if (strings[1].ToLower() == "on")
+				{
+					MidiBard.config.playOnMultipleDevices = true;
+				}
+				else if (strings[1].ToLower() == "off")
+				{
+					MidiBard.config.playOnMultipleDevices = false;
+				}
+			}
+
+			if (!MidiBard.config.playOnMultipleDevices)
+            {
+				return;
+            }
+
 			if (cmd == "switchto") // switchto + <song number in playlist>
 			{
 				if (strings.Length < 2)
@@ -102,20 +125,6 @@ namespace MidiBard
 				}
 
 				MidiBard.config.SetTransposeGlobal(number);
-			} else if (cmd == "playonmultipledevices" || cmd == "pmd")
-            {
-				if(strings.Length < 2)
-				{
-					return;
-				}
-
-				if (strings[1].ToLower() == "on")
-                {
-					MidiBard.config.playOnMultipleDevices = true;
-                } else if (strings[1].ToLower() == "off")
-                {
-					MidiBard.config.playOnMultipleDevices = false;
-                }
 			}
 		}
 
