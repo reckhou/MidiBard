@@ -131,7 +131,7 @@ namespace playlibnamespace
 			if (ptr == IntPtr.Zero) return false;
 
 			SendAction(ptr, 3, 0, 3, (ulong)tone);
-			SetToneUI(ptr, (uint)tone);
+			//SetToneUI(ptr, (uint)tone);
 
 			return true;
 		}
