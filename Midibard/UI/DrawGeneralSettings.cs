@@ -139,10 +139,9 @@ public partial class PluginUI
 		if (ImGui.Button("Change"))
 		{
 			RunSetDefaultPerformerFolderImGui();
-			MidiBard.SaveConfig();
-			IPCHandles.UpdateDefaultPerformer();
 		}
-		ImGui.Text(MidiBard.config.defaultPerformerFolder);
+
+		ImGui.Text(Path.ChangeExtension(MidiBard.config.defaultPerformerFolder, null).EllipsisString(40));
 
 		ImGuiGroupPanel.EndGroupPanel();
 		Spacing();
@@ -156,6 +155,9 @@ public partial class PluginUI
 			if (b)
 			{
 				MidiFileConfigManager.SetDefaultPerformerFolder(filePath);
+				MidiBard.SaveConfig();
+				IPCHandles.SyncAllSettings();
+				IPCHandles.UpdateDefaultPerformer();
 			}
 		}, MidiBard.config.defaultPerformerFolder);
 	}

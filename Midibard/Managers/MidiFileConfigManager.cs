@@ -22,8 +22,23 @@ namespace MidiBard.Managers
 		public static MidiFileConfig? GetMidiConfigFromFile(string songPath)
 		{
 			var configFile = GetMidiConfigFileInfo(songPath);
+			MidiFileConfig config = null;
 			if (!configFile.Exists) return null;
-			return JsonConvert.DeserializeObject<MidiFileConfig>(File.ReadAllText(configFile.FullName), JsonSerializerSettings);
+			string fileContent = "";
+			try
+			{
+				using (FileStream fs = File.Open(configFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					StreamReader sr = new StreamReader(fs);
+					fileContent = sr.ReadToEnd();
+					config = JsonConvert.DeserializeObject<MidiFileConfig>(fileContent, JsonSerializerSettings);
+				}
+			}
+			catch (Exception e)
+			{
+				PluginLog.LogError(e.ToString());
+			}
+			return config;
 		}
 
 		public static void Save(this MidiFileConfig config, string path)
@@ -101,7 +116,20 @@ namespace MidiBard.Managers
 				SaveDefaultPerformer();				
 			}
 
-			defaultPerformer = JsonConvert.DeserializeObject<DefaultPerformer>(File.ReadAllText(path), JsonSerializerSettings);
+			string fileContent = "";
+			try
+            {
+				using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					StreamReader sr = new StreamReader(fs);
+					fileContent = sr.ReadToEnd();
+					defaultPerformer = JsonConvert.DeserializeObject<DefaultPerformer>(fileContent, JsonSerializerSettings);
+				}
+			} catch (Exception e)
+            {
+				PluginLog.LogError(e.ToString());
+			}
+			
 			return defaultPerformer;
 		}
 
