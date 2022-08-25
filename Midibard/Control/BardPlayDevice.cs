@@ -291,4 +291,9 @@ internal class BardPlayDevice : IOutputDevice
 
 		return noteNumber;
 	}
+
+	public void Dispose()
+    {
+
+    }
 }

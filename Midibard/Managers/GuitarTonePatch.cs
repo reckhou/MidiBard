@@ -93,6 +93,7 @@ internal unsafe static class GuitarTonePatch
 
     public static void InitAndApply()
     {
+        return;
         try
         {
             _getNoteVtbl = (IntPtr*)api.SigScanner.GetStaticAddressFromSig("4C 8D 0D ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 4C 8D 15 ?? ?? ?? ?? 4C 89 8E E0 0B 00 00");

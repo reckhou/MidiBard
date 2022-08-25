@@ -9,9 +9,9 @@
     "other"
   ],
   "DalamudApiLevel": 7,
-  "IconUrl": "https://i.imgur.com/2Lr2Che.png",
-  "Changelog": "API7, .NET 6.0.",
+  "IconUrl": "https://i.imgur.com/OSxqew4.png",
+  "Changelog": "API7, .NET 6.0.\nKnown Issue: Sometimes your guitar always sound as overdriven LOCALLY. This only affects yourself and will NOT affect what others hear your guitar(you may use an alt to verify this).",
   "ImageUrls": [
-    "https://i.imgur.com/sh1wIpC.png"
+    "https://i.imgur.com/1R13XF0.png"
   ]
 }

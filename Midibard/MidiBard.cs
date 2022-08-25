@@ -180,16 +180,7 @@ public class MidiBard : IDalamudPlugin
     public void Command1(string command, string args) => OnCommand(command, args);
 
     [Command("/mbard")]
-    [HelpMessage("Toggle MidiBard window\n" +
-                 "/mbard perform [instrument name|instrument ID] → switch to specified instrument\n" +
-                 "/mbard cancel → quit performance mode\n" +
-                 "/mbard visual [on|off|toggle] → midi tracks visualization\n" +
-                 "/mbard transpose [set] <semitones> → Set or change transpose semitones value\n" +
-                 "/mbard [play|pause|playpause|stop|next|prev|rewind <seconds>|fastforward <seconds>] → playback control\n" + 
-                 "Party commands: Type commands below on party chat to control all bards in the party.\n" +
-                 "switchto <track number> → Switch to <track number> on the play list. e.g. switchto 3 = Switch to the 3rd song.\n" +
-                 "close → Stop playing and exit perform mode.\n" +
-                 "reloadconfig → Reload config on all clients, use after making any changes on the playlist or settings.")]
+    [HelpMessage("Toggle MidiBard window\n")]
     public void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
