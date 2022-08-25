@@ -16,6 +16,8 @@
 
 `MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard) and developing by [Ori](https://github.com/reckhou/MidiBard2).
 
+For more detailed information, please check [MidiBard Manuals](https://github.com/reckhou/MidiBard2/tree/v2-api7-stable/Manual).
+
 
 # Why MidiBard 2?
 
