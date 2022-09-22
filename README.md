@@ -18,6 +18,9 @@
 
 For more detailed information, please check [MidiBard Manuals](https://github.com/reckhou/MidiBard2/tree/v2-api7-stable/Manual).
 
+For contact you may use our E-mail: [midibard@proton.me](mailto:midibard@proton.me).
+
+
 
 # Why MidiBard 2?
 
