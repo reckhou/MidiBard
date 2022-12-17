@@ -4,11 +4,22 @@
 
 **Please join our ✅ [Discord Server](https://discord.gg/xvNhquhnVT) for support!**
 
-**Buy me a coffee if you wish:**
+<p align="left">
+  <a href="https://discord.gg/xvNhquhnVT">
+    <img src="https://discord.com/api/guilds/897518233068920852/widget.png" alt="Discord">
+  </a>
+</p>
+
+**Buy us some coffee if you wish:**
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
 `MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard) and developing by [Ori](https://github.com/reckhou/MidiBard2).
+
+For more detailed information, please check [MidiBard Manuals](https://github.com/reckhou/MidiBard2/tree/v2-api7-stable/Manual).
+
+For contact you may use our E-mail: [midibard@proton.me](mailto:midibard@proton.me).
+
 
 
 # Why MidiBard 2?
