@@ -27,6 +27,7 @@ public partial class PluginUI
         if (!IsImportRunning)
         {
             IsImportRunning = true;
+            CheckLastOpenedFolderPath();
 
             if (MidiBard.config.useLegacyFileDialog)
             {
@@ -44,6 +45,7 @@ public partial class PluginUI
         if (!IsImportRunning)
         {
             IsImportRunning = true;
+            CheckLastOpenedFolderPath();
 
             if (MidiBard.config.useLegacyFileDialog)
             {
@@ -72,7 +74,8 @@ public partial class PluginUI
 			        finally
 			        {
 				        IsImportRunning = false;
-			        }
+                        MidiBard.config.lastOpenedFolderPath = Path.GetDirectoryName(filePaths[0]);
+                    }
 		        });
 	        }
 	        else
@@ -86,7 +89,7 @@ public partial class PluginUI
     {
         fileDialogManager.OpenFileDialog("Open", ".mid,.midi,.mmsong", (b, strings) =>
         {
-            PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", strings)}");
+            //PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", strings)}");
             if (b)
             {
                 Task.Run(async () =>
@@ -98,6 +101,7 @@ public partial class PluginUI
                     finally
                     {
                         IsImportRunning = false;
+                        MidiBard.config.lastOpenedFolderPath = Path.GetDirectoryName(strings[0]);
                     }
                 });
             }
@@ -105,14 +109,14 @@ public partial class PluginUI
             {
                 IsImportRunning = false;
             }
-        }, 0);
+        }, 0, MidiBard.config.lastOpenedFolderPath, true);
     }
 
     private void RunImportFolderTaskImGui()
     {
         fileDialogManager.OpenFolderDialog("Open folder", (b, filePath) =>
         {
-            PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", filePath)}");
+            //PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", filePath)}");
             if (b)
             {
                 Task.Run(async () =>
@@ -128,7 +132,8 @@ public partial class PluginUI
                     }
                     finally
                     {
-                        IsImportRunning = false;                        
+                        IsImportRunning = false;
+                        MidiBard.config.lastOpenedFolderPath = Directory.GetParent(filePath).FullName;
                     }
                 });
             }
@@ -136,7 +141,7 @@ public partial class PluginUI
             {
                 IsImportRunning = false;
             }
-        });
+        }, MidiBard.config.lastOpenedFolderPath, true);
     }
 
     private void RunImportFolderTaskWin32()
@@ -161,6 +166,7 @@ public partial class PluginUI
                         finally
                         {
                             IsImportRunning = false;
+                            MidiBard.config.lastOpenedFolderPath = Directory.GetParent(folderPath).FullName;
                         }
                     }
                 });
@@ -170,6 +176,14 @@ public partial class PluginUI
                 IsImportRunning = false;
             }
         });
+    }
+
+    private void CheckLastOpenedFolderPath()
+    {
+        if (!Directory.Exists(MidiBard.config.lastOpenedFolderPath))
+        {
+            MidiBard.config.lastOpenedFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
     }
     
     public bool IsImportRunning { get; private set; }
