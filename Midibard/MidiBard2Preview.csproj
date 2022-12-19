@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<LangVersion>10</LangVersion>
-		<AssemblyVersion>2.2.4.0</AssemblyVersion>
+		<AssemblyVersion>2.2.4.1</AssemblyVersion>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<Nullable>disable</Nullable>
