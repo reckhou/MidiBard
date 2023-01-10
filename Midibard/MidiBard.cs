@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -100,11 +100,12 @@ public class MidiBard : IDalamudPlugin
         MidiFileConfigManager.Init();
 
         //migrate old playlist
-        if (MidiBard.config.Playlist.Any()) {
-	        PlaylistManager.CurrentContainer.SongPaths.AddRange(MidiBard.config.Playlist.Select(i=> new SongEntry(){FilePath = i}));
+        if (MidiBard.config.Playlist.Any())
+        {
+            PlaylistManager.CurrentContainer.SongPaths.AddRange(MidiBard.config.Playlist.Select(i => new SongEntry() { FilePath = i }));
             MidiBard.config.Playlist.Clear();
         }
-        
+
         ConfigureLanguage(GetCultureCodeString((CultureCode)config.uiLang));
 
  
@@ -113,7 +114,7 @@ public class MidiBard : IDalamudPlugin
 
         playlib.init();
         OffsetManager.Setup(api.SigScanner);
-        GuitarTonePatch.InitAndApply();
+        //GuitarTonePatch.InitAndApply();
         PlayNoteHook = new PlayNoteHook();
         Cbase = new XivCommonBase();
 
@@ -420,7 +421,7 @@ public class MidiBard : IDalamudPlugin
             }
 
             TextureManager.Dispose();
-            GuitarTonePatch.Dispose();
+            //GuitarTonePatch.Dispose();
             DalamudApi.api.Dispose();
         }
         catch (Exception e2)
