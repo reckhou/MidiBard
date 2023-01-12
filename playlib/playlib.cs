@@ -22,7 +22,7 @@ namespace playlibnamespace
 			{
 				fixed (ulong* u = param)
                 {
-                    AtkUnitBase.fpFireCallback((AtkUnitBase*)ptr, paircount, (AtkValue*)u, (void*)1);
+                    AtkUnitBase.MemberFunctionPointers.FireCallback((AtkUnitBase*)ptr, paircount, (AtkValue*)u, (void*)1);
                 }
 			}
 		}

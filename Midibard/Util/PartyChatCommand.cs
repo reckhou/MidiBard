@@ -135,7 +135,7 @@ namespace MidiBard
 				return;
 			}
 
-			MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+			//MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
 		}
 
 		internal static void SendSwitchTo(int songNumber)
@@ -145,7 +145,7 @@ namespace MidiBard
 				return;
 			}
 
-			MidiBard.Cbase.Functions.Chat.SendMessage($"/p switchto {songNumber}");
+			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p switchto {songNumber}");
 		}
 
 		internal static void SendPMD(bool isOn)
@@ -156,7 +156,7 @@ namespace MidiBard
 			}
 
 			var str = isOn ? "on" : "off";
-			MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
+			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
 		}
 
 		internal static void SendReloadPlaylist()
@@ -166,7 +166,7 @@ namespace MidiBard
 				return;
 			}
 
-			MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
+			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
 		}
 
 		internal static void SendUpdateDefaultPerformer()
@@ -176,7 +176,7 @@ namespace MidiBard
 				return;
 			}
 
-			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updatedefaultperformer");
+			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p updatedefaultperformer");
 		}
 
 		internal static void SendUpdateInstrument()
@@ -186,7 +186,7 @@ namespace MidiBard
 				return;
 			}
 
-			MidiBard.Cbase.Functions.Chat.SendMessage($"/p updateinstrument");
+			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p updateinstrument");
 		}
 
 		private static void UpdateInstrument()

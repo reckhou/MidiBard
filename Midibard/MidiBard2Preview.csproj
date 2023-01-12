@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<LangVersion>10</LangVersion>
-		<AssemblyVersion>2.2.4.1</AssemblyVersion>
+		<AssemblyVersion>2.3.0.0</AssemblyVersion>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<Nullable>disable</Nullable>
@@ -17,7 +17,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.8" />
+    <PackageReference Include="DalamudPackager" Version="2.1.10" />
     <PackageReference Include="Fody" Version="6.6.4" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all" />

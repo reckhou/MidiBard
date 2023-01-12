@@ -259,7 +259,7 @@ namespace MidiBard.Util.Lyrics
                         msg = "/p " + msg;
                     }
 
-                    MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                    //MidiBard.Cbase.Functions.Chat.SendMessage(msg);
                     SongTitlePosted = true;
                     return;
                 }
@@ -308,7 +308,7 @@ namespace MidiBard.Util.Lyrics
                                 msg = $"/p ♪ {lyric} ♪";
                             }
                             
-                            MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                            //MidiBard.Cbase.Functions.Chat.SendMessage(msg);
                         }
                         LrcIdx = idx;
                     }

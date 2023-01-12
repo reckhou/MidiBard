@@ -8,7 +8,7 @@
     "utility",
     "other"
   ],
-  "DalamudApiLevel": 7,
+  "DalamudApiLevel": 8,
   "IconUrl": "https://imgur.com/6d3J85U",
   "Changelog": "Use regex to identify track names, better compatibility.",
   "ImageUrls": [
