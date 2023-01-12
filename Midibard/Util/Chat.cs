@@ -98,6 +98,11 @@ namespace MidiBard.Util
             Marshal.FreeHGlobal(mem1);
         }
 
+        public static void SendMessage(string message)
+        {
+            api.Framework.RunOnTick(() => SendMessageInternal(message));
+        }
+
         /// <summary>
         /// <para>
         /// Send a given message to the chat box. <b>This can send chat to the server.</b>
@@ -111,7 +116,7 @@ namespace MidiBard.Util
         /// <param name="message">message to send</param>
         /// <exception cref="ArgumentException">If <paramref name="message"/> is empty, longer than 500 bytes in UTF-8, or contains invalid characters.</exception>
         /// <exception cref="InvalidOperationException">If the signature for this function could not be found</exception>
-        public static void SendMessage(string message)
+        private static void SendMessageInternal(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message);
             if (bytes.Length == 0)
