@@ -134,7 +134,7 @@ internal class EnsembleManager : IDisposable
                     {
                         try
                         {
-                            MidiBard.CurrentPlayback.Start();
+                            MidiPlayerControl.DoPlay(true);
                             PluginLog.Warning(
                                 $"Start ensemble: compensation: {midiClock.CurrentTime.TotalMilliseconds} ms / {midiClock.CurrentTime.Ticks} ticks, sw: {sw.Elapsed.TotalMilliseconds - midiClock.CurrentTime.TotalMilliseconds}ms");
                             EnsembleStart?.Invoke();
@@ -159,7 +159,7 @@ internal class EnsembleManager : IDisposable
                 {
                     try
                     {
-                        MidiBard.CurrentPlayback.Start();
+                        MidiPlayerControl.DoPlay(true);
                         PluginLog.Warning($"Start ensemble: sw: {sw.Elapsed.TotalMilliseconds}ms");
                         EnsembleStart?.Invoke();
                     }

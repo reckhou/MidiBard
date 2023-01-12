@@ -192,8 +192,8 @@ static class PlaylistManager
 		if (sync) IPCHandles.LoadPlayback(CurrentSongIndex);
 		if (await LoadPlaybackPrivate()) {
 			if (startPlaying) {
-				MidiBard.CurrentPlayback?.Start();
-			}
+				MidiPlayerControl.DoPlay();
+            }
 
 			return true;
 		}

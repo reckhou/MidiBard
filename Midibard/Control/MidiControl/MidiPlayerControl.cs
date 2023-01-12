@@ -50,7 +50,7 @@ internal static class MidiPlayerControl
 		}
 	}
 
-	public static void DoPlay()
+	public static void DoPlay(bool isEnsemble = false)
 	{
 		if (MidiBard.CurrentPlayback == null)
 		{
@@ -60,6 +60,11 @@ internal static class MidiPlayerControl
 		playDeltaTime = 0;
 		MidiBard.CurrentPlayback.Start();
 		_stat = e_stat.Playing;
+
+        if (isEnsemble)
+        {
+			Lrc.EnsembleStart();
+        }
 
 		Lrc.Play();
 	}

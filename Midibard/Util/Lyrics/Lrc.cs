@@ -167,8 +167,6 @@ namespace MidiBard.Util.Lyrics
 
         public static int LrcIdx = -1;
         internal static int LRCDeltaTime = 50;
-        static Stopwatch LRCStopWatch;
-        static bool EnsembleInFirst2Measures;
         static bool SongTitlePosted = false;
 
         public static List<double> LrcTimeStamps = new List<double>();
@@ -181,7 +179,6 @@ namespace MidiBard.Util.Lyrics
         public static void Play()
         {
             LRCDeltaTime = 100; // Assume usual delay between sending and other clients receiving the message would be ~100ms
-            var idx = 0;
 
             if (HasLyric())
             {
@@ -208,7 +205,6 @@ namespace MidiBard.Util.Lyrics
         public static void Stop()
         {
             LrcIdx = -1;
-            EnsembleInFirst2Measures = false;
             SongTitlePosted = false;
         }
 
@@ -225,15 +221,8 @@ namespace MidiBard.Util.Lyrics
 
         public static void EnsembleStart()
         {
-            EnsembleInFirst2Measures = true;
-            LRCStopWatch = Stopwatch.StartNew();
-        }
-
-        public static void Ensemble2MeasuresElapsed(int compensation)
-        {
-            EnsembleInFirst2Measures = false;
-            LRCStopWatch.Stop();
-            _lrc.Offset += LRCStopWatch.ElapsedMilliseconds - compensation;
+            _lrc.Offset += (long)(4.045 * 1000); // a hack way to get ensemble delay, see MidiFilePlot.cs:90 
+            //PluginLog.LogVerbose("LRC Offset: " + _lrc.Offset);
         }
 
         public static void Tick(Dalamud.Game.Framework framework)
@@ -261,11 +250,6 @@ namespace MidiBard.Util.Lyrics
 
                     Chat.SendMessage(msg);
                     SongTitlePosted = true;
-                    return;
-                }
-
-                if (EnsembleInFirst2Measures)
-                {
                     return;
                 }
 
