@@ -129,7 +129,6 @@ public class Configuration : IPluginConfiguration
     //public float plotScale = 10f;
 
     public bool StopPlayingWhenEnsembleEnds = true;
-    public bool AutoSetBackgroundFrameLimit = true;
 
     public bool SyncClients = true;
 

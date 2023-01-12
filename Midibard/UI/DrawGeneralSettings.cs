@@ -39,11 +39,7 @@ public partial class PluginUI
 			//Checkbox(Low_latency_mode, ref MidiBard.config.LowLatencyMode);
 			//ImGuiUtil.ToolTip(low_latency_mode_tooltip);
 
-			ImGui.Checkbox(setting_label_auto_set_background_frame_limit,
-				ref MidiBard.config.AutoSetBackgroundFrameLimit);
-			ImGuiUtil.ToolTip(setting_tooltip_auto_set_background_frame_limit);
-
-			//ImGui.Checkbox(checkbox_auto_restart_listening, ref MidiBard.config.autoRestoreListening);
+            //ImGui.Checkbox(checkbox_auto_restart_listening, ref MidiBard.config.autoRestoreListening);
 			//ImGuiUtil.ToolTip(checkbox_auto_restart_listening_tooltip);
 
 			//ImGui.SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2);
