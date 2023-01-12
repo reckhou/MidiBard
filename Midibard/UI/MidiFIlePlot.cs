@@ -16,7 +16,7 @@ using MidiBard.Control;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 using MidiBard.Util;
 
 namespace MidiBard;

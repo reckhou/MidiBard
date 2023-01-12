@@ -7,7 +7,7 @@ using static MidiBard.ImGuiUtil;
 using MidiBard.Control.CharacterControl;
 using Dalamud.Logging;
 using MidiBard.Control.MidiControl.PlaybackInstance;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 using MidiBard.Control.MidiControl;
 
 namespace MidiBard;

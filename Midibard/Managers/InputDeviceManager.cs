@@ -11,7 +11,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control;
 using MidiBard.DalamudApi;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 
 namespace MidiBard;
 

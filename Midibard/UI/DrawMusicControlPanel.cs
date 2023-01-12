@@ -12,7 +12,7 @@ using static ImGuiNET.ImGui;
 using MidiBard.Util.Lyrics;
 using MidiBard.Managers.Ipc;
 using static MidiBard.ImGuiUtil;
-using static MidiBard2Preview.Resources.Language;
+using static MidiBard2.Resources.Language;
 
 namespace MidiBard;
 

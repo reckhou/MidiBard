@@ -1,6 +1,6 @@
 {
   "Author": "akira0245, Ori",
-  "Name": "MidiBard 2 - Preview",
+  "Name": "MidiBard 2",
   "Punchline": "Bard performance using midi files or keyboard.\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "RepoUrl": "https://midibard.org",
@@ -9,9 +9,9 @@
     "other"
   ],
   "DalamudApiLevel": 8,
-  "IconUrl": "https://imgur.com/6d3J85U",
-  "Changelog": "Use regex to identify track names, better compatibility.",
+  "IconUrl": "https://i.imgur.com/OSxqew4.png",
+  "Changelog": "- Use regex to identify track names, better compatibility.\n- Saves the last opening folder.\n- Even better sync on lower-end PC.",
   "ImageUrls": [
-    "https://i.imgur.com/sh1wIpC.png"
+    "https://i.imgur.com/1R13XF0.png"
   ]
 }

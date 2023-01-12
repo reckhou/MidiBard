@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MidiBard2Preview.Resources {
+namespace MidiBard2.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace MidiBard2Preview.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MidiBard2Preview.Resources.Language", typeof(Language).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MidiBard2.Resources.Language", typeof(Language).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

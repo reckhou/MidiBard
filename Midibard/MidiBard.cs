@@ -331,12 +331,12 @@ public class MidiBard : IDalamudPlugin
 	    langCode ??= api.PluginInterface.UiLanguage ?? "en";
 	    try
 	    {
-		    MidiBard2Preview.Resources.Language.Culture = new CultureInfo(langCode);
+		    MidiBard2.Resources.Language.Culture = new CultureInfo(langCode);
 	    }
 	    catch (Exception ex)
 	    {
 		    PluginLog.LogError(ex, $"Could not set culture to {langCode} - falling back to default");
-		    MidiBard2Preview.Resources.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
+		    MidiBard2.Resources.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
 	    }
     }
 

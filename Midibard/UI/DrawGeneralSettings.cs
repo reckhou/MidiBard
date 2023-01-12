@@ -7,10 +7,10 @@ using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 using MidiBard.IPC;
 using MidiBard.Managers;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 using MidiBard.Util;
 using static ImGuiNET.ImGui;
-using static MidiBard2Preview.Resources.Language;
+using static MidiBard2.Resources.Language;
 
 namespace MidiBard;
 

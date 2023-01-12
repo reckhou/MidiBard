@@ -5,7 +5,7 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 using MidiBard.Control.CharacterControl;
 using static MidiBard.ImGuiUtil;
 using MidiBard.IPC;

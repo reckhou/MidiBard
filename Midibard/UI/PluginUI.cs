@@ -33,7 +33,7 @@ using MidiBard.DalamudApi;
 using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
-using MidiBard2Preview.Resources;
+using MidiBard2.Resources;
 using MidiBard.UI.Win32;
 using MidiBard.Util;
 using Newtonsoft.Json;

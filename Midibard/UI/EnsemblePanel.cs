@@ -15,7 +15,7 @@ using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
-using static MidiBard2Preview.Resources.Language;
+using static MidiBard2.Resources.Language;
 
 namespace MidiBard;
 
