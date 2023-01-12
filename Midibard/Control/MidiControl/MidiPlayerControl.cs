@@ -31,7 +31,7 @@ internal static class MidiPlayerControl
 			{
 				PlaylistManager.LoadPlayback(null, true);
 			}
-		}
+        }
 		else
 		{
 			try

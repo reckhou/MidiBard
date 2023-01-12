@@ -259,7 +259,7 @@ namespace MidiBard.Util.Lyrics
                         msg = "/p " + msg;
                     }
 
-                    //MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                    Chat.SendMessage(msg);
                     SongTitlePosted = true;
                     return;
                 }
@@ -292,7 +292,7 @@ namespace MidiBard.Util.Lyrics
                                 postLyrics = true;
                             }
                         }
-
+                        PluginLog.LogVerbose($@"Post Lyrics:{postLyrics}");
 
                         if (postLyrics)
                         {
@@ -301,6 +301,7 @@ namespace MidiBard.Util.Lyrics
                             PluginLog.LogVerbose($"{lyric}");
                             if (MidiBard.AgentMetronome.EnsembleModeRunning)
                             {
+                                PluginLog.LogVerbose("MidiBard.AgentMetronome.EnsembleModeRunning");
                                 msg = $"/s ♪ {lyric} ♪";
                             }
                             else
@@ -308,7 +309,7 @@ namespace MidiBard.Util.Lyrics
                                 msg = $"/p ♪ {lyric} ♪";
                             }
                             
-                            //MidiBard.Cbase.Functions.Chat.SendMessage(msg);
+                            Chat.SendMessage(msg);
                         }
                         LrcIdx = idx;
                     }

@@ -13,6 +13,7 @@ using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using System.Threading.Tasks;
+using MidiBard.Util;
 using static MidiBard.MidiBard;
 
 namespace MidiBard
@@ -135,7 +136,7 @@ namespace MidiBard
 				return;
 			}
 
-			//MidiBard.Cbase.Functions.Chat.SendMessage("/p close");
+			Chat.SendMessage("/p close");
 		}
 
 		internal static void SendSwitchTo(int songNumber)
@@ -145,7 +146,7 @@ namespace MidiBard
 				return;
 			}
 
-			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p switchto {songNumber}");
+			Chat.SendMessage($"/p switchto {songNumber}");
 		}
 
 		internal static void SendPMD(bool isOn)
@@ -156,7 +157,7 @@ namespace MidiBard
 			}
 
 			var str = isOn ? "on" : "off";
-			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p pmd {str}");
+			Chat.SendMessage($"/p pmd {str}");
 		}
 
 		internal static void SendReloadPlaylist()
@@ -166,7 +167,7 @@ namespace MidiBard
 				return;
 			}
 
-			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p reloadplaylist");
+			Chat.SendMessage($"/p reloadplaylist");
 		}
 
 		internal static void SendUpdateDefaultPerformer()
@@ -176,7 +177,7 @@ namespace MidiBard
 				return;
 			}
 
-			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p updatedefaultperformer");
+			Chat.SendMessage($"/p updatedefaultperformer");
 		}
 
 		internal static void SendUpdateInstrument()
@@ -186,7 +187,7 @@ namespace MidiBard
 				return;
 			}
 
-			//MidiBard.Cbase.Functions.Chat.SendMessage($"/p updateinstrument");
+			Chat.SendMessage($"/p updateinstrument");
 		}
 
 		private static void UpdateInstrument()

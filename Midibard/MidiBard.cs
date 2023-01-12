@@ -36,7 +36,6 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using playlibnamespace;
 using Dalamud.Game.Gui;
-using XivCommon;
 using MidiBard.Util.Lyrics;
 
 namespace MidiBard;
@@ -73,8 +72,6 @@ public class MidiBard : IDalamudPlugin
 
     public string Name => "MidiBard 2 - Preview";
     private static ChatGui _chatGui;
-
-    public static XivCommonBase Cbase;
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
     {
