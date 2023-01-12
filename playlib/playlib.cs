@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Diagnostics;

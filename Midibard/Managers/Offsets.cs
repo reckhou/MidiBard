@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MidiBard.Managers;
@@ -36,7 +36,7 @@ public static class Offsets
     [Function("48 89 ? ? ? 48 89 ? ? ? 57 48 83 EC ? 8B FA 41 0F ? ? 03 79")]
     public static IntPtr PressNote { get; private set; }
 
-    [Function("E9 ? ? ? ? 48 83 C2 10 48 83 C4 20 5B E9 ? ? ? ? 48 83 C2 10 48 83 C4 20 5B E9 ? ? ? ? 41 81 E8 ? ? ? ? ")]
+    [Function("E9 ? ? ? ? 48 8B 49 08 48 8B 01 FF 90 ? ? ? ? 48 8B C8 BA ? ? ? ? E8 ? ? ? ? 48 85 C0 74 11 ")]
     public static IntPtr NetworkEnsembleStart { get; private set; }
 #if DEBUG
 

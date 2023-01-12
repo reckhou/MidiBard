@@ -109,7 +109,7 @@ public partial class PluginUI
             {
                 IsImportRunning = false;
             }
-        }, 0, MidiBard.config.lastOpenedFolderPath, true);
+        }, 0, MidiBard.config.lastOpenedFolderPath);
     }
 
     private void RunImportFolderTaskImGui()
@@ -141,7 +141,7 @@ public partial class PluginUI
             {
                 IsImportRunning = false;
             }
-        }, MidiBard.config.lastOpenedFolderPath, true);
+        }, MidiBard.config.lastOpenedFolderPath);
     }
 
     private void RunImportFolderTaskWin32()
