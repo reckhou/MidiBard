@@ -10,7 +10,7 @@
   ],
   "DalamudApiLevel": 8,
   "IconUrl": "https://i.imgur.com/OSxqew4.png",
-  "Changelog": "- Use regex to identify track names, better compatibility.\n- Saves the last opening folder.\n- Even better sync on lower-end PC.",
+  "Changelog": "+ Use regex to identify track names, better compatibility for some old MIDI files.\n+ Saves the last folder of file import.\n+ Even better sync on some lower-end PCs.\n\n- Remove auto set background frame limitation functon as it's been implemented in Bard Toolbox in a more elegant way. Please Google and install Bard Toolbox if you need this function.",
   "ImageUrls": [
     "https://i.imgur.com/1R13XF0.png"
   ]
