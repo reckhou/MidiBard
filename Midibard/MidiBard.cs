@@ -61,7 +61,6 @@ public class MidiBard : IDalamudPlugin
     internal static readonly byte[] guitarGroup = { 24, 25, 26, 27, 28 };
     internal static IDictionary<SevenBitNumber, uint> ProgramInstruments;
     internal static PartyWatcher PartyWatcher;
-    internal static PlayNoteHook PlayNoteHook;
 
     internal static bool SlaveMode = false;
 
@@ -70,7 +69,7 @@ public class MidiBard : IDalamudPlugin
     internal static bool PlayingGuitar => InstrumentHelper.IsGuitar(CurrentInstrument);
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
 
-    public string Name => "MidiBard 2 - Preview";
+    public string Name => "MidiBard 2";
     private static ChatGui _chatGui;
 
     public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
@@ -112,11 +111,9 @@ public class MidiBard : IDalamudPlugin
         playlib.init();
         OffsetManager.Setup(api.SigScanner);
         //GuitarTonePatch.InitAndApply();
-        PlayNoteHook = new PlayNoteHook();
-        //Cbase = new XivCommonBase();
 
-        AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.MetronomeAgent));
-        AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.PerformanceAgent));
+        AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentMetronome));
+        AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentPerformance));
         AgentConfigSystem = new AgentConfigSystem(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentConfigSystem));
         EnsembleManager = new EnsembleManager();
 
@@ -401,7 +398,6 @@ public class MidiBard : IDalamudPlugin
             EnsembleManager.Dispose();
             PartyWatcher.Dispose();
             IpcManager.Dispose();
-            PlayNoteHook?.Dispose();
 #if DEBUG
 			NetworkManager.Instance.Dispose();
 #endif

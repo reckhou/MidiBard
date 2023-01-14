@@ -177,40 +177,26 @@ internal class BardPlayDevice : IOutputDevice
 									}
 								}
 
-								if (MidiBard.config.LowLatencyMode)
-								{
-									if (MidiBard.AgentPerformance.noteNumber - 39 == noteNum)
-									{
-										MidiBard.PlayNoteHook.NoteOff();
-									}
 
-									return MidiBard.PlayNoteHook.NoteOn(noteNum + 39);
-								}
-								else
-								{
-									//currently holding the same note?
-									if (MidiBard.AgentPerformance.noteNumber - 39 == noteNum)
-									{
-										// release repeated note in order to press it again
-										if (playlib.ReleaseKey(noteNum))
-										{
-											MidiBard.AgentPerformance.Struct->CurrentPressingNote = -100;
-#if DEBUG
-											PluginLog.Verbose($"[ONO] {metadata} {noteOnEvent}");
-#endif
-										}
-									}
+                                //currently holding the same note?
+                                if (MidiBard.AgentPerformance.noteNumber - 39 == noteNum)
+                                {
+                                    // release repeated note in order to press it again
+                                    if (playlib.ReleaseKey(noteNum))
+                                    {
+                                        MidiBard.AgentPerformance.Struct->CurrentPressingNote = -100;
+                                        PluginLog.Verbose($"[ONO] {metadata} {noteOnEvent}");
+                                    }
+                                }
 
-									if (playlib.PressKey(noteNum, ref MidiBard.AgentPerformance.Struct->NoteOffset, ref MidiBard.AgentPerformance.Struct->OctaveOffset))
-									{
-										MidiBard.AgentPerformance.Struct->CurrentPressingNote = noteNum + 39;
-#if DEBUG
-										PluginLog.Verbose($"[NO ] {metadata} {noteOnEvent}");
-#endif
-										return true;
-									}
-								}
-							}
+                                if (playlib.PressKey(noteNum, ref MidiBard.AgentPerformance.Struct->NoteOffset,
+                                        ref MidiBard.AgentPerformance.Struct->OctaveOffset))
+                                {
+                                    MidiBard.AgentPerformance.Struct->CurrentPressingNote = noteNum + 39;
+                                    PluginLog.Verbose($"[NO ] {metadata} {noteOnEvent}");
+                                    return true;
+                                }
+                            }
 							break;
 
 						case NoteOffEvent noteOffEvent:
@@ -221,20 +207,13 @@ internal class BardPlayDevice : IOutputDevice
 									return false;
 								}
 
-								if (MidiBard.config.LowLatencyMode)
-								{
-									MidiBard.PlayNoteHook.NoteOff();
-								}
-								else
-								{
-									// only release a key when it been pressing
-									if (playlib.ReleaseKey(noteNum))
-									{
-										MidiBard.AgentPerformance.Struct->CurrentPressingNote = -100;
-										return true;
-									}
-								}
-							}
+                                // only release a key when it been pressing
+                                if (playlib.ReleaseKey(noteNum))
+                                {
+                                    MidiBard.AgentPerformance.Struct->CurrentPressingNote = -100;
+                                    return true;
+                                }
+                            }
 							break;
 
 						default:
