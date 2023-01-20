@@ -10,7 +10,7 @@ using Dalamud.Logging;
 using MidiBard.Control.MidiControl;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
-using MidiBard.DalamudApi;
+using Dalamud;
 using Melanchall.DryWetMidi.Interaction;
 
 namespace MidiBard.Util.Lyrics
@@ -182,9 +182,9 @@ namespace MidiBard.Util.Lyrics
 
             if (HasLyric())
             {
-                if (DalamudApi.api.PartyList.Length <= 1)
+                if (api.PartyList.Length <= 1)
                 {
-                    DalamudApi.api.ChatGui.Print(string.Format("[MidiBard 2] Not in a party, Lyrics will not be posted."));
+                    api.ChatGui.Print(string.Format("[MidiBard 2] Not in a party, Lyrics will not be posted."));
                 }
             }
 

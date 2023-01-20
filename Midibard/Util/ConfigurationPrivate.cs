@@ -33,7 +33,7 @@ public class ConfigurationPrivate : IPluginConfiguration
             {
                 try
                 {
-                    var CS = DalamudApi.api.ClientState;
+                    var CS = api.ClientState;
                     if (CS != null && CS.IsLoggedIn)
                     {
                         var playerData = CS.LocalPlayer;
@@ -64,8 +64,8 @@ public class ConfigurationPrivate : IPluginConfiguration
     {
         try
         {
-            var PI = DalamudApi.api.PluginInterface;
-            var CS = DalamudApi.api.ClientState;
+            var PI = api.PluginInterface;
+            var CS = api.ClientState;
             if (CS != null && CS.IsLoggedIn)
             {
                 var playerData = CS.LocalPlayer;
@@ -94,8 +94,8 @@ public class ConfigurationPrivate : IPluginConfiguration
 
     public static void Load()
     {
-        var PI = DalamudApi.api.PluginInterface;
-        var CS = DalamudApi.api.ClientState;
+        var PI = api.PluginInterface;
+        var CS = api.ClientState;
         if (CS != null && CS.IsLoggedIn)
         {
             var playerData = CS.LocalPlayer;
@@ -141,7 +141,7 @@ public class ConfigurationPrivate : IPluginConfiguration
 
     static FileInfo GetConfigFileInfo(string charName, string world, ulong contentID)
     {
-        var pluginConfigDirectory = DalamudApi.api.PluginInterface.ConfigDirectory;
+        var pluginConfigDirectory = api.PluginInterface.ConfigDirectory;
 
         return new FileInfo(pluginConfigDirectory.FullName + $@"\{charName}_{world}_{contentID}.json");
     }

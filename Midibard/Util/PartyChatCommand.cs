@@ -131,7 +131,7 @@ namespace MidiBard
 
 		internal static void SendClose()
 		{
-			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			if (!MidiBard.config.playOnMultipleDevices || api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -141,7 +141,7 @@ namespace MidiBard
 
 		internal static void SendSwitchTo(int songNumber)
         {
-			if (!MidiBard.config.playOnMultipleDevices || DalamudApi.api.PartyList.Length < 2)
+			if (!MidiBard.config.playOnMultipleDevices || api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -151,7 +151,7 @@ namespace MidiBard
 
 		internal static void SendPMD(bool isOn)
 		{
-			if (DalamudApi.api.PartyList.Length < 2)
+			if (api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -162,7 +162,7 @@ namespace MidiBard
 
 		internal static void SendReloadPlaylist()
         {
-			if (DalamudApi.api.PartyList.Length < 2)
+			if (api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -172,7 +172,7 @@ namespace MidiBard
 
 		internal static void SendUpdateDefaultPerformer()
         {
-			if (DalamudApi.api.PartyList.Length < 2)
+			if (api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -182,7 +182,7 @@ namespace MidiBard
 
 		internal static void SendUpdateInstrument()
         {
-			if (DalamudApi.api.PartyList.Length < 2)
+			if (api.PartyList.Length < 2)
 			{
 				return;
 			}
@@ -205,7 +205,7 @@ namespace MidiBard
 			{
 				try
 				{
-					trackStatus[i].Enabled = dbTracks[i].Enabled && MidiFileConfig.GetFirstCidInParty(dbTracks[i]) == (long)DalamudApi.api.ClientState.LocalContentId;
+					trackStatus[i].Enabled = dbTracks[i].Enabled && MidiFileConfig.GetFirstCidInParty(dbTracks[i]) == (long)api.ClientState.LocalContentId;
 					trackStatus[i].Transpose = dbTracks[i].Transpose;
 					trackStatus[i].Tone = Util.InstrumentHelper.GetGuitarTone(dbTracks[i].Instrument);
 				}
@@ -218,7 +218,7 @@ namespace MidiBard
 			uint? instrument = null;
 			foreach (var cur in MidiBard.CurrentPlayback.MidiFileConfig.Tracks)
 			{
-				if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)DalamudApi.api.ClientState.LocalContentId, cur))
+				if (cur.Enabled && MidiFileConfig.IsCidOnTrack((long)api.ClientState.LocalContentId, cur))
 				{
 					instrument = (uint?)cur.Instrument;
 					break;
