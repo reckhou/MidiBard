@@ -14,7 +14,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L6CQMMD)
 
-`MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards, , with minimal input latancy and prefect sync between bards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard) and developing by [Ori](https://github.com/reckhou/MidiBard2).
+`MidiBard 2` is an FF14 Bard plugin based on the [Dalamud](https://github.com/goatcorp/Dalamud) framework, which supports bard performance by MIDI files or keyboards, , featuring zero input latancy and prefect sync between bards. It is originally authored by [akira0245](https://github.com/akira0245/MidiBard) and developing by [Ori](https://github.com/reckhou/MidiBard2).
 
 For more detailed information, please check [MidiBard Manuals](https://github.com/reckhou/MidiBard2/tree/v2-api7-stable/Manual).
 
@@ -24,11 +24,13 @@ For contact you may use our E-mail: [midibard@proton.me](mailto:midibard@proton.
 
 # Why MidiBard 2?
 
-❖ High-quality playback, clean sound on every instrument. Minimal delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
+❖ High-quality playback, clean sound on every instrument. Zero delay on playing notes, never drop any notes in crowded areas. Suits especially well for fast and busy songs.
 
 ❖ Based on in-game detection of bard ensemble mode, almost perfect sync between bards. Also supports manual sync if you wish to add a little bit of flavour to your song.
 
-❖ Automatically switches instruments by track names following BMP rules, all songs from [BMP MIDI Repository](https://bmp.trotlinebeercan.com/) are supported.
+❖ Automatically switches instruments by track names following BMP rules, all songs from [Bard Music Player MIDI Repository](https://songs.bardmusicplayer.com/) are supported.
+
+❖ Widely used by solo bards to octet bands, supports all file types used by Bard Music Player, LightAmp and MogAmp.
 
 ❖ No need to set key bindings and hotbars on your every bard.
 
