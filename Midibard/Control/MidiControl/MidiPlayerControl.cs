@@ -16,6 +16,7 @@
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -30,6 +31,7 @@ namespace MidiBard.Control.MidiControl;
 
 internal static class MidiPlayerControl
 {
+	private static HashSet<int> playedIndexes = new HashSet<int>();
 	internal static void Play()
 	{
 		if (MidiBard.CurrentPlayback == null)
@@ -139,6 +141,27 @@ internal static class MidiPlayerControl
 
 	}
 
+
+	// Takes in the set of already played songs and returns a new random song that hasn't already been played.
+
+	// @TODO so i don't forget, need to add a function so pressing the play button resets the playedlist, or add another button there since there is room in the UI
+	private static int limitedRandom(HashSet<int> playedIndexes)
+	{
+		//we've played all the songs, reset.
+		if(playedIndexes.Count == PlaylistManager.FilePathList.Count)
+		{
+			playedIndexes.Clear(); 
+		}
+
+		var unplayed = Enumerable.Range(0, PlaylistManager.FilePathList.Count-1).Where(i => !playedIndexes.Contains(i));
+		var r = new Random();
+
+		// effectively we're getting a random list exluding the playedIndexes
+		int index = r.Next(0, PlaylistManager.FilePathList.Count-1-playedIndexes.Count);
+		
+		return unplayed.ElementAt(index);
+	}
+
 	private static int GetSongIndex(int songIndex, bool next)
 	{
 		var playMode = (PlayMode)MidiBard.config.PlayMode;
@@ -163,11 +186,11 @@ internal static class MidiPlayerControl
 				var r = new Random();
 				do
 				{
-					songIndex = r.Next(0, PlaylistManager.FilePathList.Count);
+					songIndex = limitedRandom(playedIndexes);
+					playedIndexes.Add(songIndex);
 				} while (songIndex == PlaylistManager.CurrentSongIndex);
 			}
 		}
-
 		return songIndex;
 	}
 
