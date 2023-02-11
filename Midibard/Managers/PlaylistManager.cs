@@ -147,6 +147,8 @@ static class PlaylistManager
 		var success = 0;
 		var sw = Stopwatch.StartNew();
 
+		MidiPlayerControl.ClearAlreadyPlayed();
+
 		await Task.Run(() => {
 			foreach (var path in CheckValidFiles(filePaths)) {
 				FilePathList.Add(new SongEntry { FilePath = path });
