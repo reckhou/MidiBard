@@ -141,16 +141,19 @@ internal static class MidiPlayerControl
 
 	}
 
+	internal static void ClearAlreadyPlayed(){
+		playedIndexes.Clear();
+	}
 
 	// Takes in the set of already played songs and returns a new random song that hasn't already been played.
 
 	// @TODO so i don't forget, need to add a function so pressing the play button resets the playedlist, or add another button there since there is room in the UI
-	private static int limitedRandom(HashSet<int> playedIndexes)
+	private static int LimitedRandom(HashSet<int> playedIndexes)
 	{
 		//we've played all the songs, reset.
 		if(playedIndexes.Count == PlaylistManager.FilePathList.Count)
 		{
-			playedIndexes.Clear(); 
+			ClearAlreadyPlayed();
 		}
 
 		var unplayed = Enumerable.Range(0, PlaylistManager.FilePathList.Count-1).Where(i => !playedIndexes.Contains(i));
@@ -186,7 +189,7 @@ internal static class MidiPlayerControl
 				var r = new Random();
 				do
 				{
-					songIndex = limitedRandom(playedIndexes);
+					songIndex = LimitedRandom(playedIndexes);
 					playedIndexes.Add(songIndex);
 				} while (songIndex == PlaylistManager.CurrentSongIndex);
 			}
