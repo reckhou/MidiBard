@@ -140,14 +140,12 @@ internal static class MidiPlayerControl
 		PlaylistManager.LoadPlayback(songIndex, MidiBard.IsPlaying);
 
 	}
-
+	
 	internal static void ClearAlreadyPlayed(){
 		playedIndexes.Clear();
 	}
 
 	// Takes in the set of already played songs and returns a new random song that hasn't already been played.
-
-	// @TODO so i don't forget, need to add a function so pressing the play button resets the playedlist, or add another button there since there is room in the UI
 	private static int LimitedRandom(HashSet<int> playedIndexes)
 	{
 		//we've played all the songs, reset.
