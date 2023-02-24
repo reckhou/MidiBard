@@ -95,6 +95,7 @@ static class PlaylistManager
 	public static void Clear()
 	{
 		FilePathList.Clear();
+		MidiPlayerControl.ClearAlreadyPlayed();
 		CurrentSongIndex = -1;
 		IPCHandles.SyncPlaylist();
 	}
@@ -113,6 +114,7 @@ static class PlaylistManager
 		try {
 			FilePathList.RemoveAt(index);
 			PluginLog.Debug($"removed [{playlistIndex}, {index}]");
+			MidiPlayerControl.ClearAlreadyPlayed();
 			if (index < CurrentSongIndex) {
 				CurrentSongIndex--;
 			}
@@ -144,6 +146,8 @@ static class PlaylistManager
 		var count = filePaths.Length;
 		var success = 0;
 		var sw = Stopwatch.StartNew();
+
+		MidiPlayerControl.ClearAlreadyPlayed();
 
 		await Task.Run(() => {
 			foreach (var path in CheckValidFiles(filePaths)) {
