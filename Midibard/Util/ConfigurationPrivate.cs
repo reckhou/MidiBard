@@ -9,10 +9,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Configuration;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiNET;
 using Newtonsoft.Json;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -80,14 +82,14 @@ public class ConfigurationPrivate : IPluginConfiguration
                     var serializedContents = JsonConvert.SerializeObject(this, Formatting.Indented);
 
                     File.WriteAllText(configFileInfo.FullName, serializedContents);
-                    PluginLog.LogWarning($"Saving {DateTime.Now} - {playerName}_{playerWorld}_{contentId}.json Saved");
+                    PluginLog.Warning($"Saving {DateTime.Now} - {playerName}_{playerWorld}_{contentId}.json Saved");
                 }
             }
         }
         catch (Exception e)
         {
             PluginLog.Error(e, "Error when saving private config");
-            ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Error, "Error when saving private config");
+            ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving private config");
         }
         
     }
@@ -129,10 +131,10 @@ public class ConfigurationPrivate : IPluginConfiguration
 
             if (playerData == null)
             {
-                PluginLog.LogDebug("PlayerData NULL");
+                PluginLog.Debug("PlayerData NULL");
             } else
             {
-                PluginLog.LogDebug(playerData.HomeWorld.GameData == null ? "playerData.HomeWorld.GameData == null" : "");
+                PluginLog.Debug(playerData.HomeWorld.GameData == null ? "playerData.HomeWorld.GameData == null" : "");
             }
         }
 

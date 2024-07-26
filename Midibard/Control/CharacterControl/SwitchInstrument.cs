@@ -22,7 +22,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 using MidiBard.Control.MidiControl;
@@ -31,6 +30,7 @@ using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Util;
 using playlibnamespace;
+using static Dalamud.api;
 
 namespace MidiBard.Control.CharacterControl;
 
@@ -138,7 +138,8 @@ internal static class SwitchInstrument
 	}
 
 	public static bool TryParseInstrumentName(string capturedInstrumentString, out uint instrumentId)
-	{
+    {
+        var bmpNameEqual = TrackInfo.GetInstrumentIDByName(capturedInstrumentString);
 		Perform equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
 			i?.Instrument?.RawString.Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
 		Perform contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
@@ -146,8 +147,8 @@ internal static class SwitchInstrument
 		Perform gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
 			i?.Name?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
 
-		var rowId = (equal ?? contains ?? gmName)?.RowId;
-		PluginLog.Debug($"equal: {equal?.Instrument?.RawString}, contains: {contains?.Instrument?.RawString}, gmName: {gmName?.Name?.RawString} finalId: {rowId}");
+		var rowId = bmpNameEqual ?? (equal ?? contains ?? gmName)?.RowId;
+		PluginLog.Debug($"idFromBmpName: {bmpNameEqual}, equal: {equal?.Instrument?.RawString}, contains: {contains?.Instrument?.RawString}, gmName: {gmName?.Name?.RawString} finalId: {rowId}");
 		if (rowId is null)
 		{
 			instrumentId = 0;

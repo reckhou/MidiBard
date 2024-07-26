@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2022 akira0245
+// Copyright (C) 2022 akira0245
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -18,30 +18,43 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Dalamud.Logging;
 using JetBrains.Annotations;
 using MidiBard.Util;
 using Newtonsoft.Json;
 using ProtoBuf;
+using static Dalamud.api;
 
 namespace MidiBard;
 
 [ProtoContract]
 public class PlaylistContainer
 {
+	private static Regex metadataParser = new Regex(@"^\[(?<key>.+?):(?<value>.+)\]$");
 	[CanBeNull]
 	public static PlaylistContainer FromFile(string filePath, bool createIfNotExist = false)
 	{
 		if (File.Exists(filePath)) {
 			RecordToRecentUsed(filePath);
 			var container = new PlaylistContainer();
-			var readLines = File.ReadLines(filePath, Encoding.UTF8);
-			var absolutePaths = readLines.Select(i => Path.GetFullPath(i, filePath));
-			container.SongPaths.AddRange(absolutePaths.Select(i => new SongEntry { FilePath = i }));
-			container.FilePathWhenLoading = filePath;
+            var readLines = File.ReadAllLines(filePath, Encoding.UTF8);
+			var songEntries = readLines.Select(i =>
+			{
+				try {
+					var fullPath = Path.GetFullPath(i, filePath);
+					return new SongEntry { FilePath = fullPath };
+				}
+				catch (Exception e) {
+					return null;
+				}
+			}).Where(i=> i is not null);
+			container.SongPaths.AddRange(songEntries);
+            container.FilePathWhenLoading = filePath;
 			return container;
 		}
 
@@ -51,9 +64,9 @@ public class PlaylistContainer
 		newContainer.Save(filePath);
 		RecordToRecentUsed(filePath);
 		return newContainer;
-	}
+    }
 
-	private PlaylistContainer() { }
+    private PlaylistContainer() { }
 
 	private static void RecordToRecentUsed(string filePath)
 	{
@@ -108,6 +121,33 @@ public class PlaylistContainer
 		set => _currentSongIndex = value.Clamp(-1, SongPaths.Count - 1);
 	}
 
+	private int lastReadDurationtick = 0;
+	private TimeSpan _totalDuration;
+	public TimeSpan TotalDuration
+	{
+		get
+		{
+			try {
+				var tickCount = Environment.TickCount;
+				if (tickCount > lastReadDurationtick + 20) {
+					var d = 0L;
+					for (var i = 0; i < SongPaths.Count; i++) {
+						d += SongPaths[i].SongLength.Ticks;
+					}
+
+					var fromTicks = TimeSpan.FromTicks(d);
+					_totalDuration = fromTicks;
+					lastReadDurationtick = tickCount;
+					return fromTicks;
+				}
+			}
+			catch (Exception e) {
+			}
+
+            return _totalDuration;
+        }
+    }
+
 	public SongEntry? CurrentSongEntry
 	{
 		get
@@ -124,14 +164,14 @@ public class PlaylistContainer
 			}
 		}
 	}
-
-	public PlaylistContainer Clone() => this.ProtoDeepClone();
 }
 
 [ProtoContract]
 public class SongEntry
 {
 	[ProtoMember(1)] public string FilePath;
-	[JsonIgnore] private string _name;
+	[ProtoMember(2)] public TimeSpan SongLength;
+    [JsonIgnore] private string _name;
 	[JsonIgnore] public string FileName => _name ??= Path.GetFileNameWithoutExtension(FilePath);
+	[JsonIgnore] public string LrcPath => Path.ChangeExtension(FilePath, "lrc");
 }

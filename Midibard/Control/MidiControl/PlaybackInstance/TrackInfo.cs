@@ -89,6 +89,7 @@ public record TrackInfo
         { "electricguitarspecial", 28 },
 
         //alias
+        { "snare", 13 },
         { "programelectricguitar", 24 },
         { "program", 24 },
         { "electricguitar", 24 }
@@ -139,7 +140,7 @@ public record TrackInfo
             bool isParsable = Int32.TryParse(groups[2].Value, out octave);
             octave = (plusMinusSign == "-" ? -octave : octave) * 12;
         }
-        //PluginLog.LogDebug("Transpose octave: " + octave);
+        //PluginLog.Debug("Transpose octave: " + octave);
 
         return octave;
     }

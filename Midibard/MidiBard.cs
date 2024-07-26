@@ -27,7 +27,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Lumina.Data;
@@ -53,20 +52,28 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using playlibnamespace;
 using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
+using JetBrains.Annotations;
 using MidiBard.Util.Lyrics;
+using MidiBard2.IPC;
+using static Dalamud.api;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace MidiBard;
 
 public class MidiBard : IDalamudPlugin
 {
+    internal static readonly Version Version = typeof(MidiBard).Assembly.GetName().Version;
+    internal static readonly string VersionString = Version?.ToString();
     public static Configuration config { get; internal set; }
     internal static PluginUI Ui { get; set; }
-    internal static BardPlayback CurrentPlayback { get; set; }
+    [CanBeNull] internal static BardPlayback CurrentPlayback { get; set; }
     internal static AgentMetronome AgentMetronome { get; set; }
     internal static AgentPerformance AgentPerformance { get; set; }
-    internal static AgentConfigSystem AgentConfigSystem { get; set; }
     internal static EnsembleManager EnsembleManager { get; set; }
     internal static IPCManager IpcManager { get; set; }
+    internal static PluginIPC PluginIpc { get; set; }
+	public static BardPlayDevice BardPlayDevice { get; private set; }
 
     private int configSaverTick;
     private static bool wasEnsembleModeRunning = false;
@@ -80,16 +87,17 @@ public class MidiBard : IDalamudPlugin
     internal static PartyWatcher PartyWatcher;
 
     internal static bool SlaveMode = false;
-
-    internal static byte CurrentInstrument => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset);
-    internal static byte CurrentTone => Marshal.ReadByte(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset + 1);
+    internal static int CurrentInstrumentWithTone => CurrentInstrument >= 24 ? 24 + CurrentTone : CurrentInstrument;
+    internal static unsafe byte CurrentInstrument => *(byte*)(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset);
+    internal static unsafe byte CurrentTone => *(byte*)(Offsets.PerformanceStructPtr + 3 + Offsets.InstrumentOffset + 1);
     internal static bool PlayingGuitar => InstrumentHelper.IsGuitar(CurrentInstrument);
     internal static bool IsPlaying => CurrentPlayback?.IsRunning == true;
+    internal static TimeSpan? CurrentPlaybackTime => CurrentPlayback?.GetCurrentTime<MetricTimeSpan>().GetTimeSpan();
+    internal static TimeSpan? CurrentPlaybackDuration => CurrentPlayback?.GetDuration<MetricTimeSpan>().GetTimeSpan();
 
     public string Name => "MidiBard 2";
-    private static ChatGui _chatGui;
 
-    public unsafe MidiBard(DalamudPluginInterface pi, ChatGui chatGui)
+    public unsafe MidiBard(IDalamudPluginInterface pi)
     {
         api.Initialize(this, pi);
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -121,27 +129,29 @@ public class MidiBard : IDalamudPlugin
 
         ConfigureLanguage(GetCultureCodeString((CultureCode)config.uiLang));
 
- 
         IpcManager = new IPCManager();
         PartyWatcher = new PartyWatcher();
+        PluginIpc = new PluginIPC();
 
-        playlib.init();
+        //playlib.init();
         OffsetManager.Setup(api.SigScanner);
         //GuitarTonePatch.InitAndApply();
 
-        AgentMetronome = new AgentMetronome(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentMetronome));
-        AgentPerformance = new AgentPerformance(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentPerformance));
-        AgentConfigSystem = new AgentConfigSystem(AgentManager.Instance.FindAgentInterfaceByVtable(Offsets.AgentConfigSystem));
+        var raptureAtkModule = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->UIModule->GetRaptureAtkModule();
+        var pAgentPerformanceMetronome = raptureAtkModule->AgentModule.GetAgentByInternalId(AgentId.PerformanceMetronome);
+        var pAgentPerformance = raptureAtkModule->AgentModule.GetAgentByInternalId(AgentId.PerformanceMode);
+
+        AgentMetronome = new AgentMetronome((IntPtr)pAgentPerformanceMetronome);
+        AgentPerformance = new AgentPerformance((IntPtr)pAgentPerformance);
         EnsembleManager = new EnsembleManager();
 
 #if DEBUG
 			_ = NetworkManager.Instance;
 			_ = Testhooks.Instance;
 #endif
-        _chatGui = chatGui;
-        _chatGui.ChatMessage += PartyChatCommand.OnChatMessage;
+        api.ChatGui.ChatMessage += PartyChatCommand.OnChatMessage;
 
-        _ = BardPlayDevice.Instance;
+		BardPlayDevice = new BardPlayDevice();
         InputDeviceManager.ScanMidiDeviceThread.Start();
 
         Ui = new PluginUI();
@@ -153,7 +163,7 @@ public class MidiBard : IDalamudPlugin
         if (api.PluginInterface.IsDev) Ui.Open();
     }
 
-    private void OnFrameworkUpdate(Dalamud.Game.Framework framework)
+    private void OnFrameworkUpdate(IFramework framework)
     {
         PerformanceEvents.Instance.InPerformanceMode = AgentPerformance.InPerformanceMode;
 
@@ -168,24 +178,24 @@ public class MidiBard : IDalamudPlugin
 
         if (!MidiBard.config.MonitorOnEnsemble) return;
 
+		if (wasEnsembleModeRunning)
+		{
+			if (!AgentMetronome.EnsembleModeRunning || !AgentPerformance.InPerformanceMode) {
+                EnsembleManager.InvokeEnsembleStop();
+                if (config.StopPlayingWhenEnsembleEnds)
+				{
+					MidiPlayerControl.Pause();
+				}
+			}
+		}
+         
+		wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning && AgentPerformance.InPerformanceMode;
+
         if (AgentPerformance.InPerformanceMode)
         {
             playlib.ConfirmReceiveReadyCheck();
-
-            if (!AgentMetronome.EnsembleModeRunning && wasEnsembleModeRunning)
-            {
-                if (config.StopPlayingWhenEnsembleEnds)
-                {
-                    MidiPlayerControl.Pause();
-                }
-            }
-
-            wasEnsembleModeRunning = AgentMetronome.EnsembleModeRunning;
-        } else
-        {
-            wasEnsembleModeRunning = false;
-        }
-    }
+		}
+	}
 
     [Command("/midibard")]
     [HelpMessage("Toggle MidiBard window")]
@@ -196,7 +206,7 @@ public class MidiBard : IDalamudPlugin
     public void OnCommand(string command, string args)
     {
         var argStrings = args.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        PluginLog.Debug($"command: {command}, {string.Join('|', argStrings)}");
+        api.PluginLog.Debug($"command: {command}, {string.Join('|', argStrings)}");
         if (argStrings.Any())
         {
             switch (argStrings[0])
@@ -318,8 +328,8 @@ public class MidiBard : IDalamudPlugin
 
     public enum CultureCode
     {
-	    English,
-	    简体中文,
+        English,
+        简体中文,
         //繁體中文,
         //日本語,
         //Deutsch,
@@ -327,47 +337,47 @@ public class MidiBard : IDalamudPlugin
 
     public static string GetCultureCodeString(CultureCode culture)
     {
-	    return culture switch
-	    {
-		    CultureCode.English => "en",
-		    CultureCode.简体中文 => "zh-Hans",
-		    //CultureCode.繁體中文 => "zh-Hant",
-		    //CultureCode.日本語 => "ja",
-		    //CultureCode.Deutsch => "de",
-		    _ => null
-	    };
+        return culture switch
+        {
+            CultureCode.English => "en",
+            CultureCode.简体中文 => "zh-Hans",
+            //CultureCode.繁體中文 => "zh-Hant",
+            //CultureCode.日本語 => "ja",
+            //CultureCode.Deutsch => "de",
+            _ => null
+        };
     }
 
     //https://git.annaclemens.io/ascclemens/SoundFilter/src/commit/0a109907477bf1839e220c460253da68c6162d5c/SoundFilter/Ui/PluginUi.cs#L31
     internal static void ConfigureLanguage(string? langCode = null)
     {
-	    // ReSharper disable once ConstantNullCoalescingCondition
-	    langCode ??= api.PluginInterface.UiLanguage ?? "en";
-	    try
-	    {
-		    MidiBard2.Resources.Language.Culture = new CultureInfo(langCode);
-	    }
-	    catch (Exception ex)
-	    {
-		    PluginLog.LogError(ex, $"Could not set culture to {langCode} - falling back to default");
-		    MidiBard2.Resources.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
-	    }
+        // ReSharper disable once ConstantNullCoalescingCondition
+        langCode ??= api.PluginInterface.UiLanguage ?? "en";
+        try
+        {
+            MidiBard2.Resources.Language.Culture = new CultureInfo(langCode);
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Error(ex, $"Could not set culture to {langCode} - falling back to default");
+            MidiBard2.Resources.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
+        }
     }
 
     internal static void SaveConfig()
     {
-	    var startNew = Stopwatch.StartNew();
-	    Task.Run(() =>
-	    {
-		    try
-		    {
-			    api.PluginInterface.SavePluginConfig(config);
-			    PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
-		    }
-		    catch (Exception e)
-		    {
-			    PluginLog.Warning($"error when saving config {e.Message}");
-			    //ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
+        var startNew = Stopwatch.StartNew();
+        Task.Run(() =>
+        {
+            try
+            {
+                api.PluginInterface.SavePluginConfig(config);
+                PluginLog.Verbose($"config saved in {startNew.Elapsed.TotalMilliseconds}ms");
+            }
+            catch (Exception e)
+            {
+                PluginLog.Warning($"error when saving config {e.Message}");
+                //ImGuiUtil.AddNotification(NotificationType.Error, "Error when saving config");
 
             }
         });
@@ -379,8 +389,8 @@ public class MidiBard : IDalamudPlugin
         {
             try
             {
-                config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();                
-                foreach(var cur in config.TrackStatus)
+                config = (Configuration)api.PluginInterface.GetPluginConfig() ?? new Configuration();
+                foreach (var cur in config.TrackStatus)
                 {
                     cur.Enabled = false;
                 }
@@ -412,11 +422,12 @@ public class MidiBard : IDalamudPlugin
             api.PluginInterface.UiBuilder.Draw -= Ui.Draw;
             PlaylistManager.CurrentContainer.Save();
 
-            EnsembleManager.Dispose();
-            PartyWatcher.Dispose();
-            IpcManager.Dispose();
-#if DEBUG
-			NetworkManager.Instance.Dispose();
+            PluginIpc?.Dispose();
+            EnsembleManager?.Dispose();
+            PartyWatcher?.Dispose();
+            IpcManager?.Dispose();
+#if false
+            NetworkManager.Instance.Dispose();
 #endif
             InputDeviceManager.DisposeCurrentInputDevice();
             try
@@ -430,7 +441,7 @@ public class MidiBard : IDalamudPlugin
                 PluginLog.Error(e, "error when disposing playback");
             }
 
-            TextureManager.Dispose();
+            BardPlayDevice?.Dispose();
             //GuitarTonePatch.Dispose();
             Dalamud.api.Dispose();
         }
@@ -451,7 +462,7 @@ public class MidiBard : IDalamudPlugin
             PluginLog.Error(e, "error when saving config file");
         }
 
-        _chatGui.ChatMessage -= PartyChatCommand.OnChatMessage;
+        api.ChatGui.ChatMessage -= PartyChatCommand.OnChatMessage;
         //Cbase.Dispose();
 
         FreeUnmanagedResources();

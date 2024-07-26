@@ -27,10 +27,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
+using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
+using Melanchall.DryWetMidi.Multimedia;
 using Newtonsoft.Json;
 using ProtoBuf;
 using ProtoBuf.Serializers;
+using static Dalamud.api;
 
 namespace MidiBard.Util;
 
@@ -116,7 +119,7 @@ static class Extensions
 
 	public static unsafe T* AsPtr<T>(this byte[] bytes, int offset = 0) where T : unmanaged
 	{
-		if (bytes == null || bytes.Length == 0) return (T*)0;
+		if (bytes == null) return null;
 		fixed (byte* f = bytes)
 		{
 			return (T*)(f + offset);
@@ -151,8 +154,9 @@ static class Extensions
 	public static T ProtoDeepClone<T>(this T obj) => ProtoBuf.Serializer.DeepClone(obj);
 	public static string JsonSerialize<T>(this T obj) where T : class => JsonConvert.SerializeObject(obj, Formatting.Indented, JsonSerializerSettings);
 	public static T JsonDeserialize<T>(this string str) where T : class => JsonConvert.DeserializeObject<T>(str);
+	public static T JsonClone<T>(this T obj) where T : class => JsonDeserialize<T>(JsonConvert.SerializeObject(obj, Formatting.Indented, JsonSerializerSettings));
 	public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> valueFactory)
-	{
+    {
 		if (dict.TryGetValue(key, out TValue val)) return val;
 		val = valueFactory();
 		dict.Add(key, val);
@@ -227,5 +231,53 @@ static class Extensions
 		processStartInfo.UseShellExecute = true;
 
 		Process.Start(processStartInfo);
+	}
+
+	public static TimeSpan? GetDurationTimeSpan(this MidiFile midiFile)
+	{
+		try {
+			return midiFile?.GetDuration<MetricTimeSpan>();
+		}
+		catch (Exception e) {
+			PluginLog.Error(e,"error when getting midifile timespan");
+			return null;
+		}
+	}
+
+	public static TimeSpan? GetDurationTimeSpan(this Playback playback)
+	{
+		try
+		{
+			return playback?.GetDuration<MetricTimeSpan>();
+		}
+		catch (Exception e)
+		{
+			PluginLog.Error(e, "error when getting playback timespan");
+			return null;
+		}
+	}
+	public static T GetValueOrDefault<T>(this List<T> list, int index, T defaultValue = default)
+	{
+		if (index >= 0 && index < list.Count)
+		{
+			return list[index];
+		}
+		else
+		{
+			return defaultValue;
+		}
+	}
+	public static bool TryGetValue<T>(this List<T> list, int index, out T value)
+	{
+		if (index >= 0 && index < list.Count)
+		{
+			value = list[index];
+			return true;
+		}
+		else
+		{
+			value = default;
+			return false;
+		}
 	}
 }

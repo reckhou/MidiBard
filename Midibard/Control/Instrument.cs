@@ -21,6 +21,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dalamud;
+using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures;
 using ImGuiScene;
 using Lumina.Data.Files;
 using Lumina.Excel.GeneratedSheets;
@@ -55,5 +57,5 @@ public class Instrument
 
     public readonly string InstrumentString;
     public override string ToString() => InstrumentString;
-    public TextureWrap IconTextureWrap { get; }
+    public ISharedImmediateTexture IconTextureWrap { get; }
 }

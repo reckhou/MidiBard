@@ -26,6 +26,7 @@ using MidiBard2.Resources;
 using MidiBard.Control.CharacterControl;
 using static MidiBard.ImGuiUtil;
 using MidiBard.IPC;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -91,10 +92,11 @@ public partial class PluginUI
 				FilePlayback.CancelWaiting();
 			} else
             {
-				StopEnsemble();
 				MidiPlayerControl.Stop();
-			}	
-		}
+			}
+
+            StopEnsemble();
+        }
 	}
 
 	private unsafe void DrawButtonFastForward()

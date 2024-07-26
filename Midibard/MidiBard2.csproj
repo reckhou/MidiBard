@@ -1,14 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<LangVersion>10</LangVersion>
-		<AssemblyVersion>2.4.0.1</AssemblyVersion>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<AssemblyVersion>2.6.0.1</AssemblyVersion>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<Nullable>disable</Nullable>
 		<UseWpf>true</UseWpf>
 		<Configurations>Debug;Release;DEBUG2</Configurations>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<PropertyGroup>
+		<!--<TieredCompilation>false</TieredCompilation>-->
+		<TieredCompilationQuickJit>false</TieredCompilationQuickJit>
+		<TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PlatformTarget>x64</PlatformTarget>
@@ -17,7 +22,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.10" />
+    <PackageReference Include="DalamudPackager" Version="2.1.13" />
     <PackageReference Include="Fody" Version="6.6.4" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all" />

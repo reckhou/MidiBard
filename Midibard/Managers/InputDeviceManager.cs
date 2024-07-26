@@ -21,14 +21,15 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control;
 using Dalamud;
+using Dalamud.Interface.ImGuiNotification;
 using MidiBard2.Resources;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -165,6 +166,6 @@ static class InputDeviceManager
 	private static void InputDevice_EventReceived(object sender, MidiEventReceivedEventArgs e)
 	{
 		PluginLog.Verbose($"[{sender}]{e.Event}");
-		BardPlayDevice.Instance.SendEventWithMetadata(e.Event, new BardPlayDevice.MidiDeviceMetaData());
+			MidiBard.BardPlayDevice.SendEventWithMetadata(e.Event, new BardPlayDevice.MidiDeviceMetaData());
 	}
 }

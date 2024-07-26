@@ -80,25 +80,25 @@ public partial class PluginUI
     {
         FileDialogs.OpenMidiFileDialog((result, filePaths) =>
         {
-	        if (result == true)
-	        {
-		        Task.Run(async () =>
-		        {
-			        try
-			        {
-				        await PlaylistManager.AddAsync(filePaths);
-			        }
-			        finally
-			        {
-				        IsImportRunning = false;
+            if (result == true)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await PlaylistManager.AddAsync(filePaths);
+                    }
+                    finally
+                    {
+                        IsImportRunning = false;
                         MidiBard.config.lastOpenedFolderPath = Path.GetDirectoryName(filePaths[0]);
                     }
-		        });
-	        }
-	        else
-	        {
-		        IsImportRunning = false;
-	        }
+                });
+            }
+            else
+            {
+                IsImportRunning = false;
+            }
         });
     }
 
@@ -113,7 +113,7 @@ public partial class PluginUI
                 {
                     try
                     {
-                        await PlaylistManager.AddAsync(strings.ToArray());
+                        await PlaylistManager.AddAsync(strings);
                     }
                     finally
                     {
@@ -131,7 +131,7 @@ public partial class PluginUI
 
     private void RunImportFolderTaskImGui()
     {
-        fileDialogManager.OpenFolderDialog("Open folder", (b, filePath) =>
+        fileDialogManager.OpenFolderDialog("Open folder", (b, folderPath) =>
         {
             //PluginLog.Debug($"dialog result: {b}\n{string.Join("\n", filePath)}");
             if (b)
@@ -140,17 +140,15 @@ public partial class PluginUI
                 {
                     try
                     {
-                        var files = Directory.GetFiles(filePath, "*.mid", SearchOption.AllDirectories);
-                        await PlaylistManager.AddAsync(files);
-                        files = Directory.GetFiles(filePath, "*.midi", SearchOption.AllDirectories);
-                        await PlaylistManager.AddAsync(files);
-                        files = Directory.GetFiles(filePath, "*.mmsong", SearchOption.AllDirectories);
+                        var allowedExtensions = new[] { ".mid", ".midi", ".mmsong" };
+                        var files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
+                            .Where(i => allowedExtensions.Any(ext => i.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)));
                         await PlaylistManager.AddAsync(files);
                     }
                     finally
                     {
                         IsImportRunning = false;
-                        MidiBard.config.lastOpenedFolderPath = Directory.GetParent(filePath).FullName;
+                        MidiBard.config.lastOpenedFolderPath = Directory.GetParent(folderPath).FullName;
                     }
                 });
             }
@@ -173,11 +171,9 @@ public partial class PluginUI
                     {
                         try
                         {
-                            var files = Directory.GetFiles(folderPath, "*.mid", SearchOption.AllDirectories);
-                            await PlaylistManager.AddAsync(files);
-                            files = Directory.GetFiles(folderPath, "*.midi", SearchOption.AllDirectories);
-                            await PlaylistManager.AddAsync(files);
-                            files = Directory.GetFiles(folderPath, "*.mmsong", SearchOption.AllDirectories);
+                            var allowedExtensions = new[] { ".mid", ".midi", ".mmsong" };
+                            var files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
+                                .Where(i => allowedExtensions.Any(ext => i.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)));
                             await PlaylistManager.AddAsync(files);
                         }
                         finally
@@ -202,8 +198,8 @@ public partial class PluginUI
             MidiBard.config.lastOpenedFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
     }
-    
+
     public bool IsImportRunning { get; private set; }
-    
+
     #endregion
 }

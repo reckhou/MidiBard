@@ -20,11 +20,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Interface.ImGuiNotification;
+using Dalamud.Interface.Utility;
 using Dalamud.Logging;
 using ImGuiNET;
 using static ImGuiNET.ImGui;
+using static Dalamud.api;
+
 
 namespace MidiBard;
 
@@ -160,13 +164,15 @@ public static class ImGuiUtil
 		}
 	}
 
-	public static void ToolTip(string desc)
+	public static void ToolTip(string desc, int wrap = 400)
 	{
 		if (IsItemHovered())
 		{
 			PushFont(UiBuilder.DefaultFont);
 			BeginTooltip();
+			PushTextWrapPos(ImGuiHelpers.GlobalScale * wrap);
 			TextUnformatted(desc);
+			PopTextWrapPos();
 			EndTooltip();
 			PopFont();
 		}
@@ -244,13 +250,14 @@ public static class ImGuiUtil
 			EndPopup();
 		}
 	}
-	public static void AddNotification(NotificationType type, string content, string title = null)
+	public static void AddNotification(NotificationType type, string content)
 	{
-		PluginLog.Debug($"[Notification] {type}:{title}:{content}");
-		Dalamud.api.PluginInterface.UiBuilder.AddNotification(content, string.IsNullOrWhiteSpace(title) ? "Midibard" : "Midibard: " + title, type, 5000);
-	}
+		PluginLog.Debug($"[Notification] {type}:{content}");
+        Dalamud.api.ShowNotification(content, type, 5000);
 
-	public static void PushStyleColors(bool pushNew, uint color, params ImGuiCol[] colors)
+    }
+
+    public static void PushStyleColors(bool pushNew, uint color, params ImGuiCol[] colors)
 	{
 		if (pushNew)
 		{
@@ -368,4 +375,7 @@ public static class ImGuiUtil
 		SetNextItemWidth(-1);
 		return DragFloat($"##{label}", ref value, vSpeed, vMin, vMax, format, flags);
 	}
+
+    [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
+    public static extern unsafe void igClearActiveID();
 }

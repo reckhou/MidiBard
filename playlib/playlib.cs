@@ -20,26 +20,38 @@ using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Dalamud.Game;
 
 namespace playlibnamespace
 {
 	public class playlib
 	{
         private playlib() { }
-        private static unsafe IntPtr GetWindowByName(string s) => (IntPtr)AtkStage.GetSingleton()->RaptureAtkUnitManager->GetAddonByName(s);
-        [Signature("83 FA 04 77 4E", ScanType = ScanType.Text, UseFlags = SignatureUseFlags.Pointer)]
-        private static unsafe delegate* unmanaged<IntPtr, uint, void> SetToneUI;
-        public static void init() => SignatureHelper.Initialise(new playlib());
+        private static unsafe IntPtr GetWindowByName(string s) => (IntPtr)AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName(s);
+
+        //[Signature("83 FA 04 77 4E", ScanType = ScanType.Text, UseFlags = SignatureUseFlags.Pointer)]
+        //private static unsafe delegate* unmanaged<IntPtr, uint, void> SetToneUI;
+
+
+   //     public static unsafe void init()
+   //     {
+   //         var mainModule = Process.GetCurrentProcess().MainModule;
+   //         var mainModuleBaseAddress = mainModule.BaseAddress;
+			////SignatureHelper.Initialise(new playlib());
+   //         var scan = SigScanner.Scan(mainModuleBaseAddress, mainModule.ModuleMemorySize, "83 FA 04 77 4E");
+   //         SetToneUI = (delegate* unmanaged<IntPtr, uint, void>)scan;
+   //     }
+
         public static void SendAction(nint ptr, params ulong[] param)
 		{
 			if (param.Length % 2 != 0) throw new ArgumentException("The parameter length must be an integer multiple of 2.");
 			if (ptr == IntPtr.Zero) throw new ArgumentException("input pointer is null");
-			var paircount = param.Length / 2;
+			uint paircount = (uint)param.Length / 2;
 			unsafe
 			{
 				fixed (ulong* u = param)
                 {
-                    AtkUnitBase.MemberFunctionPointers.FireCallback((AtkUnitBase*)ptr, paircount, (AtkValue*)u, (void*)1);
+                    AtkUnitBase.MemberFunctionPointers.FireCallback((AtkUnitBase*)ptr, paircount, (AtkValue*)u, true);
                 }
 			}
 		}
@@ -156,21 +168,5 @@ namespace playlibnamespace
 		public static unsafe bool BeginReadyCheck() => SendAction("PerformanceMetronome", 3, 2, 2, 0);
         public static unsafe bool ConfirmBeginReadyCheck() => SendAction("PerformanceReadyCheck", 3, 2);
         public static unsafe bool ConfirmReceiveReadyCheck() => SendAction("PerformanceReadyCheckReceive", 3, 2);
-
-		public static string MainModuleRva(IntPtr ptr)
-		{
-			var modules = Process.GetCurrentProcess().Modules;
-			List<ProcessModule> mh = new();
-			for (int i = 0; i < modules.Count; i++)
-				mh.Add(modules[i]);
-
-			mh.Sort((x, y) => (long)x.BaseAddress > (long)y.BaseAddress ? -1 : 1);
-			foreach (var module in mh)
-			{
-				if ((long)module.BaseAddress <= (long)ptr)
-					return $"[{module.ModuleName}+0x{(long)ptr - (long)module.BaseAddress:X}]";
-			}
-			return $"[0x{(long)ptr:X}]";
-		}
 	}
 }

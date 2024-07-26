@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Hooking;
 using Dalamud.Logging;
+using static Dalamud.api;
 
 namespace MidiBard.Managers;
 
@@ -123,7 +124,7 @@ internal unsafe static class GuitarTonePatch
 
         //local solo tone fix
         var scanText = api.SigScanner.ScanText("E8 ?? ?? ?? ?? 80 63 1B FE");
-        PlayNoteWithToneHook = new Hook<PlayNoteWithToneDelegate>(scanText,
+        PlayNoteWithToneHook = api.GameInteropProvider.HookFromAddress<PlayNoteWithToneDelegate>(scanText,
             (a1, a2, a3, a4, a5, a6) =>
             {
                 if (a4 > 0 && a6 == 1) a5 = (uint)PerformanceStruct.Instance->PlayingNoteTone;

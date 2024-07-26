@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2022 akira0245
+// Copyright (C) 2022 akira0245
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Logging;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
@@ -30,6 +31,8 @@ using MidiBard.Managers;
 using MidiBard.Util;
 using MidiBard.Util.MidiPreprocessor;
 using MidiBard.IPC;
+using MidiBard.Managers.Ipc;
+using static Dalamud.api;
 
 namespace MidiBard.Control.MidiControl.PlaybackInstance;
 
@@ -42,7 +45,7 @@ internal sealed class BardPlayback : Playback
 
 		MidiFileConfig midiFileConfig = null;
 		// only use midiFileConfig(including Default Performer) when in the party
-		if (api.PartyList.Length > 1)
+		if (api.PartyList.IsInParty())
 		{
 			midiFileConfig = MidiFileConfigManager.GetMidiConfigFromFile(filePath);
 
@@ -98,8 +101,8 @@ internal sealed class BardPlayback : Playback
 			TrackChunks = trackChunks,
 			TrackInfos = trackInfos,
 			MidiFileConfig = midiFileConfig,
-			DisplayName = $"{PlaylistManager.CurrentSongIndex + 1:000} {Path.GetFileNameWithoutExtension(filePath)}"
-		};
+			DisplayName = Path.GetFileNameWithoutExtension(filePath)
+        };
 	}
 	
 
@@ -112,9 +115,10 @@ internal sealed class BardPlayback : Playback
 
 	protected override bool TryPlayEvent(MidiEvent midiEvent, object metadata)
 	{
-		// Place your logic here
-		// Return true if event played (sent to plug-in); false otherwise
-		return BardPlayDevice.Instance.SendEventWithMetadata(midiEvent, metadata);
+        // Place your logic here
+        // Return true if event played (sent to plug-in); false otherwise
+		MidiBard.BardPlayDevice.SendEventWithMetadata(midiEvent, metadata);
+		return true;
 	}
 
 	internal MidiFileConfig MidiFileConfig { get; set; }
@@ -142,7 +146,7 @@ internal sealed class BardPlayback : Playback
 		}
 		catch (Exception e)
 		{
-			PluginLog.Warning($"[LoadPlayback] {e} error when getting file TempoMap, using default TempoMap instead.");
+			PluginLog.Warning(e, "[LoadPlayback] error when getting file TempoMap, using default TempoMap instead.");
 			return TempoMap.Default;
 		}
 	}
@@ -220,7 +224,7 @@ internal sealed class BardPlayback : Playback
 					.Where(i => i.Event.EventType is not MidiEventType.ControlChange and not MidiEventType.PitchBend and not MidiEventType.UnknownMeta)
 					.Select(timedEvent => new TimedEventWithMetadata(timedEvent.Event, timedEvent.Time, GetMetadataForEvent(timedEvent.Event, timedEvent.Time, index))))
 			.OrderBy(e => e.Time)
-			.ThenBy(i => ((BardPlayDevice.MidiPlaybackMetaData)i.Metadata).eventValue);
+			.ThenBy(i => ((BardPlayDevice.MidiPlaybackMetaData)i.Metadata).EventValue);
 		return timedEvents;
 	}
 
@@ -243,7 +247,7 @@ internal sealed class BardPlayback : Playback
 	public static MidiFileConfig LoadDefaultPerformer(MidiFileConfig midiFileConfig)
     {
 		MidiFileConfigManager.UsingDefaultPerformer = true;
-		ImGuiUtil.AddNotification(Dalamud.Interface.Internal.Notifications.NotificationType.Info, $"Use Default Performer.");
+		ImGuiUtil.AddNotification(NotificationType.Info,$"Use Default Performer.");
 		Cids = new long[100];
 		DefaultPerformer trackMapping = MidiFileConfigManager.defaultPerformer;
 		var partyMembers = api.PartyList.ToList();

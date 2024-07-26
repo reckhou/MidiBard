@@ -4,15 +4,12 @@
   "Punchline": "Bard performance using midi files or keyboard.\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "Description": "Bard performance using midi files or keyboard.\n- Solo and ensemble mode support\n- Text commands for instrument equip and switch\nSupported by FFXIV Bards & Bands Community: discord.gg/ff14bard",
   "RepoUrl": "https://midibard.org",
-  "CategoryTags": [
-    "utility",
-    "other"
-  ],
-  "DalamudApiLevel": 8,
+  "Tags": ["music", "utility", "midi", "bard"],
   "AcceptsFeedback": false,
   "IconUrl": "https://i.imgur.com/OSxqew4.png",
-  "Changelog": "+ Use regex to identify track names, better compatibility for some old MIDI files.\n+ Saves the last folder of file import.\n+ Even better sync on some lower-end PCs.\n\n- Remove auto set background frame limitation functon as it's been implemented in Bard Toolbox in a more elegant way. Please Google and install Bard Toolbox if you need this function.",
+  "Changelog": "Dawntrail Update.",
   "ImageUrls": [
     "https://i.imgur.com/1R13XF0.png"
-  ]
+  ],
+  "Apiversion": 10
 }

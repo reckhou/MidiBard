@@ -17,19 +17,22 @@
 
 using System;
 using System.Runtime.InteropServices;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace MidiBard.Managers.Agents;
 
 public sealed unsafe class AgentMetronome : AgentInterface
 {
-    public AgentMetronome(AgentInterface agentInterface) : base(agentInterface.Pointer, agentInterface.Id) { }
+    public AgentMetronome(AgentInterface agentInterface) : base(agentInterface.Pointer) { }
+    public AgentMetronome(IntPtr ptr) : base(ptr) { }
     public static AgentMetronome Instance => MidiBard.AgentMetronome;
+
     public new unsafe AgentMetronomeStruct* Struct => (AgentMetronomeStruct*)Pointer;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct AgentMetronomeStruct
     {
-        [FieldOffset(0)] public FFXIVClientStructs.FFXIV.Component.GUI.AgentInterface AgentInterface;
+        [FieldOffset(0)] public FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentInterface AgentInterface;
         [FieldOffset(0x48)] public long MetronomeTimer1;
         [FieldOffset(0x50)] public long MetronomeTimer2;
         [FieldOffset(0x60)] public long MetronomePPQN;

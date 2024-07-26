@@ -413,7 +413,7 @@ Only recommended while using Midi keyboard.</value>
     <value>Assign track to a character. Right click to reset assigned character</value>
   </data>
   <data name="ensemble config Draw ensemble progress indicator on visualizer" xml:space="preserve">
-    <value>Draw ensemble progress indicator on visualizer</value>
+    <value>Draw ensemble timeline on visualizer</value>
   </data>
   <data name="ensemble config Ensemble indicator delay" xml:space="preserve">
     <value>Ensemble indicator delay</value>

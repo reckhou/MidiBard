@@ -42,8 +42,8 @@ class PerformanceEvents
 
         if (MidiBard.config.AutoSetOffAFKSwitchingTime)
         {
-	        AgentConfigSystem.SetOptionValue(ConfigOption.AutoAfkSwitchingTime, 0);
-        }
+			api.GameConfig.System.Set("AutoAfkSwitchingTime", 0);
+		}
     }
 
     private void ExitingPerformance()

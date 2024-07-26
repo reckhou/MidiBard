@@ -44,7 +44,6 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using MidiBard.Control;
-using MidiBard.DalamudApi;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
@@ -177,7 +176,6 @@ namespace MidiBard
 
 					Separator();
 					TextUnformatted($"currentPlaying: {PlaylistManager.CurrentSongIndex}");
-					TextUnformatted($"currentSelected: {PlaylistManager.CurrentListIndex}");
 					TextUnformatted($"FilelistCount: {PlaylistManager.FilePathList.Count}");
 					TextUnformatted($"currentUILanguage: {api.PluginInterface.UiLanguage}");
 

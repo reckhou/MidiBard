@@ -159,19 +159,19 @@ namespace MidiBard.Managers;
 
 
 
-        playnoteHook = new Hook<sub_140C7ED20>(Offsets.PressNote, (agentPerformance, note, isPressing) =>
-			{
-				//PluginLog.Verbose($"{agentPerformance.ToInt64():X}, {note}, {isPressing}");
-				if (!MidiBard.IsPlaying || note != off)
-				{
-					playnoteHook.Original.Invoke(agentPerformance, note, isPressing);
-				}
-			});
+        //      playnoteHook = new Hook<sub_140C7ED20>(Offsets.PressNote, (agentPerformance, note, isPressing) =>
+        //	{
+        //		//PluginLog.Verbose($"{agentPerformance.ToInt64():X}, {note}, {isPressing}");
+        //		if (!MidiBard.IsPlaying || note != off)
+        //		{
+        //			playnoteHook.Original.Invoke(agentPerformance, note, isPressing);
+        //		}
+        //	});
 
-			//playnoteHook.Enable();
-		}
+        //	//playnoteHook.Enable();
+    }
 
-		public static Testhooks Instance { get; } = new Testhooks();
+    public static Testhooks Instance { get; } = new Testhooks();
 
 		public void Dispose()
 		{

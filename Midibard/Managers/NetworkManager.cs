@@ -25,8 +25,10 @@ using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Memory;
 using MidiBard.Structs;
+using MidiBard.Util;
+using static Dalamud.api;
 
-#if DEBUG
+#if false
 namespace MidiBard.Managers
 {
     class NetworkManager : IDisposable
@@ -44,12 +46,9 @@ namespace MidiBard.Managers
 
         private unsafe void SoloSend(IntPtr dataptr)
         {
-#if DEBUG
             var l = 10;
             LogNotes("SoloSend", dataptr, l);
-
-#endif
-        }
+		}
 
         private unsafe void LogNotes(string label, IntPtr dataptr, int count)
         {
@@ -92,32 +91,40 @@ namespace MidiBard.Managers
 
         private unsafe void SoloRecv(uint sourceId, IntPtr data)
         {
-#if DEBUG
+
             //var ipc = Marshal.PtrToStructure<SoloPerformanceIpc>(data);
             //PluginLog.Information($"[{nameof(SoloRecv)}] {toString(ipc.NoteNumbers)} : {toString(ipc.NoteTones)}");
-#endif
+
         }
 
         private unsafe void EnsembleSend(IntPtr dataptr)
         {
+
 #if DEBUG
-            LogNotes("EnsembleSend", dataptr, 60);
+           LogNotes("EnsembleSend", dataptr, 60);
 #endif
+
         }
 
         private unsafe void EnsembleRecv(uint sourceId, IntPtr data)
-        {
-#if DEBUG
-            var ipc = Marshal.PtrToStructure<EnsemblePerformanceIpc>(data);
-            //if (MidiBard.Debug)
-            foreach (var perCharacterData in ipc.EnsembleCharacterDatas.Where(i => i.IsValid))
+		{
+
+            var firstEnsemblePacket = !EnsembleManager.EnsembleRecvTime.Any();
+            if (firstEnsemblePacket)
             {
-                PluginLog.Information($"[{nameof(EnsembleRecv)}] {perCharacterData.CharacterId:X} {perCharacterData.NoteNumbers.toString()}");
+                MidiBard.config.EnsembleIndicatorDelay = -(float)EnsembleManager.EnsembleTimer.Elapsed.TotalSeconds - 1.15f;
             }
-#endif
+
+            //  PluginLog.Warning($"EnsembleRecv {EnsembleManager.EnsembleTimer.Elapsed}");
+            //var ipc = Marshal.PtrToStructure<EnsemblePerformanceIpc>(data);
+            EnsembleManager.EnsembleRecvTime.Add((EnsembleManager.EnsembleTimer.Elapsed));
+			//foreach (var perCharacterData in ipc.EnsembleCharacterDatas.Where(i => i.IsValid))
+			//{
+			//	//PluginLog.Information($"[{nameof(EnsembleRecv)}] {perCharacterData.CharacterId:X} {perCharacterData.NoteNumbers.toString()}");
+			//}
         }
 
-        delegate IntPtr sub_14070A1C0(uint sourceId, IntPtr data);
+		delegate IntPtr sub_14070A1C0(uint sourceId, IntPtr data);
         private readonly Hook<sub_14070A1C0> soloReceivedHook;
 
         delegate IntPtr sub_14070A230(uint sourceId, IntPtr data);
@@ -131,48 +138,48 @@ namespace MidiBard.Managers
 
         private NetworkManager()
         {
-            ensembleSendHook = new Hook<sub_14119B120>(Offsets.EnsembleSendHandler, (dataptr) =>
-            {
-                try
-                {
-                    EnsembleSend(dataptr);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Error(e, $"error in {nameof(ensembleSendHook)}");
-                }
+            //ensembleSendHook = new Hook<sub_14119B120>(Offsets.EnsembleSendHandler, (dataptr) =>
+            //{
+            //    try
+            //    {
+            //        EnsembleSend(dataptr);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        PluginLog.Error(e, $"error in {nameof(ensembleSendHook)}");
+            //    }
 
-                ensembleSendHook.Original(dataptr);
-            });
+            //    ensembleSendHook.Original(dataptr);
+            //});
 
-            soloSendHook = new Hook<sub_14119B2E0>(Offsets.SoloSendHandler, (dataptr) =>
-            {
-                try
-                {
-                    SoloSend(dataptr);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Error(e, "error in solo send handler hook");
-                }
+            //soloSendHook = new Hook<sub_14119B2E0>(Offsets.SoloSendHandler, (dataptr) =>
+            //{
+            //    try
+            //    {
+            //        SoloSend(dataptr);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        PluginLog.Error(e, "error in solo send handler hook");
+            //    }
 
-                soloSendHook.Original(dataptr);
-            });
+            //    soloSendHook.Original(dataptr);
+            //});
 
-            soloReceivedHook = new Hook<sub_14070A1C0>(Offsets.SoloReceivedHandler, (id, data) =>
-            {
-                try
-                {
-                    SoloRecv(id, data);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.Error(e, "error in solo recv handler hook");
-                }
-                return soloReceivedHook.Original(id, data);
-            });
+            //soloReceivedHook = new Hook<sub_14070A1C0>(Offsets.SoloReceivedHandler, (id, data) =>
+            //{
+            //    try
+            //    {
+            //        SoloRecv(id, data);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        PluginLog.Error(e, "error in solo recv handler hook");
+            //    }
+            //    return soloReceivedHook.Original(id, data);
+            //});
 
-            ensembleReceivedHook = new Hook<sub_14070A230>(Offsets.EnsembleReceivedHandler, (id, data) =>
+            ensembleReceivedHook = api.GameInteropProvider.HookFromAddress<sub_14070A230>(Offsets.EnsembleReceivedHandler, (id, data) =>
             {
                 try
                 {
@@ -186,10 +193,10 @@ namespace MidiBard.Managers
             });
 
 
-            ensembleSendHook.Enable();
-            soloSendHook.Enable();
-            soloReceivedHook.Enable();
-            ensembleReceivedHook.Enable();
+            ensembleSendHook?.Enable();
+            soloSendHook?.Enable();
+            soloReceivedHook?.Enable();
+            ensembleReceivedHook?.Enable();
         }
 
         public static NetworkManager Instance { get; } = new NetworkManager();

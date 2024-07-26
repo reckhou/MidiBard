@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -26,12 +27,13 @@ using System.Threading.Tasks;
 using Dalamud.Game;
 using Dalamud.Logging;
 using playlibnamespace;
+using static Dalamud.api;
 
 namespace MidiBard.Managers;
 
 public static class OffsetManager
 {
-    public static void Setup(SigScanner scanner)
+    public static void Setup(ISigScanner scanner)
     {
         var props = typeof(Offsets).GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
             .Select(i => (prop: i, Attribute: i.GetCustomAttribute<SigAttribute>())).Where(i => i.Attribute != null);
@@ -69,8 +71,7 @@ public static class OffsetManager
 
                 address += sigAttribute.Offset;
                 propertyInfo.SetValue(null, address);
-                PluginLog.Information($"[{nameof(OffsetManager)}][{propertyInfo.Name}] {address.ToInt64():X}");
-                PluginLog.Information($"[{nameof(OffsetManager)}][{propertyInfo.Name}] {playlib.MainModuleRva(address)}");
+                PluginLog.Information($"[{nameof(OffsetManager)}][{propertyInfo.Name}] +{address - Process.GetCurrentProcess().MainModule.BaseAddress:X} {address.ToInt64():X}");
             }
             catch (Exception e)
             {

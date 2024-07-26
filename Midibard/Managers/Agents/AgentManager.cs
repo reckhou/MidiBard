@@ -29,40 +29,42 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using MidiBard.Managers.Agents;
 using static MidiBard.MidiBard;
+using static Dalamud.api;
+using AgentInterface = MidiBard.Managers.Agents.AgentInterface;
 
 namespace MidiBard;
 
-unsafe class AgentManager
-{
-    internal List<AgentInterface> AgentTable { get; } = new List<AgentInterface>(400);
+//unsafe class AgentManager
+//{
+//    internal List<AgentInterface> AgentTable { get; } = new List<AgentInterface>(400);
 
-    private AgentManager()
-    {
-        try
-        {
-            unsafe
-            {
-                var instance = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
-                var agentModule = instance->UIModule->GetAgentModule();
-                var i = 0;
-                foreach (var pointer in agentModule->AgentsSpan)
-                {
-                    AgentTable.Add(new AgentInterface((IntPtr)pointer.Value, i++));
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            PluginLog.Error(e.ToString());
-        }
-    }
+//    private AgentManager()
+//    {
+//        try
+//        {
+//            unsafe
+//            {
+//                var instance = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+//                var agentModule = instance->UIModule->GetAgentModule();
+//                var i = 0;
+//                foreach (var pointer in agentModule->Agents)
+//                {
+//                    AgentTable.Add(new AgentInterface((IntPtr)pointer.Value));
+//                }
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            PluginLog.Error(e.ToString());
+//        }
+//    }
 
-    public static AgentManager Instance { get; } = new AgentManager();
+//    public static AgentManager Instance { get; } = new AgentManager();
 
-    internal AgentInterface FindAgentInterfaceById(int id) => AgentTable[id];
+//    internal AgentInterface FindAgentInterfaceById(int id) => AgentTable[id];
 
-    internal AgentInterface FindAgentInterfaceByVtable(IntPtr vtbl) => AgentTable.First(i=>i.VTable == vtbl);
-}
+//    internal AgentInterface FindAgentInterfaceByVtable(IntPtr vtbl) => AgentTable.First(i=>i.VTable == vtbl);
+//}
 
 //public unsafe class AgentInterface<T> where T : unmanaged
 //{

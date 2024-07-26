@@ -19,17 +19,20 @@ using System;
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Logging;
 using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl;
+using MidiBard.IPC;
 using MidiBard.Util;
 using static ImGuiNET.ImGui;
 using MidiBard.Util.Lyrics;
 using MidiBard.Managers.Ipc;
 using static MidiBard.ImGuiUtil;
 using static MidiBard2.Resources.Language;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -37,7 +40,7 @@ public partial class PluginUI
 {
     private void DrawPanelMusicControl()
     {
-        ManualDelay();
+        //ManualDelay();
         if (Lrc.LrcLoaded())
         {
             LRCDeltaTime();
@@ -83,10 +86,16 @@ public partial class PluginUI
 		//-------------------
 		SetNextItemWidth(itemWidth);
 		if (InputFloat(setting_label_song_delay, ref MidiBard.config.SecondsBetweenTracks, 0.5f, 0.5f, $" {MidiBard.config.SecondsBetweenTracks:f2} s", ImGuiInputTextFlags.AutoSelectAll))
-			MidiBard.config.SecondsBetweenTracks = Math.Max(0, MidiBard.config.SecondsBetweenTracks);
-		if (IsItemHovered() && IsMouseClicked(ImGuiMouseButton.Right))
-			MidiBard.config.SecondsBetweenTracks = 3;
-		ToolTip(setting_tooltip_song_delay);
+        {
+            MidiBard.config.SecondsBetweenTracks = Math.Max(0, MidiBard.config.SecondsBetweenTracks);
+            IPCHandles.SyncAllSettings();
+        }
+        if (IsItemClicked(ImGuiMouseButton.Right))
+        {
+            MidiBard.config.SecondsBetweenTracks = 3;
+            IPCHandles.SyncAllSettings();
+        }
+        ToolTip(setting_tooltip_song_delay);
 		//-------------------
 		SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2f);
 		SetNextItemWidth(itemWidth);
@@ -104,13 +113,19 @@ public partial class PluginUI
 
 
 		//-------------------
-		Checkbox(setting_label_auto_adapt_notes, ref MidiBard.config.AdaptNotesOOR);
+		if (Checkbox(setting_label_auto_adapt_notes, ref MidiBard.config.AdaptNotesOOR))
+        {
+            IPCHandles.SyncAllSettings();
+        }
 		ToolTip(setting_tooltip_auto_adapt_notes);
 		//-------------------
 		SameLine(ImGuiUtil.GetWindowContentRegionWidth() / 2f);
 		SetNextItemWidth(itemWidth);
-		ImGuiUtil.EnumCombo(setting_label_tone_mode, ref MidiBard.config.GuitarToneMode, _toolTips);
-		ImGuiUtil.ToolTip(setting_tooltip_tone_mode);
+		if (ImGuiUtil.EnumCombo(setting_label_tone_mode, ref MidiBard.config.GuitarToneMode, _toolTips))
+        {
+            IPCHandles.SyncAllSettings();
+        }
+        ImGuiUtil.ToolTip(setting_tooltip_tone_mode);
 
 		//-------------------
 
@@ -118,7 +133,7 @@ public partial class PluginUI
 		PushStyleColor(ImGuiCol.Button, 0xFF000000 | DiscordColor);
 		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | DiscordColor);
 		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | DiscordColor);
-		if (Button("Join Discord", new Vector2(GetFrameHeight() * 4, GetFrameHeight())))
+		if (Button(" Join Discord "))
 		{
 			try
 			{
@@ -138,7 +153,7 @@ public partial class PluginUI
 		PushStyleColor(ImGuiCol.Button, 0xFF000000 | KofiColor);
 		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | KofiColor);
 		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | KofiColor);
-		if (Button("Support us on Ko-fi!", new Vector2(GetFrameHeight() * 6, GetFrameHeight())))
+		if (Button(" Support us on Ko-fi! "))
 		{
 			try
 			{
@@ -158,7 +173,7 @@ public partial class PluginUI
 		PushStyleColor(ImGuiCol.Button, 0xFF000000 | WebsiteColor);
 		PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | WebsiteColor);
 		PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | WebsiteColor);
-		if (Button("MidiBard.org", new Vector2(GetFrameHeight() * 4, GetFrameHeight())))
+		if (Button(" MidiBard.org "))
 		{
 			try
 			{
@@ -222,26 +237,14 @@ public partial class PluginUI
 					$"{(currentTime.Hours != 0 ? currentTime.Hours + ":" : "")}{currentTime.Minutes:00}:{currentTime.Seconds:00}",
 					ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoRoundToFormat))
 			{
-				if (api.PartyList.Length < 2)
-				{
-					MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(progress));
-				}
-				else
-				{
-					IPC.IPCHandles.MoveToTime(progress);
-				}
+				MidiPlayerControl.SetTime(duration.Multiply(progress));
+                IPC.IPCHandles.SetPlaybackTime((MetricTimeSpan)duration.Multiply(progress));
 			}
 
 			if (IsItemHovered() && IsMouseClicked(ImGuiMouseButton.Right))
 			{
-				if (api.PartyList.Length < 2)
-				{
-					MidiBard.CurrentPlayback.MoveToTime(duration.Multiply(0));
-				}
-				else
-				{
-					IPC.IPCHandles.MoveToTime(0);
-				}
+				MidiPlayerControl.SetTime(duration.Multiply(0));
+                IPC.IPCHandles.SetPlaybackTime(TimeSpan.Zero);
 			}
 		}
 		else
@@ -259,7 +262,7 @@ public partial class PluginUI
 		UIcurrentInstrument = MidiBard.CurrentInstrument;
 		if (MidiBard.PlayingGuitar)
 		{
-			UIcurrentInstrument = MidiBard.AgentPerformance.CurrentGroupTone + MidiBard.guitarGroup[0]; ;
+			UIcurrentInstrument = MidiBard.AgentPerformance.CurrentGroupTone + MidiBard.guitarGroup[0];
 		}
 
 		if (BeginCombo(setting_label_select_instrument, MidiBard.InstrumentStrings[UIcurrentInstrument], ImGuiComboFlags.HeightLarge))
@@ -269,7 +272,7 @@ public partial class PluginUI
 			{
 				var instrument = MidiBard.Instruments[i];
 				GetWindowDrawList().ChannelsSetCurrent(1);
-				Image(instrument.IconTextureWrap.ImGuiHandle, new Vector2(GetTextLineHeightWithSpacing()));
+				Image(instrument.IconTextureWrap.GetWrapOrEmpty().ImGuiHandle, new Vector2(GetTextLineHeightWithSpacing()));
 				SameLine();
 				GetWindowDrawList().ChannelsSetCurrent(0);
 				AlignTextToFramePadding();

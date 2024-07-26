@@ -15,14 +15,15 @@ using MidiBard.Managers.Ipc;
 using System.Threading.Tasks;
 using MidiBard.Util;
 using static MidiBard.MidiBard;
+using static Dalamud.api;
 
 namespace MidiBard
 {
 	internal class PartyChatCommand
 	{
-		internal static void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
-		{
-			if (isHandled)
+        internal static void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+        {
+            if (isHandled)
 				return;
 
 			if (type != XivChatType.Party)
@@ -74,7 +75,7 @@ namespace MidiBard
 					return;
 				}
 
-				MidiPlayerControl.SwitchSong();
+				MidiPlayerControl.StopLrc();
 				PlaylistManager.LoadPlayback(number-1);
 				Ui.Open();
 			}
@@ -228,7 +229,7 @@ namespace MidiBard
 			if (instrument != null)
 				SwitchInstrument.SwitchToContinue((uint)instrument);
 
-			PluginLog.LogDebug($"Instrument: {instrument}");
+			PluginLog.Debug($"Instrument: {instrument}");
 		}
 	}
 }

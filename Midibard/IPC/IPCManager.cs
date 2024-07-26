@@ -37,6 +37,7 @@ using MidiBard.Util;
 using Newtonsoft.Json;
 using TinyIpc.IO;
 using TinyIpc.Messaging;
+using static Dalamud.api;
 
 namespace MidiBard.IPC;
 
@@ -164,8 +165,9 @@ internal class IPCManager : IDisposable
 		{
 			_messagesQueueRunning = false;
 			MessageBus.MessageReceived -= MessageBus_MessageReceived;
+			if (initFailed) return;
 			_autoResetEvent?.Set();
-			_autoResetEvent?.Dispose();
+            _autoResetEvent?.Dispose();
 		}
 		finally
 		{

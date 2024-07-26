@@ -19,9 +19,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dalamud.Logging;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud;
+using Dalamud.Interface.ImGuiNotification;
 using Newtonsoft.Json;
+using static Dalamud.api;
 
 namespace MidiBard.Managers
 {
@@ -52,7 +53,7 @@ namespace MidiBard.Managers
 			}
 			catch (Exception e)
 			{
-				PluginLog.LogError(e.ToString());
+				PluginLog.Error(e.ToString());
 			}
 			return config;
 		}
@@ -97,18 +98,18 @@ namespace MidiBard.Managers
 
 		internal static DefaultPerformer LoadDefaultPerformer()
 		{
-			PluginLog.LogDebug("Loading Default Performer...");
+			PluginLog.Debug("Loading Default Performer...");
 			var folder = MidiBard.config.defaultPerformerFolder;
 			bool succeed = true;
 			if (!Directory.Exists(folder))
             {
-				PluginLog.LogWarning($"Default Performer folder not exist, creating at {folder}");
+				PluginLog.Warning($"Default Performer folder not exist, creating at {folder}");
 				try
 				{
 					Directory.CreateDirectory(folder);
 				} catch (Exception e)
                 {
-					PluginLog.LogError($"Invalid default performer foler: {folder}, using default folder!");
+					PluginLog.Error($"Invalid default performer foler: {folder}, using default folder!");
 					ImGuiUtil.AddNotification(NotificationType.Error, $"Invalid default performer foler: {folder}, using default folder instead!");
 					MidiBard.config.defaultPerformerFolder = api.PluginInterface.ConfigDirectory.FullName;
 					folder = MidiBard.config.defaultPerformerFolder;
@@ -120,7 +121,7 @@ namespace MidiBard.Managers
 			
 			if (!fileInfo.Exists)
             {
-				PluginLog.LogWarning($"Default Performer not exist, creating at {path}");
+				PluginLog.Warning($"Default Performer not exist, creating at {path}");
 				succeed = SaveDefaultPerformer();
             }
 
@@ -143,7 +144,7 @@ namespace MidiBard.Managers
 				}
 			} catch (Exception e)
             {
-				PluginLog.LogError(e.ToString());
+				PluginLog.Error(e.ToString());
 			}
 			
 			return defaultPerformer;
@@ -164,11 +165,11 @@ namespace MidiBard.Managers
 				{
 					var serializedContents = JsonConvert.SerializeObject(defaultPerformer, Formatting.Indented);
 					File.WriteAllText(trackMappingFileInfo.FullName, serializedContents);
-					PluginLog.LogWarning($"{path} Saved");
+					PluginLog.Warning($"{path} Saved");
 				}
 			} catch (Exception e)
             {
-				PluginLog.LogError(e.ToString());
+				PluginLog.Error(e.ToString());
 				return false;
             }
 

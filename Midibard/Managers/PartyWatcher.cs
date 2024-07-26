@@ -21,7 +21,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Dalamud.Logging;
 using Dalamud;
+using Dalamud.Plugin.Services;
 using MidiBard.Managers.Ipc;
+using static Dalamud.api;
 
 namespace MidiBard.Managers;
 
@@ -40,7 +42,7 @@ public class PartyWatcher : IDisposable
         .ToArray();
 
     [SuppressMessage("ReSharper", "SimplifyLinqExpressionUseAll")]
-    private void Framework_Update(Dalamud.Game.Framework framework)
+    private void Framework_Update(IFramework framework)
     {
         var newMemberCIDs = GetMemberCIDs;
         if (!newMemberCIDs.ToHashSet().SetEquals(PartyMemberCIDs.ToHashSet()))

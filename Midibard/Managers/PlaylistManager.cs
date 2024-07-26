@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2022 akira0245
+// Copyright (C) 2022 akira0245
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -35,13 +35,14 @@ using Melanchall.DryWetMidi.Tools;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl;
 using Dalamud;
+using Dalamud.Interface.ImGuiNotification;
 using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using Newtonsoft.Json;
 using ProtoBuf;
-using Dalamud.Interface.Internal.Notifications;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -61,12 +62,12 @@ static class PlaylistManager
 
 		if (lastOrDefault is null || !fileExists) {
 			ImGuiUtil.AddNotification(NotificationType.Error, $"Latest playlist NOT exist: {lastOrDefault}, using default playlist instead!");
-			PluginLog.Log("Load Default playlist");
+			PluginLog.Information("Load Default playlist");
 			return PlaylistContainer.FromFile(
 				Path.Combine(api.PluginInterface.GetPluginConfigDirectory(), "DefaultPlaylist.mpl"), true);
 		}
 
-		PluginLog.Log($"Load playlist: {lastOrDefault}");
+		PluginLog.Information($"Load playlist: {lastOrDefault}");
 		return PlaylistContainer.FromFile(lastOrDefault);
 	}
 
@@ -95,7 +96,6 @@ static class PlaylistManager
 	public static void Clear()
 	{
 		FilePathList.Clear();
-		MidiPlayerControl.ClearAlreadyPlayed();
 		CurrentSongIndex = -1;
 		IPCHandles.SyncPlaylist();
 	}
@@ -114,7 +114,6 @@ static class PlaylistManager
 		try {
 			FilePathList.RemoveAt(index);
 			PluginLog.Debug($"removed [{playlistIndex}, {index}]");
-			MidiPlayerControl.ClearAlreadyPlayed();
 			if (index < CurrentSongIndex) {
 				CurrentSongIndex--;
 			}
@@ -141,41 +140,69 @@ static class PlaylistManager
 		InvalidSystemCommonEventParameterValuePolicy = InvalidSystemCommonEventParameterValuePolicy.SnapToLimits
 	};
 
-	internal static async Task AddAsync(string[] filePaths)
+	internal static async Task AddAsync(IEnumerable<string> filePaths)
 	{
-		var count = filePaths.Length;
 		var success = 0;
 		var sw = Stopwatch.StartNew();
 
-		MidiPlayerControl.ClearAlreadyPlayed();
-
 		await Task.Run(() => {
-			foreach (var path in CheckValidFiles(filePaths)) {
-				FilePathList.Add(new SongEntry { FilePath = path });
-				success++;
+			foreach (var (file, path) in CheckValidFiles(filePaths)) {
+                try {
+					var songLength = file.GetDurationTimeSpan();
+					FilePathList.Add(new SongEntry { FilePath = path, SongLength = songLength ?? TimeSpan.Zero });
+                    success++;
+                }
+                catch (Exception e)
+                {
+                    PluginLog.Warning(e,"error when getting duration");
+                }
 			}
+
+			CalculateDurationAll();
 		});
 
 		IPCHandles.SyncPlaylist();
 		CurrentContainer.Save();
-		PluginLog.Information(
-			$"File import all complete in {sw.Elapsed.TotalMilliseconds} ms! success: {success} total: {count}");
+		PluginLog.Information($"File import all complete in {sw.Elapsed.TotalMilliseconds} ms! success: {success}");
 	}
 
-	internal static IEnumerable<string> CheckValidFiles(string[] filePaths)
+	internal static void CalculateDurationAll()
+	{
+		var parallelQuery = PlaylistManager.FilePathList.AsParallel();
+		parallelQuery.ForAll(i => {
+			if (i.SongLength == default)
+			{
+				try
+				{
+					i.SongLength = PlaylistManager.LoadSongFile(i.FilePath).GetDuration<MetricTimeSpan>();
+				}
+				catch (Exception e)
+				{
+					PluginLog.Warning(e, $"error when getting {i.FilePath} duration");
+				}
+			}
+		});
+	}
+	private static IEnumerable<(MidiFile, string)> CheckValidFiles(IEnumerable<string> filePaths)
 	{
 		foreach (var path in filePaths) {
 			MidiFile file = null;
 
-			if (Path.GetExtension(path).Equals(".mmsong"))
-				file = LoadMMSongFile(path);
-			else if (Path.GetExtension(path).Equals(".mid") || Path.GetExtension(path).Equals(".midi"))
-				file = LoadMidiFile(path);
-			if (file is not null) yield return path;
+			file = LoadSongFile(path);
+			if (file is not null) yield return (file, path);
 		}
 	}
 
-	internal static MidiFile LoadMidiFile(string filePath)
+	internal static MidiFile LoadSongFile(string path)
+	{
+		if (Path.GetExtension(path).Equals(".mmsong"))
+			return LoadMMSongFile(path);
+		else if (Path.GetExtension(path).Equals(".mid") || Path.GetExtension(path).Equals(".midi"))
+			return LoadMidiFile(path);
+		return null;
+	}
+
+	private static MidiFile LoadMidiFile(string filePath)
 	{
 		PluginLog.Debug($"[LoadMidiFile] -> {filePath} START");
 		MidiFile loaded = null;
@@ -234,7 +261,7 @@ static class PlaylistManager
 		}
 	}
 
-	internal static MidiFile LoadMMSongFile(string filePath)
+	private static MidiFile LoadMMSongFile(string filePath)
 	{
 		PluginLog.Debug($"[LoadMMSongFile] -> {filePath} START");
 		MidiFile midiFile = null;

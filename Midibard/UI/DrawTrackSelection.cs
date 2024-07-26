@@ -19,6 +19,8 @@ using System;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.Utility;
 using ImGuiNET;
 using static MidiBard.ImGuiUtil;
 using MidiBard.Control.CharacterControl;
@@ -26,6 +28,7 @@ using Dalamud.Logging;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard2.Resources;
 using MidiBard.Control.MidiControl;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -42,7 +45,7 @@ public partial class PluginUI
 
 	readonly string[] toneStrings = new string[]
 	{
-		" I ", " II ", "III", "IV", " V ",
+		"I", "II", "III", "IV", "V",
 	};
 
 	private unsafe void DrawTrackTrunkSelectionWindow()
@@ -157,13 +160,21 @@ public partial class PluginUI
 						if (MidiBard.PlayingGuitar && MidiBard.config.GuitarToneMode == GuitarToneMode.OverrideByTrack)
 						{
 							ImGui.NextColumn();
-
+							//var fontAvailable = FontJupiter23?.Available == true;
+							float scale = ImGui.GetIO().FontGlobalScale;
+							//if (fontAvailable) {
+							//	ImGui.GetIO().FontGlobalScale/=2;
+							//	ImGui.PushFont(FontJupiter23.ImFont);
+							//}
 							for (int toneId = 0; toneId < 5; toneId++)
 							{
 								if (toneId != 0) ImGui.SameLine();
 								drawToneSelectButton(toneId, ref MidiBard.config.TrackStatus[i].Tone);
 							}
-
+							//if (fontAvailable) {
+							//	ImGui.GetIO().FontGlobalScale = scale;
+							//	ImGui.PopFont();
+							//}
 							ImGui.NextColumn();
 						}
 					}
@@ -197,7 +208,9 @@ public partial class PluginUI
 		}
 	}
 
-	bool drawToneSelectButton(int toneID, ref int selected)
+	//private static readonly GameFontHandle FontJupiter23 = api.PluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamilyAndSize.Jupiter23));
+
+    bool drawToneSelectButton(int toneID, ref int selected)
 	{
 		var buttonSize = new Vector2(ImGui.GetFrameHeight() * 0.8f, ImGui.GetFrameHeight());
 		var toneColor = toneColors[toneID];
@@ -211,13 +224,13 @@ public partial class PluginUI
 			ImGui.PushStyleColor(ImGuiCol.ButtonActive, toneColor);
 		}
 
-		if (ImGui.Button($"{toneName}##toneSwitchButton", buttonSize))
+        if (ImGui.Button($"{toneName}##toneSwitchButton", buttonSize))
 		{
 			selected = toneID;
 			ret = true;
 		}
 
-		if (drawcolor)
+        if (drawcolor)
 		{
 			ImGui.PopStyleColor(3);
 		}

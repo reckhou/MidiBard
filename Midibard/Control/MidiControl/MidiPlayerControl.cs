@@ -16,7 +16,7 @@
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -26,12 +26,12 @@ using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.Managers;
 using MidiBard.Util;
 using MidiBard.Util.Lyrics;
+using static Dalamud.api;
 
 namespace MidiBard.Control.MidiControl;
 
 internal static class MidiPlayerControl
 {
-	private static HashSet<int> playedIndexes = new HashSet<int>();
 	internal static void Play()
 	{
 		if (MidiBard.CurrentPlayback == null)
@@ -57,7 +57,7 @@ internal static class MidiPlayerControl
 			{
 				if (MidiBard.CurrentPlayback.GetCurrentTime<MidiTimeSpan>() == MidiBard.CurrentPlayback.GetDuration<MidiTimeSpan>())
 				{
-					MidiBard.CurrentPlayback.MoveToStart();
+					MidiBard.CurrentPlayback.MoveToTime(new MidiTimeSpan(0));
 				}
 
 				DoPlay();
@@ -71,12 +71,9 @@ internal static class MidiPlayerControl
 
 	public static void DoPlay(bool isEnsemble = false)
 	{
-		if (MidiBard.CurrentPlayback == null)
-		{
-			return;
-		}
+		if (MidiBard.CurrentPlayback == null) return;
 
-		playDeltaTime = 0;
+        playDeltaTime = 0;
 		MidiBard.CurrentPlayback.Start();
 		_stat = e_stat.Playing;
 
@@ -107,7 +104,7 @@ internal static class MidiPlayerControl
 			{
 				Pause();
 				var TimeSpan = MidiBard.CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
-				PluginLog.LogInformation($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
+				PluginLog.Information($"Timespan: [{TimeSpan.Minutes}:{TimeSpan.Seconds}:{TimeSpan.Milliseconds}]");
 			}
 			else
 			{
@@ -140,28 +137,6 @@ internal static class MidiPlayerControl
 		PlaylistManager.LoadPlayback(songIndex, MidiBard.IsPlaying);
 
 	}
-	
-	internal static void ClearAlreadyPlayed(){
-		playedIndexes.Clear();
-	}
-
-	// Takes in the set of already played songs and returns a new random song that hasn't already been played.
-	private static int LimitedRandom(HashSet<int> playedIndexes)
-	{
-		//we've played all the songs, reset.
-		if(playedIndexes.Count == PlaylistManager.FilePathList.Count)
-		{
-			ClearAlreadyPlayed();
-		}
-
-		var unplayed = Enumerable.Range(0, PlaylistManager.FilePathList.Count-1).Where(i => !playedIndexes.Contains(i));
-		var r = new Random();
-
-		// effectively we're getting a random list exluding the playedIndexes
-		int index = r.Next(0, PlaylistManager.FilePathList.Count-1-playedIndexes.Count);
-		
-		return unplayed.ElementAt(index);
-	}
 
 	private static int GetSongIndex(int songIndex, bool next)
 	{
@@ -187,15 +162,38 @@ internal static class MidiPlayerControl
 				var r = new Random();
 				do
 				{
-					songIndex = LimitedRandom(playedIndexes);
-					playedIndexes.Add(songIndex);
+					songIndex = r.Next(0, PlaylistManager.FilePathList.Count);
 				} while (songIndex == PlaylistManager.CurrentSongIndex);
 			}
 		}
+
 		return songIndex;
 	}
 
-	internal static void MoveTime(double timeInSeconds)
+    internal static void SetTime(ITimeSpan time)
+    {
+        var bardPlayback = MidiBard.CurrentPlayback;
+        if (bardPlayback is null) return;
+
+        try
+        {
+            if (bardPlayback.IsRunning)
+			{
+                bardPlayback.MoveToTime(time);
+            }
+            else
+			{
+                bardPlayback.MoveToTime(time);
+                bardPlayback.PlaybackStart = time;
+            }
+        }
+        catch (Exception e)
+        {
+            PluginLog.Warning(e.ToString(), "error when try setting current playback time");
+        }
+    }
+
+    internal static void MoveTime(double timeInSeconds)
 	{
 		try
 		{
@@ -208,7 +206,7 @@ internal static class MidiPlayerControl
 		}
 		catch (Exception e)
 		{
-			PluginLog.Warning(e.ToString(), "error when try setting current playback time");
+			PluginLog.Warning(e.ToString(), "error when try moving current playback time");
 		}
 	}
 
@@ -234,21 +232,21 @@ internal static class MidiPlayerControl
 
 		var currentTime = MidiBard.CurrentPlayback.GetCurrentTime<MetricTimeSpan>();
 		long msTime = currentTime.TotalMicroseconds;
-		//PluginLog.LogDebug("curTime:" + msTime);
+		//PluginLog.Debug("curTime:" + msTime);
 		if (msTime + delta * 1000 < 0)
 		{
 			return false;
 		}
 		msTime += delta * 1000;
 		MetricTimeSpan newTime = new MetricTimeSpan(msTime);
-		//PluginLog.LogDebug("newTime:" + newTime.TotalMicroseconds);
+		//PluginLog.Debug("newTime:" + newTime.TotalMicroseconds);
 		MidiBard.CurrentPlayback.MoveToTime(newTime);
 		playDeltaTime += delta;
 
 		return true;
 	}
 
-	internal static void SwitchSong()
+	internal static void StopLrc()
     {
 		Lrc.Stop();
 		_stat = e_stat.Stopped;

@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Dalamud.Logging;
 using Dalamud;
 using MidiBard.Managers;
+using static Dalamud.api;
 
 namespace MidiBard.Control.CharacterControl;
 

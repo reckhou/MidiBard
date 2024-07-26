@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Dalamud.Logging;
+using static Dalamud.api;
 
 namespace MidiBard.Util.MidiPreprocessor
 {
@@ -38,7 +39,7 @@ namespace MidiBard.Util.MidiPreprocessor
             }
 
             stopwatch.Stop();
-            PluginLog.LogWarning($"[MidiPreprocessor] Process tracks took: {stopwatch.Elapsed.TotalMilliseconds} ms");
+            PluginLog.Warning($"[MidiPreprocessor] Process tracks took: {stopwatch.Elapsed.TotalMilliseconds} ms");
             return trackChunks;
         }
 

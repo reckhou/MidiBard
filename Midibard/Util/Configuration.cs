@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Configuration;
@@ -30,6 +29,7 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using MidiBard.Managers;
 using MidiBard.Util;
+using Newtonsoft.Json;
 
 namespace MidiBard;
 
@@ -85,13 +85,13 @@ public class Configuration : IPluginConfiguration
 
 	[JsonIgnore]
     public TrackStatus[] TrackStatus = Enumerable.Repeat(new TrackStatus(), 100).ToArray().JsonSerialize().JsonDeserialize<TrackStatus[]>();
-	//public ChannelStatus[] ChannelStatus = Enumerable.Repeat(new ChannelStatus(), 16).ToArray();
+    //public ChannelStatus[] ChannelStatus = Enumerable.Repeat(new ChannelStatus(), 16).ToArray();
 
-	public List<string> RecentUsedPlaylists = new List<string>();
+    public List<string> RecentUsedPlaylists = new List<string>();
 
-	public List<string> Playlist = new List<string>();
+    public List<string> Playlist = new List<string>();
 
-	public float PlaySpeed = 1f;
+    public float PlaySpeed = 1f;
     public float SecondsBetweenTracks = 3;
     public int PlayMode = 0;
     public int TransposeGlobal = 0;
@@ -157,6 +157,17 @@ public class Configuration : IPluginConfiguration
     public bool UseEnsembleIndicator = false;
 
     public bool UpdateInstrumentBeforeReadyCheck;
+    [JsonProperty("comp")]
+    public int[] LegacyInstrumentCompensation = EnsembleManager.GetCompensationAver();
+    public bool SearchUseRegex;
+    public CompensationModes CompensationMode = CompensationModes.ByInstrumentNote;
+
+    public enum CompensationModes
+    {
+        None = 0,
+        ByInstrument = 1,
+        ByInstrumentNote = 2,
+    }
 
     //public bool DrawSelectPlaylistWindow;
     //[JsonIgnore] public bool OverrideGuitarTones => GuitarToneMode == GuitarToneMode.Override;
@@ -166,7 +177,7 @@ public class Configuration : IPluginConfiguration
         bool isDrumTrackPlaying = false;
         if (MidiBard.CurrentPlayback?.TrackInfos?.Length > 0)
         {
-            foreach(var trackInfo in MidiBard.CurrentPlayback?.TrackInfos)
+            foreach (var trackInfo in MidiBard.CurrentPlayback?.TrackInfos)
             {
                 var insID = trackInfo.InstrumentIDFromTrackName;
                 if (trackInfo.IsEnabled && insID >= 10 && insID <= 14)

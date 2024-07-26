@@ -27,12 +27,14 @@ using MidiBard.Control.MidiControl;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using Dalamud;
+using Dalamud.Interface.Utility;
 using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
 using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using static MidiBard2.Resources.Language;
+using static Dalamud.api;
 
 namespace MidiBard;
 
@@ -64,20 +66,20 @@ public partial class PluginUI
 				{
 					if (!ensembleRunning)
 					{
-						if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
-						{
-							IPCHandles.UpdateMidiFileConfig(config);
-						}
-
 						if (MidiBard.config.UpdateInstrumentBeforeReadyCheck)
 						{
-							if (!MidiBard.config.playOnMultipleDevices)
+							if (MidiBard.CurrentPlayback?.MidiFileConfig is { } config)
+							{
+								IPCHandles.UpdateMidiFileConfig(config);
+							}
+
+                            if (!MidiBard.config.playOnMultipleDevices)
 							{
 								IPCHandles.UpdateInstrument(true);
 							}
 						}
 
-						MidiBard.EnsembleManager.BeginEnsembleReadyCheck();
+						EnsembleManager.BeginEnsembleReadyCheck();
 					}
 					else
 					{
@@ -139,8 +141,8 @@ public partial class PluginUI
 						? ensemble_unmute_other_clients
 						: ensemble_mute_other_clients))
 			{
-				IPCHandles.SetOption(ConfigOption.SoundMaster, otherClientsMuted ? 100 : 0, false);
-				AgentConfigSystem.SetOptionValue(ConfigOption.SoundMaster, 100);
+				IPCHandles.SetOption("IsSndMaster", otherClientsMuted ? 1 : 0, false);
+				api.GameConfig.System.Set("IsSndMaster", true);
 				otherClientsMuted ^= true;
 			}
 
@@ -414,11 +416,11 @@ public partial class PluginUI
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(ImGui.GetStyle().FramePadding.Y));
 		if (value == 0)
 		{
-			ImGui.Image(TextureManager.Get(60042).ImGuiHandle, new Vector2(ImGui.GetFrameHeight()));
+			ImGui.Image(TextureManager.Get(60042).GetWrapOrEmpty().ImGuiHandle, new Vector2(ImGui.GetFrameHeight()));
 		}
 		else
 		{
-			ImGui.Image(MidiBard.Instruments[value].IconTextureWrap.ImGuiHandle, new Vector2(ImGui.GetFrameHeight()));
+			ImGui.Image(MidiBard.Instruments[value].IconTextureWrap.GetWrapOrEmpty().ImGuiHandle, new Vector2(ImGui.GetFrameHeight()));
 		}
 		if (ImGui.IsItemHovered()) ImGuiUtil.ToolTip(MidiBard.Instruments[value].InstrumentString);
 
@@ -429,7 +431,7 @@ public partial class PluginUI
 			for (int i = 1; i < MidiBard.Instruments.Length; i++)
 			{
 
-				ImGui.Image(MidiBard.Instruments[i].IconTextureWrap.ImGuiHandle, ImGuiHelpers.ScaledVector2(40, 40));
+				ImGui.Image(MidiBard.Instruments[i].IconTextureWrap.GetWrapOrEmpty().ImGuiHandle, ImGuiHelpers.ScaledVector2(40, 40));
 				if (ImGui.IsItemClicked())
 				{
 					value = i;

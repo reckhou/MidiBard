@@ -24,7 +24,6 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Logging;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
@@ -40,6 +39,7 @@ using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using MidiBard.Util.Lyrics;
 using static MidiBard.MidiBard;
+using static Dalamud.api;
 
 namespace MidiBard.Control.MidiControl;
 
@@ -57,6 +57,7 @@ public static class FilePlayback
 		playback.Finished += Playback_Finished;
 		PluginLog.Debug($"[LoadPlayback] -> {path} OK! in {stopwatch.Elapsed.TotalMilliseconds} ms");
 		api.ChatGui.Print(String.Format("[MidiBard 2] Now Playing: {0}", playback.DisplayName));
+		MidiBard.PluginIpc.MidiBardPlayingFileNamePub.SendMessage(playback.DisplayName);
 		return playback;
 	}
 
@@ -84,7 +85,7 @@ public static class FilePlayback
 					case PlayMode.Single:
 						break;
 					case PlayMode.SingleRepeat:
-						CurrentPlayback.MoveToStart();
+						CurrentPlayback?.MoveToTime(new MidiTimeSpan(0));
 						MidiPlayerControl.DoPlay();
 						break;
 					case PlayMode.ListOrdered when PlaylistManager.CurrentSongIndex >= PlaylistManager.FilePathList.Count - 1:
@@ -105,11 +106,7 @@ public static class FilePlayback
 
 	internal static async Task<bool> LoadPlayback(string filePath)
 	{
-		MidiFile midiFile = null;
-		if (Path.GetExtension(filePath).Equals(".mmsong"))
-			midiFile = await Task.Run(() => PlaylistManager.LoadMMSongFile(filePath));
-		else if (Path.GetExtension(filePath).Equals(".mid") || Path.GetExtension(filePath).Equals(".midi"))
-			midiFile = await Task.Run(() => PlaylistManager.LoadMidiFile(filePath));
+		MidiFile midiFile = await Task.Run(() => PlaylistManager.LoadSongFile(filePath));
 
 		if (midiFile == null)
 		{
@@ -126,7 +123,7 @@ public static class FilePlayback
 			CurrentPlayback = playback;
 
 			Ui.RefreshPlotData();
-			BardPlayDevice.Instance.ResetChannelStates();
+			MidiBard.BardPlayDevice.ResetChannelStates();
 
 			try
 			{
@@ -140,12 +137,11 @@ public static class FilePlayback
 				Lrc.InitLrc(filePath);
 
 #if DEBUG
-            PluginLog.LogVerbose($"Title: {lrc.Title}, Artist: {lrc.Artist}, Album: {lrc.Album}, LrcBy: {lrc.LrcBy}, Offset: {lrc.Offset}");
-            foreach(var pair in lrc.LrcWord)
-            {
-                PluginLog.LogVerbose($"{pair.Key}, {pair.Value}");
-            }
-
+            //PluginLog.LogVerbose($"Title: {lrc.Title}, Artist: {lrc.Artist}, Album: {lrc.Album}, LrcBy: {lrc.LrcBy}, Offset: {lrc.Offset}");
+            //foreach(var pair in lrc.LrcWord)
+            //{
+            //    PluginLog.LogVerbose($"{pair.Key}, {pair.Value}");
+            //}
 #endif
 			}
 
