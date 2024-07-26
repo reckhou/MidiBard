@@ -156,6 +156,7 @@ public class MidiBard : IDalamudPlugin
 
         Ui = new PluginUI();
         api.PluginInterface.UiBuilder.Draw += Ui.Draw;
+        api.PluginInterface.UiBuilder.OpenMainUi += () => Ui.Toggle();
         api.PluginInterface.UiBuilder.OpenConfigUi += () => Ui.Toggle();
         api.Framework.Update += OnFrameworkUpdate;
         api.Framework.Update += Lrc.Tick;
@@ -419,6 +420,8 @@ public class MidiBard : IDalamudPlugin
             InputDeviceManager.ShouldScanMidiDeviceThread = false;
             api.Framework.Update -= OnFrameworkUpdate;
             api.Framework.Update -= Lrc.Tick;
+            api.PluginInterface.UiBuilder.OpenMainUi -= () => Ui.Toggle();
+            api.PluginInterface.UiBuilder.OpenConfigUi -= () => Ui.Toggle();
             api.PluginInterface.UiBuilder.Draw -= Ui.Draw;
             PlaylistManager.CurrentContainer.Save();
 
