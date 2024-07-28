@@ -167,6 +167,12 @@ public partial class PluginUI
 		{
 			PartyChatCommand.SendClose();
 		}
+		else if (api.PartyList.Length <= 1)
+		{
+            SwitchInstrument.SwitchToContinue(0);
+            MidiPlayerControl.Stop();
+            return;
+        }
 		else
 		{
 			IPCHandles.UpdateInstrument(false);
