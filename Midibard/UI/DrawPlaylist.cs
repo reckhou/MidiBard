@@ -17,30 +17,22 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dalamud.Interface;
-using Dalamud.Logging;
 using ImGuiNET;
 using MidiBard.Control.MidiControl;
-using Dalamud;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Utility;
-using Melanchall.DryWetMidi.Interaction;
 using MidiBard.IPC;
-using MidiBard.Managers.Ipc;
 using MidiBard2.Resources;
 using MidiBard.UI.Win32;
 using MidiBard.Util;
 using static ImGuiNET.ImGui;
 using static MidiBard.ImGuiUtil;
-using MidiBard.IPC;
-using MidiBard.Util.Lyrics;
-using playlibnamespace;
 using static Dalamud.api;
 
 namespace MidiBard;

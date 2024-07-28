@@ -347,10 +347,10 @@ static class PlaylistManager
 					foreach (var bard in msong.bards)
 					{
 						var thisTrack = new TrackChunk(new SequenceTrackNameEvent(instr[bard.instrument]));
-						using (var manager = new TimedEventsManager(thisTrack.Events))
-						{
-							TimedObjectsCollection<TimedEvent> timedEvents = manager.Events;
-							int last = 0;
+                        using (var manager = thisTrack.ManageTimedEvents())
+                        {
+                            TimedObjectsCollection<TimedEvent> timedEvents = manager.Objects;
+                            int last = 0;
 							foreach (var note in bard.sequence)
 							{
 								if (note.Value == 254)

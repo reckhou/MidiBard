@@ -124,8 +124,8 @@ internal class IPCManager : IDisposable
 		{
 			var sw = Stopwatch.StartNew();
 			PluginLog.Verbose($"message received");
-			var bytes = e.Message.Decompress();
-			PluginLog.Verbose($"message decompressed in {sw.Elapsed.TotalMilliseconds}ms");
+            var bytes = e.Message.ToArray<byte>().Decompress();
+            PluginLog.Verbose($"message decompressed in {sw.Elapsed.TotalMilliseconds}ms");
 			var message = bytes.ProtoDeserialize<IPCEnvelope>();
 			PluginLog.Verbose($"proto deserialized in {sw.Elapsed.TotalMilliseconds}ms");
 			PluginLog.Debug(message.ToString());
