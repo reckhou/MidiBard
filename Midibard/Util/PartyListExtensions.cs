@@ -17,8 +17,8 @@
 
 using System.Linq;
 using Dalamud.Game.ClientState.Party;
-using Dalamud;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 
 namespace MidiBard.Managers.Ipc;
 
@@ -30,5 +30,5 @@ public static class PartyListExtensions
     public static bool IsPartyLeader(this IPartyMember member) => api.PartyList.IsInParty() && member != null && member.ContentId == api.PartyList.GetPartyLeader()?.ContentId;
     public static bool IsPartyLeader(this IPartyList partyList) => partyList.IsInParty() && (long)api.ClientState.LocalContentId == partyList.GetPartyLeader()?.ContentId;
     public static IPartyMember? GetPartyMemberFromCid(this IPartyList partyList, long cid) => partyList.FirstOrDefault(i => i.ContentId == cid);
-    public static string NameAndWorld(this IPartyMember member) => $"{member?.Name}·{member?.World.GameData?.Name}";
+    public static string NameAndWorld(this IPartyMember member) => $"{member?.Name}·{member?.World.ValueNullable?.Name.ToDalamudString().TextValue}";
 }

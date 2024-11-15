@@ -15,21 +15,12 @@
 // 
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dalamud;
-using Dalamud.Interface.Internal;
 using Dalamud.Interface.Textures;
-using ImGuiScene;
-using Lumina.Data.Files;
-using Lumina.Excel.GeneratedSheets;
+using Dalamud.Utility;
+using Lumina.Excel.Sheets;
 using Melanchall.DryWetMidi.Common;
 using MidiBard.Managers;
 using MidiBard.Util;
-using static MidiBard.MidiBard;
 
 namespace MidiBard.Control;
 
@@ -41,10 +32,10 @@ public class Instrument
         GuitarTone = InstrumentHelper.GetGuitarTone((int)row.RowId);
         IsGuitar = InstrumentHelper.IsGuitar((int)row.RowId);
         ProgramNumber = Row.GetMidiProgramId();
-        FFXIVDisplayName = row.Instrument.RawString;
+        FFXIVDisplayName = row.Instrument.ToDalamudString().TextValue;
         FFXIVProgramName = Row.GetGameProgramName();
         GeneralMidiProgramName = ProgramNumber.GetGMProgramName();
-        InstrumentString = $"{(row.RowId == 0 ? "None" : $"{row.Instrument.RawString} ({row.Name})")}";
+        InstrumentString = $"{(row.RowId == 0 ? "None" : $"{row.Instrument.ToDalamudString().TextValue} ({row.Name})")}";
         IconTextureWrap = TextureManager.Get((uint)row.Order);
     }
     public Perform Row { get; }

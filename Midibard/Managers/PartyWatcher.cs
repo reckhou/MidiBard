@@ -16,13 +16,9 @@
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Dalamud.Logging;
-using Dalamud;
 using Dalamud.Plugin.Services;
-using MidiBard.Managers.Ipc;
 using static Dalamud.api;
 
 namespace MidiBard.Managers;
@@ -37,7 +33,7 @@ public class PartyWatcher : IDisposable
     public long[] PartyMemberCIDs { get; private set; } = { };
 
     public static long[] GetMemberCIDs => api.PartyList
-        .Where(i => i.World.Id > 0 && i.Territory.Id > 0)
+        .Where(i => i.World.Value.RowId > 0 && i.Territory.Value.RowId > 0)
         .Select(i => i.ContentId)
         .ToArray();
 

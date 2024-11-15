@@ -17,17 +17,11 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
-using Lumina.Excel.GeneratedSheets;
-using MidiBard.Control.MidiControl;
-using MidiBard.Control.MidiControl.PlaybackInstance;
-using MidiBard.Managers;
-using MidiBard.Managers.Agents;
+using Lumina.Excel.Sheets;
 using MidiBard.Util;
 using playlibnamespace;
 using static Dalamud.api;
@@ -140,15 +134,15 @@ internal static class SwitchInstrument
 	public static bool TryParseInstrumentName(string capturedInstrumentString, out uint instrumentId)
     {
         var bmpNameEqual = TrackInfo.GetInstrumentIDByName(capturedInstrumentString);
-		Perform equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-			i?.Instrument?.RawString.Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
-		Perform contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-			i?.Instrument?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
-		Perform gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-			i?.Name?.RawString?.ContainsIgnoreCase(capturedInstrumentString) == true);
+		Perform? equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+			i.Instrument.ExtractText().Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
+		Perform? contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+            i.Instrument.ExtractText().ContainsIgnoreCase(capturedInstrumentString) == true);
+		Perform? gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
+            i.Instrument.ExtractText().ContainsIgnoreCase(capturedInstrumentString) == true);
 
 		var rowId = bmpNameEqual ?? (equal ?? contains ?? gmName)?.RowId;
-		PluginLog.Debug($"idFromBmpName: {bmpNameEqual}, equal: {equal?.Instrument?.RawString}, contains: {contains?.Instrument?.RawString}, gmName: {gmName?.Name?.RawString} finalId: {rowId}");
+		PluginLog.Debug($"idFromBmpName: {bmpNameEqual}, equal: {equal?.Instrument.ExtractText()}, contains: {contains?.Instrument.ExtractText()}, gmName: {gmName?.Name.ExtractText()} finalId: {rowId}");
 		if (rowId is null)
 		{
 			instrumentId = 0;

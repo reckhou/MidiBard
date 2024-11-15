@@ -16,7 +16,8 @@
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
 using System.Text.RegularExpressions;
-using Lumina.Excel.GeneratedSheets;
+using Dalamud.Utility;
+using Lumina.Excel.Sheets;
 using Melanchall.DryWetMidi.Common;
 
 namespace MidiBard.Util;
@@ -43,7 +44,7 @@ internal static class InstrumentHelper
             return true;
         }
 
-        Match match = MidiProgramRegex.Match(perform.Name);
+        Match match = MidiProgramRegex.Match(perform.Name.ToDalamudString().TextValue);
         if (match.Success)
         {
             if (SevenBitNumber.TryParse(match.Groups[1].Value, out var GameId))
