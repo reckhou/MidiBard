@@ -9,11 +9,9 @@ using System.Text.RegularExpressions;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Utility;
-using Dalamud.Logging;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Melanchall.DryWetMidi.Interaction;
-using MidiBard.Control.MidiControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
 using MidiBard.IPC;
 using MidiBard.UI.Win32;
@@ -22,6 +20,7 @@ using MidiBard.Util.Lyrics;
 using static ImGuiNET.ImGui;
 using static MidiBard.ImGuiUtil;
 using static Dalamud.api;
+using Dalamud.Utility;
 
 namespace MidiBard;
 
@@ -218,14 +217,14 @@ public class LrcEditor
 
                     LrcLines.Clear();
                     LrcLines.AddRange(Enumerable.Range(0, count).Select(i => new LrcEntry { TimeStamp = dura / count * i }));
-                    var bNpcNames = api.DataManager.GetExcelSheet<BNpcName>()!.Where(i => !string.IsNullOrWhiteSpace(i.Singular.RawString)).ToList();
+                    var bNpcNames = api.DataManager.GetExcelSheet<BNpcName>()!.Where(i => !string.IsNullOrWhiteSpace(i.Singular.ToDalamudString().TextValue)).ToList();
                     LrcLines.ForEach(i =>
                     {
                         i.Text = string.Join(' ',
-                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.RawString,
-                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.RawString,
+                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.ToDalamudString().TextValue,
+                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.ToDalamudString().TextValue,
                             //bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.RawString,
-                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.RawString);
+                            bNpcNames[Random.Shared.Next(0, bNpcNames.Count)].Singular.ToDalamudString().TextValue);
                     });
                 }
             }

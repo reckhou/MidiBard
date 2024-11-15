@@ -16,50 +16,22 @@
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Numerics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Game.ClientState.Party;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using ImPlotNET;
-using Melanchall.DryWetMidi.Common;
-using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
-using MidiBard.Control;
-using MidiBard.Control.CharacterControl;
-using MidiBard.Control.MidiControl;
-using Dalamud;
 using Dalamud.Interface.Utility;
-using MidiBard.IPC;
-using MidiBard.Managers;
 using MidiBard.Managers.Ipc;
 using MidiBard2.Resources;
-using MidiBard.UI.Win32;
-using MidiBard.Util;
-using Newtonsoft.Json;
 using static ImGuiNET.ImGui;
 using static MidiBard.MidiBard;
 using static MidiBard.ImGuiUtil;
 using EnsembleManager = MidiBard.Managers.EnsembleManager;
 using static Dalamud.api;
+using Dalamud.Utility;
 
 namespace MidiBard;
 
@@ -138,7 +110,7 @@ public partial class PluginUI
 				if (ImGui.Begin($"MidiBard - {api.ClientState.LocalPlayer?.Name.TextValue} PID{Process.GetCurrentProcess().Id}###MIDIBARD",
 					ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #else
-            var name = $"♪ MidiBard 2 v{typeof(PluginUI).Assembly.GetName().Version} ♪ {api.ClientState.LocalPlayer?.Name.TextValue}@{api.ClientState.LocalPlayer?.HomeWorld.GameData.Name.ToString()} ###MIDIBARD";
+            var name = $"♪ MidiBard 2 v{typeof(PluginUI).Assembly.GetName().Version} ♪ {api.ClientState.LocalPlayer?.Name.TextValue}@{api.ClientState.LocalPlayer?.HomeWorld.ValueNullable?.Name.ToDalamudString().TextValue} ###MIDIBARD";
             if (Begin(name, ref MainWindowVisible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | flag))
 #endif
             {

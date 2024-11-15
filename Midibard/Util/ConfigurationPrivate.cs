@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.IO;
-using System.Numerics;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud;
 using Dalamud.Configuration;
 using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Logging;
-using Dalamud.Plugin;
-using ImGuiNET;
 using Newtonsoft.Json;
 using static Dalamud.api;
+using Dalamud.Utility;
 
 namespace MidiBard;
 
@@ -40,7 +33,7 @@ public class ConfigurationPrivate : IPluginConfiguration
                     {
                         var playerData = CS.LocalPlayer;
                         var contentId = CS.LocalContentId;
-                        if (playerData == null || playerData.HomeWorld.GameData == null)
+                        if (playerData == null || playerData.HomeWorld.ValueNullable == null)
                         {
                             Thread.Sleep(500);
                             continue;
@@ -72,10 +65,10 @@ public class ConfigurationPrivate : IPluginConfiguration
             {
                 var playerData = CS.LocalPlayer;
                 var contentId = CS.LocalContentId;
-                if (playerData != null && playerData.HomeWorld.GameData != null)
+                if (playerData != null && playerData.HomeWorld.ValueNullable != null)
                 {
                     var playerName = playerData.Name.TextValue;
-                    var playerWorld = playerData.HomeWorld.GameData.Name.ToString();
+                    var playerWorld = playerData.HomeWorld.ValueNullable?.Name.ToDalamudString().TextValue;
 
                     var configFileInfo = GetConfigFileInfo(playerName, playerWorld, contentId);
 
@@ -103,10 +96,10 @@ public class ConfigurationPrivate : IPluginConfiguration
             var playerData = CS.LocalPlayer;
             var contentId = CS.LocalContentId;
 
-            if (playerData != null && playerData.HomeWorld.GameData != null)
+            if (playerData != null && playerData.HomeWorld.ValueNullable != null)
             {
                 var playerName = playerData.Name.TextValue;
-                var playerWorld = playerData.HomeWorld.GameData.Name.ToString();
+                var playerWorld = playerData.HomeWorld.ValueNullable?.Name.ToDalamudString().TextValue;
 
                 var configFileInfo = GetConfigFileInfo(playerName, playerWorld, contentId);
                 if (configFileInfo.Exists)
@@ -134,7 +127,7 @@ public class ConfigurationPrivate : IPluginConfiguration
                 PluginLog.Debug("PlayerData NULL");
             } else
             {
-                PluginLog.Debug(playerData.HomeWorld.GameData == null ? "playerData.HomeWorld.GameData == null" : "");
+                PluginLog.Debug(playerData.HomeWorld.ValueNullable == null ? "playerData.HomeWorld.GameData == null" : "");
             }
         }
 

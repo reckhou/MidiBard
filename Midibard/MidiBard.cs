@@ -19,44 +19,30 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Interface;
-using Dalamud.Logging;
 using Dalamud.Plugin;
-using Lumina.Data;
-using Lumina.Data.Files;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Melanchall.DryWetMidi.Common;
-using Melanchall.DryWetMidi.Composing;
-using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using Melanchall.DryWetMidi.Multimedia;
-using Melanchall.DryWetMidi.MusicTheory;
-using Melanchall.DryWetMidi.Standards;
 using MidiBard.Control;
 using MidiBard.Control.CharacterControl;
 using MidiBard.Control.MidiControl;
 using MidiBard.Control.MidiControl.PlaybackInstance;
-using Dalamud;
 using MidiBard.IPC;
 using MidiBard.Managers;
 using MidiBard.Managers.Agents;
-using MidiBard.Managers.Ipc;
 using MidiBard.Util;
 using playlibnamespace;
-using Dalamud.Game.Gui;
 using Dalamud.Plugin.Services;
 using JetBrains.Annotations;
 using MidiBard.Util.Lyrics;
 using MidiBard2.IPC;
 using static Dalamud.api;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace MidiBard;
@@ -104,7 +90,7 @@ public class MidiBard : IDalamudPlugin
 
         InstrumentSheet = api.DataManager.Excel.GetSheet<Perform>();
         Instruments = InstrumentSheet!
-            .Where(i => !string.IsNullOrWhiteSpace(i.Instrument) || i.RowId == 0)
+            .Where(i => !string.IsNullOrWhiteSpace(i.Instrument.ToDalamudString().TextValue) || i.RowId == 0)
             .Select(i => new Instrument(i))
             .ToArray();
 
@@ -196,7 +182,7 @@ public class MidiBard : IDalamudPlugin
         {
             playlib.ConfirmReceiveReadyCheck();
 		}
-	}
+    }
 
     [Command("/midibard")]
     [HelpMessage("Toggle MidiBard window")]

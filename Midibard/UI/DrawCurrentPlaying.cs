@@ -18,7 +18,7 @@
 using System;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Logging;
+using Dalamud.Utility;
 using ImGuiNET;
 using Melanchall.DryWetMidi.Interaction;
 using MidiBard.Control.MidiControl;
@@ -132,7 +132,7 @@ public partial class PluginUI
             string currentInstrumentText;
             if (currentInstrument != 0)
             {
-                currentInstrumentText = MidiBard.InstrumentSheet.GetRow(currentInstrument).Instrument;
+                currentInstrumentText = MidiBard.InstrumentSheet.GetRow(currentInstrument).Instrument.ToDalamudString().TextValue;
                 if (MidiBard.PlayingGuitar && !(MidiBard.config.GuitarToneMode is GuitarToneMode.OverrideByTrack))
                 {
                     currentInstrumentText = currentInstrumentText.Split(':', '：').First() + ": Auto";
