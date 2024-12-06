@@ -43,7 +43,6 @@ using MidiBard.Util.Lyrics;
 using MidiBard2.IPC;
 using static Dalamud.api;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace MidiBard;
 
@@ -124,8 +123,8 @@ public class MidiBard : IDalamudPlugin
         //GuitarTonePatch.InitAndApply();
 
         var raptureAtkModule = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->UIModule->GetRaptureAtkModule();
-        var pAgentPerformanceMetronome = raptureAtkModule->AgentModule.GetAgentByInternalId(AgentId.PerformanceMetronome);
-        var pAgentPerformance = raptureAtkModule->AgentModule.GetAgentByInternalId(AgentId.PerformanceMode);
+        var pAgentPerformanceMetronome = raptureAtkModule->AgentModule.GetAgentByInternalId(FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentId.PerformanceMetronome);
+        var pAgentPerformance = raptureAtkModule->AgentModule.GetAgentByInternalId(FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentId.PerformanceMode);
 
         AgentMetronome = new AgentMetronome((IntPtr)pAgentPerformanceMetronome);
         AgentPerformance = new AgentPerformance((IntPtr)pAgentPerformance);
