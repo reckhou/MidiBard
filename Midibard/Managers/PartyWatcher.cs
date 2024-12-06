@@ -18,7 +18,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Windows.Documents;
 using Dalamud.Plugin.Services;
 using static Dalamud.api;
 
