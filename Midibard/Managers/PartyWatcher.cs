@@ -30,17 +30,32 @@ public class PartyWatcher : IDisposable
         api.Framework.Update += Framework_Update;
     }
 
-    public long[] PartyMemberCIDs { get; private set; } = { };
+    public long[] PartyMemberCIDs { get; private set; } = Array.Empty<long>();
 
-    public static long[] GetMemberCIDs => api.PartyList
-        .Where(i => i.World.Value.RowId > 0 && i.Territory.Value.RowId > 0)
-        .Select(i => i.ContentId)
-        .ToArray();
+    public static long[] GetMemberCIDs()
+    {
+        System.Collections.Generic.List<long> cids = new();
+        foreach(var p in api.PartyList)
+        {
+            try
+            {
+                if (p.ObjectId <= 0 || !p.GameObject.IsValid())
+                    continue;
+                if (p.World.Value.RowId > 0 && p.Territory.Value.RowId > 0)
+                {
+                    cids.Add(p.ContentId);
+                }
+            }
+            catch (NullReferenceException) { }
+        }
+        return cids.ToArray();
+
+    }
 
     [SuppressMessage("ReSharper", "SimplifyLinqExpressionUseAll")]
     private void Framework_Update(IFramework framework)
     {
-        var newMemberCIDs = GetMemberCIDs;
+        var newMemberCIDs = GetMemberCIDs();
         if (!newMemberCIDs.ToHashSet().SetEquals(PartyMemberCIDs.ToHashSet()))
         {
             //PluginLog.Warning($"CHANGE {newList.Length - PartyMembers.Length}");
