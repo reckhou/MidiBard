@@ -134,15 +134,12 @@ internal static class SwitchInstrument
 	public static bool TryParseInstrumentName(string capturedInstrumentString, out uint instrumentId)
     {
         var bmpNameEqual = TrackInfo.GetInstrumentIDByName(capturedInstrumentString);
-		Perform? equal = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-			i.Instrument.ExtractText().Equals(capturedInstrumentString, StringComparison.InvariantCultureIgnoreCase) == true);
-		Perform? contains = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-            i.Instrument.ExtractText().ContainsIgnoreCase(capturedInstrumentString) == true);
-		Perform? gmName = MidiBard.InstrumentSheet.FirstOrDefault(i =>
-            i.Instrument.ExtractText().ContainsIgnoreCase(capturedInstrumentString) == true);
-
-		var rowId = bmpNameEqual ?? (equal ?? contains ?? gmName)?.RowId;
-		PluginLog.Debug($"idFromBmpName: {bmpNameEqual}, equal: {equal?.Instrument.ExtractText()}, contains: {contains?.Instrument.ExtractText()}, gmName: {gmName?.Name.ExtractText()} finalId: {rowId}");
+		string lookupstr = capturedInstrumentString.ToLower().Trim(); //trim it, lower it, make it working
+        Perform? sheet = MidiBard.InstrumentSheet.FirstOrDefault(i => i.GetGameProgramName().ContainsIgnoreCase(lookupstr) ||
+																	 i.GetGameProgramName().StartsWith(lookupstr) ||
+                                                                     i.GetGameProgramName().Equals(lookupstr, StringComparison.Ordinal) );
+		var rowId = bmpNameEqual ?? sheet?.RowId;
+		PluginLog.Debug($"idFromBmpName: {bmpNameEqual}, equal: {sheet?.GetGameProgramName()}, finalId: {rowId}");
 		if (rowId is null)
 		{
 			instrumentId = 0;
