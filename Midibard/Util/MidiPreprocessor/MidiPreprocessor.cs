@@ -15,21 +15,60 @@
 // 
 // This code is written by akira0245 and was originally used in the MidiBard project. Any usage of this code must prominently credit the author, akira0245, and indicate that it was originally used in the MidiBard project.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using Dalamud.Logging;
 using static Dalamud.api;
 
 namespace MidiBard.Util.MidiPreprocessor
 {
     internal class MidiPreprocessor
     {
+        /// <summary>
+        /// Realign the the notes and Events in a <see cref="MidiFile"/> to the beginning
+        /// </summary>
+        /// <param name="midi"></param>
+        /// <returns><see cref="MidiFile"/></returns>
+        public static MidiFile RealignMidiFile(MidiFile midi)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            //get the first note on event
+            var x = midi.GetTrackChunks().GetNotes().First().GetTimedNoteOnEvent().Time;
+            //move everything to the new offset
+            Parallel.ForEach(midi.GetTrackChunks(), chunk =>
+            {
+                chunk = RealignTrackEvents(chunk, x).Result;
+            });
+
+            PluginLog.Warning($"[MidiPreprocessor] Realign tracks took: {stopwatch.Elapsed.TotalMilliseconds} ms");
+            stopwatch.Stop();
+            return midi;
+        }
+
+        /// <summary>
+        /// Realigns the track events in <see cref="TrackChunk"/>
+        /// </summary>
+        /// <param name="originalChunk"></param>
+        /// <param name="delta"></param>
+        /// <returns><see cref="Task{TResult}"/> is <see cref="TrackChunk"/></returns>
+        internal static Task<TrackChunk> RealignTrackEvents(TrackChunk originalChunk, long delta)
+        {
+            using (var manager = originalChunk.ManageTimedEvents())
+            {
+                foreach (TimedEvent _event in manager.Objects)
+                {
+                    long newStart = _event.Time - delta;
+                    if (newStart <= -1)
+                        _event.Time = 0;
+                    else
+                        _event.Time = newStart;
+                }
+            }
+            return Task.FromResult(originalChunk);
+        }
+
         public static TrackChunk[] ProcessTracks(TrackChunk[] trackChunks, TempoMap tempoMap)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
